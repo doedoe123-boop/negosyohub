@@ -10,7 +10,7 @@ class SectorDistributionChart extends ChartWidget
 {
     protected static ?string $heading = 'Stores by Industry Sector';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     protected static ?string $maxHeight = '260px';
 

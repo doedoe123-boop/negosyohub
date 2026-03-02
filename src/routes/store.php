@@ -1,6 +1,8 @@
 <?php
 
+use App\Livewire\Store\StoreForgotPassword;
 use App\Livewire\Store\StoreLogin;
+use App\Livewire\Store\StoreResetPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +34,16 @@ Route::domain('{storeSlug}.'.config('app.domain'))
             // Fallback if store has no token yet (pending stores)
             return abort(404);
         })->name('store.subdomain.home');
+
+        // Forgot password
+        Route::get('/portal/{token}/forgot-password', StoreForgotPassword::class)
+            ->middleware('guest')
+            ->name('store.subdomain.password.request');
+
+        // Reset password (link from email)
+        Route::get('/portal/{token}/reset-password/{resetToken}', StoreResetPassword::class)
+            ->middleware('guest')
+            ->name('store.subdomain.password.reset');
 
         // Logout from subdomain
         Route::post('/logout', function () {

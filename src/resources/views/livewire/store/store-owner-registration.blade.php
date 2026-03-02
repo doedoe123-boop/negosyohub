@@ -271,7 +271,7 @@
                             <label for="storeName" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Store Name</label>
                             <input wire:model.live.debounce.300ms="storeName" type="text" id="storeName"
                                 class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm placeholder-slate-400 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none text-slate-900 dark:text-white"
-                                placeholder="Nelson's Kitchen">
+                                placeholder="Store name or Agency">
                             @error('storeName') <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1"><x-heroicon-s-exclamation-circle class="w-3 h-3" />{{ $message }}</p> @enderror
                         </div>
 

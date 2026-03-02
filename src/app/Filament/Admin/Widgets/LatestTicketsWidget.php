@@ -14,7 +14,7 @@ class LatestTicketsWidget extends TableWidget
 {
     protected static ?string $heading = 'Recent Support Tickets';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 6;
 
     protected int|string|array $columnSpan = 'full';
 

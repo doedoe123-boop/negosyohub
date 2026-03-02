@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Lunar\Base\Casts\Price;
 use Lunar\Models\Order as LunarOrder;
+use Spatie\Activitylog\LogOptions;
 
 /**
  * Extends Lunar's Order model with marketplace-specific fields.
@@ -21,6 +22,27 @@ use Lunar\Models\Order as LunarOrder;
  */
 class Order extends LunarOrder
 {
+    /**
+     * Point to our custom OrderFactory.
+     */
+    protected static function newFactory(): \Database\Factories\OrderFactory
+    {
+        return \Database\Factories\OrderFactory::new();
+    }
+
+    /**
+     * Override Lunar's logAll() to exclude Price cast fields that are not
+     * serialisable by Spatie's dirty-attribute comparator.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('lunar')
+            ->logOnly(['status', 'store_id', 'user_id'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
     /**
      * Additional casts for marketplace columns.
      *

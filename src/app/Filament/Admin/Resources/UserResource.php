@@ -9,9 +9,11 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -133,10 +135,32 @@ class UserResource extends Resource
                 Tables\Filters\TernaryFilter::make('email_verified_at')
                     ->label('Email Verified')
                     ->nullable(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('disable')
+                    ->label('Disable')
+                    ->icon('heroicon-o-no-symbol')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Disable User Account')
+                    ->modalDescription('The user will no longer be able to log in. You can restore the account later.')
+                    ->visible(fn (User $record): bool => ! $record->trashed() && ! $record->isAdmin())
+                    ->action(function (User $record): void {
+                        $record->delete();
+
+                        Notification::make()
+                            ->title('User disabled')
+                            ->body("{$record->name}'s account has been disabled.")
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\RestoreAction::make()
+                    ->label('Enable')
+                    ->icon('heroicon-o-arrow-path')
+                    ->successNotificationTitle('User account re-enabled'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -146,10 +170,16 @@ class UserResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([SoftDeletingScope::class]);
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            UserResource\RelationManagers\LoginHistoriesRelationManager::class,
         ];
     }
 

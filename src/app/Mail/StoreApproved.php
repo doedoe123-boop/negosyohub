@@ -27,7 +27,7 @@ class StoreApproved extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Store Has Been Approved!',
+            subject: "Your {$this->store->sectorLabel()} Has Been Approved!",
         );
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\IndustrySector;
 use App\StoreStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -219,6 +220,14 @@ class Store extends Model
     }
 
     /**
+     * Scope to approved stores only.
+     */
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->where('status', StoreStatus::Approved);
+    }
+
+    /**
      * Determine if the store is approved.
      */
     public function isApproved(): bool
@@ -240,6 +249,20 @@ class Store extends Model
     public function isRealEstate(): bool
     {
         return $this->sector === IndustrySector::RealEstate;
+    }
+
+    /**
+     * Get a human-readable label for the store's sector/business type.
+     *
+     * Maps enum values to friendly names (e.g. "Real Estate Agency", "Food & Beverage Store").
+     */
+    public function sectorLabel(): string
+    {
+        return match ($this->sector) {
+            IndustrySector::FoodAndBeverage => 'Food & Beverage Store',
+            IndustrySector::RealEstate => 'Real Estate Agency',
+            default => 'Business',
+        };
     }
 
     /**

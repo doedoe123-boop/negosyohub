@@ -28,7 +28,7 @@ class StoreSuspended extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Store Has Been Suspended',
+            subject: "Your {$this->store->sectorLabel()} Has Been Suspended",
         );
     }
 

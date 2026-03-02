@@ -28,7 +28,7 @@ class StoreRejected extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Store Application Has Been Rejected',
+            subject: "Your {$this->store->sectorLabel()} Application Has Been Rejected",
         );
     }
 

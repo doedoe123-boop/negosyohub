@@ -485,6 +485,8 @@ class StoreResource extends Resource
     {
         return [
             StoreResource\RelationManagers\StaffRelationManager::class,
+            StoreResource\RelationManagers\OrdersRelationManager::class,
+            StoreResource\RelationManagers\PayoutsRelationManager::class,
         ];
     }
 
