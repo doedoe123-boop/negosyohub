@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | PayPal
+    |--------------------------------------------------------------------------
+    | Set PAYPAL_ENV=sandbox for testing or PAYPAL_ENV=live for production.
+    | Credentials are created at https://developer.paypal.com/dashboard/
+    |
+    */
+    'paypal' => [
+        'env' => env('PAYPAL_ENV', 'sandbox'),
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
+    ],
+
 ];

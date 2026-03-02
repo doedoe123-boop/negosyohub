@@ -81,6 +81,15 @@ make tinker           # Laravel Tinker REPL
 make artisan CMD="…"  # Run any artisan command
 ```
 
+### Filament Panel Cache
+
+Run this after adding any new Filament plugin, resource, or page — otherwise Livewire component discovery breaks and returns 404:
+
+```bash
+make artisan CMD="filament:clear-cached-components"
+make artisan CMD="filament:cache-components"
+```
+
 ### Frontend
 
 ```bash

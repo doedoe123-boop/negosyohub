@@ -7,6 +7,7 @@ use App\TicketCategory;
 use App\TicketPriority;
 use App\TicketStatus;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -102,33 +103,36 @@ class StoreSupportTickets extends Page implements HasTable
                 Tables\Actions\ViewAction::make()
                     ->modalHeading('Ticket Details')
                     ->form([
-                        TextInput::make('subject')
-                            ->disabled(),
-                        Select::make('category')
-                            ->options(collect(TicketCategory::cases())->mapWithKeys(
-                                fn (TicketCategory $c) => [$c->value => $c->label()]
-                            ))
-                            ->disabled(),
-                        Select::make('priority')
-                            ->options(collect(TicketPriority::cases())->mapWithKeys(
-                                fn (TicketPriority $p) => [$p->value => $p->name]
-                            ))
-                            ->disabled(),
-                        Select::make('status')
-                            ->options(collect(TicketStatus::cases())->mapWithKeys(
-                                fn (TicketStatus $s) => [$s->value => $s->name]
-                            ))
-                            ->disabled(),
-                        Textarea::make('message')
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Textarea::make('admin_notes')
-                            ->label('Admin Response')
-                            ->disabled()
-                            ->columnSpanFull()
-                            ->placeholder('No response yet.'),
-                    ])
-                    ->columns(2),
+                        Grid::make(2)->schema([
+                            TextInput::make('subject')
+                                ->disabled()
+                                ->columnSpanFull(),
+                            Select::make('category')
+                                ->options(collect(TicketCategory::cases())->mapWithKeys(
+                                    fn (TicketCategory $c) => [$c->value => $c->label()]
+                                ))
+                                ->disabled(),
+                            Select::make('priority')
+                                ->options(collect(TicketPriority::cases())->mapWithKeys(
+                                    fn (TicketPriority $p) => [$p->value => $p->name]
+                                ))
+                                ->disabled(),
+                            Select::make('status')
+                                ->options(collect(TicketStatus::cases())->mapWithKeys(
+                                    fn (TicketStatus $s) => [$s->value => $s->name]
+                                ))
+                                ->disabled()
+                                ->columnSpanFull(),
+                            Textarea::make('message')
+                                ->disabled()
+                                ->columnSpanFull(),
+                            Textarea::make('admin_notes')
+                                ->label('Admin Response')
+                                ->disabled()
+                                ->columnSpanFull()
+                                ->placeholder('No response yet.'),
+                        ]),
+                    ]),
             ])
             ->emptyStateHeading('No support tickets yet')
             ->emptyStateDescription('Submit a ticket if you need help from our admin team.')
@@ -146,33 +150,34 @@ class StoreSupportTickets extends Page implements HasTable
                 ->icon('heroicon-o-plus-circle')
                 ->color('primary')
                 ->form([
-                    TextInput::make('subject')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpanFull(),
+                    Grid::make(2)->schema([
+                        TextInput::make('subject')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
 
-                    Select::make('category')
-                        ->options(collect(TicketCategory::cases())->mapWithKeys(
-                            fn (TicketCategory $c) => [$c->value => $c->label()]
-                        ))
-                        ->required()
-                        ->native(false),
+                        Select::make('category')
+                            ->options(collect(TicketCategory::cases())->mapWithKeys(
+                                fn (TicketCategory $c) => [$c->value => $c->label()]
+                            ))
+                            ->required()
+                            ->native(false),
 
-                    Select::make('priority')
-                        ->options(collect(TicketPriority::cases())->mapWithKeys(
-                            fn (TicketPriority $p) => [$p->value => $p->name]
-                        ))
-                        ->default(TicketPriority::Medium->value)
-                        ->required()
-                        ->native(false),
+                        Select::make('priority')
+                            ->options(collect(TicketPriority::cases())->mapWithKeys(
+                                fn (TicketPriority $p) => [$p->value => $p->name]
+                            ))
+                            ->default(TicketPriority::Medium->value)
+                            ->required()
+                            ->native(false),
 
-                    Textarea::make('message')
-                        ->required()
-                        ->rows(5)
-                        ->maxLength(5000)
-                        ->columnSpanFull(),
+                        Textarea::make('message')
+                            ->required()
+                            ->rows(5)
+                            ->maxLength(5000)
+                            ->columnSpanFull(),
+                    ]),
                 ])
-                ->columns(2)
                 ->action(function (array $data): void {
                     $user = auth()->user();
                     $store = $user?->getStoreForPanel();
