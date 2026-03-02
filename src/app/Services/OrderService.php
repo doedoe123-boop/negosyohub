@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Mail\NewOrderReceived;
 use App\Models\Order;
 use App\Models\Store;
 use App\OrderStatus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Lunar\Models\Cart;
 
@@ -35,7 +38,7 @@ class OrderService
         $this->validateStore($store);
         $this->validateCartBelongsToStore($cart, $store);
 
-        return DB::transaction(function () use ($cart, $store): Order {
+        $order = DB::transaction(function () use ($cart, $store): Order {
             $cart = $cart->calculate();
 
             /** @var Order $order */
@@ -51,6 +54,10 @@ class OrderService
 
             return $order->refresh();
         });
+
+        $this->notifyStoreOwner($order);
+
+        return $order;
     }
 
     /**
@@ -97,6 +104,31 @@ class OrderService
         if ($foreignLines->isNotEmpty()) {
             throw ValidationException::withMessages([
                 'cart' => 'All cart items must belong to the same store.',
+            ]);
+        }
+    }
+
+    /**
+     * Queue a new-order notification email to the store owner.
+     *
+     * Failures are logged but never bubble up — a failed email must never
+     * roll back or block a successfully placed order.
+     */
+    private function notifyStoreOwner(Order $order): void
+    {
+        $ownerEmail = $order->store?->owner?->email;
+
+        if (! $ownerEmail) {
+            return;
+        }
+
+        try {
+            Mail::to($ownerEmail)->queue(new NewOrderReceived($order));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to queue new-order notification', [
+                'order_id' => $order->id,
+                'store_id' => $order->store_id,
+                'error' => $e->getMessage(),
             ]);
         }
     }
