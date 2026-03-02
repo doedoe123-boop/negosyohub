@@ -119,6 +119,28 @@ class OrderService
         ];
     }
 
+    /**
+     * Return a paginated list of orders scoped to the given user's role.
+     *
+     * - Admins see all orders.
+     * - Store owners see only their store's orders.
+     * - Customers see only their own orders.
+     *
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function listForUser(\App\Models\User $user, int $perPage = 15)
+    {
+        $query = Order::query()->with('store');
+
+        if ($user->isStoreOwner()) {
+            $query->where('store_id', $user->store?->id);
+        } elseif ($user->isCustomer()) {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
     // ── Status Transitions ─────────────────────────────────────────────
 
     /**

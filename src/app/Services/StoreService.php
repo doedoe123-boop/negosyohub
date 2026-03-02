@@ -101,4 +101,41 @@ class StoreService
 
         return $store->refresh();
     }
+
+    /**
+     * Return a paginated list of approved stores for the customer storefront.
+     *
+     * Supports optional filtering by sector, city, and a name search term.
+     *
+     * @param  array{sector?: string|null, city?: string|null, search?: string|null, per_page?: int}  $filters
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function browseApproved(array $filters = [])
+    {
+        $query = Store::query()->where('status', StoreStatus::Approved);
+
+        if (! empty($filters['sector'])) {
+            $query->where('sector', $filters['sector']);
+        }
+
+        if (! empty($filters['city'])) {
+            $query->where('city', $filters['city']);
+        }
+
+        if (! empty($filters['search'])) {
+            $query->where('name', 'like', '%'.$filters['search'].'%');
+        }
+
+        return $query->paginate($filters['per_page'] ?? 15);
+    }
+
+    /**
+     * Find a single approved store, or abort with 404.
+     */
+    public function findApprovedOrFail(Store $store): Store
+    {
+        abort_if($store->status !== StoreStatus::Approved, 404);
+
+        return $store;
+    }
 }

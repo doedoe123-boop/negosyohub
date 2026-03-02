@@ -220,7 +220,7 @@ function arcPath(conn) {
 
     <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div
-        class="grid min-h-[88vh] items-center gap-8 py-16 lg:grid-cols-[1fr_1.1fr] lg:gap-0"
+        class="grid min-h-[88vh] items-center gap-8 py-16 lg:grid-cols-[1fr_1.5fr] lg:gap-0"
       >
         <!-- ── Left: rotating slides ──────────────────── -->
         <div class="z-10 max-w-xl">
@@ -342,14 +342,14 @@ function arcPath(conn) {
             class="pointer-events-none absolute inset-0 flex items-center justify-center lg:justify-end"
           >
             <div
-              class="map-glow h-[520px] w-[420px] rounded-full blur-3xl lg:h-[580px] lg:w-[480px]"
+              class="map-glow h-[620px] w-[520px] rounded-full blur-3xl lg:h-[760px] lg:w-[640px]"
             />
           </div>
 
           <svg
             viewBox="-5 -5 710 730"
             xmlns="http://www.w3.org/2000/svg"
-            class="relative w-full max-w-[440px] drop-shadow-2xl lg:max-w-[520px]"
+            class="relative w-full max-w-[540px] drop-shadow-2xl lg:max-w-[700px]"
             aria-hidden="true"
           >
             <!-- ── Base map paths ── -->
@@ -504,27 +504,27 @@ function arcPath(conn) {
               <circle
                 :cx="city.x"
                 :cy="city.y"
-                r="6"
+                r="9"
                 fill="none"
                 stroke="rgba(249,93,47,0.25)"
-                stroke-width="1"
+                stroke-width="1.2"
                 class="city-ring ring-1"
               />
               <!-- Outer pulse ring 2 (offset) -->
               <circle
                 :cx="city.x"
                 :cy="city.y"
-                r="4"
+                r="6"
                 fill="none"
                 stroke="rgba(249,93,47,0.4)"
-                stroke-width="0.8"
+                stroke-width="1"
                 class="city-ring ring-2"
               />
               <!-- Core dot -->
               <circle
                 :cx="city.x"
                 :cy="city.y"
-                r="2.5"
+                r="3.5"
                 fill="#f95d2f"
                 class="city-core"
               />
@@ -541,8 +541,8 @@ function arcPath(conn) {
             <!-- ── City labels (only shown on larger maps) ── -->
             <g
               font-family="system-ui, sans-serif"
-              font-size="8"
-              fill="rgba(148,163,184,0.8)"
+              font-size="11"
+              fill="rgba(148,163,184,0.9)"
               class="city-labels"
             >
               <text

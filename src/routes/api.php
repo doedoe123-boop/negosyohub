@@ -1,40 +1,47 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\StoreController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\StoreController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes — v1 (Customer Storefront)
 |--------------------------------------------------------------------------
 |
-| All API routes are prefixed with /api and use the 'api' middleware group.
-| Multi-store endpoints filter by store_id to enforce tenant isolation.
+| All routes are prefixed with /api/v1 by the RouteServiceProvider.
+| This API is for the customer-facing Vue SPA only.
+|
+| Seller registration and store management live in the Blade portal
+| at /register/sector (handled by Livewire in routes/web.php).
 |
 */
 
-// Guest auth routes (tighter throttle to prevent brute-force)
-Route::middleware('throttle:10,1')->group(function () {
-    Route::post('/register/customer', [AuthController::class, 'register'])->name('api.auth.register.customer');
-    Route::post('/login', [AuthController::class, 'login'])->name('api.auth.login');
-});
+Route::prefix('v1')->name('api.v1.')->group(function () {
 
-Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
-    // Auth
-    Route::post('/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
-    Route::get('/user', [AuthController::class, 'user'])->name('api.auth.user');
+    // ── Guest endpoints (tight throttle to prevent brute-force) ──────────
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+        Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+    });
 
-    // Orders – see /skills/order-processing.md
-    Route::get('/orders', [OrderController::class, 'index'])->name('api.orders.index');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('api.orders.show');
-    Route::post('/orders', [OrderController::class, 'store'])->name('api.orders.store');
+    // ── Public browse (no auth required) ─────────────────────────────────
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/stores', [StoreController::class, 'index'])->name('stores.index');
+        Route::get('/stores/{store}', [StoreController::class, 'show'])->name('stores.show');
+    });
 
-    // Stores – see /skills/store-management.md
-    Route::get('/stores', [StoreController::class, 'index'])->name('api.stores.index');
-    Route::get('/stores/{store}', [StoreController::class, 'show'])->name('api.stores.show');
-    Route::post('/stores', [StoreController::class, 'store'])->name('api.stores.store');
-    Route::post('/stores/{store}/approve', [StoreController::class, 'approve'])->name('api.stores.approve');
-    Route::post('/stores/{store}/suspend', [StoreController::class, 'suspend'])->name('api.stores.suspend');
+    // ── Authenticated customer endpoints ──────────────────────────────────
+    Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+        // Auth
+        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::get('/user', [AuthController::class, 'user'])->name('auth.user');
+
+        // Orders
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    });
+
 });

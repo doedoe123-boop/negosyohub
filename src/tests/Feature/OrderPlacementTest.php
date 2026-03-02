@@ -11,7 +11,7 @@ use App\Services\CommissionService;
 describe('Order Placement', function () {
 
     it('rejects unauthenticated users', function () {
-        $this->postJson('/api/orders')
+        $this->postJson('/api/v1/orders')
             ->assertUnauthorized();
     });
 
@@ -19,7 +19,7 @@ describe('Order Placement', function () {
         $user = User::factory()->storeOwner()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/orders', ['store_id' => 1])
+            ->postJson('/api/v1/orders', ['store_id' => 1])
             ->assertForbidden();
     });
 
@@ -27,7 +27,7 @@ describe('Order Placement', function () {
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/orders', [])
+            ->postJson('/api/v1/orders', [])
             ->assertJsonValidationErrors(['store_id']);
     });
 
@@ -35,7 +35,7 @@ describe('Order Placement', function () {
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/orders', ['store_id' => 99999])
+            ->postJson('/api/v1/orders', ['store_id' => 99999])
             ->assertJsonValidationErrors(['store_id']);
     });
 
@@ -44,7 +44,7 @@ describe('Order Placement', function () {
         $store = Store::factory()->pending()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', ['store_id' => $store->id])
             ->assertJsonValidationErrors(['store_id']);
     });
 
@@ -53,7 +53,7 @@ describe('Order Placement', function () {
         $store = Store::factory()->suspended()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', ['store_id' => $store->id])
             ->assertJsonValidationErrors(['store_id']);
     });
 });
