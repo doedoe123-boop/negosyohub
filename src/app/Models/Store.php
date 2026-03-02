@@ -39,8 +39,13 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property ?float $default_interest_rate
  * @property ?int $default_loan_term_years
  * @property ?float $default_down_payment_percent
+ * @property ?string $tagline
+ * @property ?string $phone
+ * @property ?string $website
+ * @property ?array $operating_hours
  * @property ?\Illuminate\Support\Carbon $suspended_at
  * @property ?string $suspension_reason
+ * @property ?\Illuminate\Support\Carbon $setup_completed_at
  * @property ?\Illuminate\Support\Carbon $created_at
  * @property ?\Illuminate\Support\Carbon $updated_at
  *
@@ -87,8 +92,13 @@ class Store extends Model
         'default_interest_rate',
         'default_loan_term_years',
         'default_down_payment_percent',
+        'tagline',
+        'phone',
+        'website',
+        'operating_hours',
         'suspended_at',
         'suspension_reason',
+        'setup_completed_at',
     ];
 
     /**
@@ -109,7 +119,9 @@ class Store extends Model
             'social_links' => 'array',
             'default_interest_rate' => 'decimal:2',
             'default_down_payment_percent' => 'decimal:2',
+            'operating_hours' => 'array',
             'suspended_at' => 'datetime',
+            'setup_completed_at' => 'datetime',
         ];
     }
 
@@ -241,6 +253,32 @@ class Store extends Model
     public function isSuspended(): bool
     {
         return $this->status === StoreStatus::Suspended;
+    }
+
+    /**
+     * Determine whether the portal setup wizard has been completed.
+     */
+    public function isSetupComplete(): bool
+    {
+        return $this->setup_completed_at !== null;
+    }
+
+    /**
+     * Return a public URL for the store logo, or null if unset.
+     *
+     * Handles both legacy http URLs and storage-relative paths.
+     */
+    public function logoUrl(): ?string
+    {
+        if (! $this->logo) {
+            return null;
+        }
+
+        if (str_starts_with($this->logo, 'http')) {
+            return $this->logo;
+        }
+
+        return asset('storage/'.$this->logo);
     }
 
     /**

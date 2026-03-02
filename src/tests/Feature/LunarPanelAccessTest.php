@@ -49,11 +49,26 @@ it('allows approved store owners to access the Lunar panel', function () {
     Store::factory()->for($owner, 'owner')->create([
         'status' => StoreStatus::Approved,
         'sector' => IndustrySector::FoodAndBeverage,
+        'setup_completed_at' => now(),
     ]);
 
     $this->actingAs($owner)
         ->get(lunarPath())
         ->assertOk();
+});
+
+it('redirects approved store owners with incomplete setup to the setup wizard', function () {
+    $owner = User::factory()->storeOwner()->create();
+    $owner->assignRole('store_owner');
+    Store::factory()->for($owner, 'owner')->create([
+        'status' => StoreStatus::Approved,
+        'sector' => IndustrySector::FoodAndBeverage,
+        'setup_completed_at' => null,
+    ]);
+
+    $this->actingAs($owner)
+        ->get(lunarPath())
+        ->assertRedirectContains('/setup');
 });
 
 it('blocks pending store owners from the Lunar panel', function () {

@@ -45,6 +45,36 @@ class StoreStaffResource extends Resource
     }
 
     /**
+     * Bypass UserPolicy — store owners can always create staff for their own store.
+     */
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->isStoreOwner() === true;
+    }
+
+    /**
+     * Bypass UserPolicy — store owners can edit staff belonging to their store.
+     */
+    public static function canEdit(Model $record): bool
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return $user->isStoreOwner() && $record->store_id === $user->store?->id;
+    }
+
+    /**
+     * Bypass UserPolicy — store owners can delete staff belonging to their store.
+     */
+    public static function canDelete(Model $record): bool
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return $user->isStoreOwner() && $record->store_id === $user->store?->id;
+    }
+
+    /**
      * Scope the query to only show staff belonging to the current store owner's store.
      */
     public static function getEloquentQuery(): Builder

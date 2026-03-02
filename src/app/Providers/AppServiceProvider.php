@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Filament\Resources\TaxZoneResource\Pages\CreateTaxZone;
+use App\Filament\Resources\TaxZoneResource\Pages\EditTaxZone;
+use App\Filament\Resources\TaxZoneResource\Pages\ListTaxZones;
+use App\Http\Middleware\EnsureStoreSetupComplete;
 use App\Http\Responses\LunarLogoutResponse;
 use App\Listeners\RecordLoginHistory;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse;
@@ -12,6 +16,7 @@ use Illuminate\Support\ServiceProvider;
 use Lunar\Admin\Filament\Resources\OrderResource as LunarOrderResource;
 use Lunar\Admin\Filament\Resources\ProductResource as LunarProductResource;
 use Lunar\Admin\Filament\Resources\StaffResource;
+use Lunar\Admin\Filament\Resources\TaxZoneResource as LunarTaxZoneResource;
 use Lunar\Admin\LunarPanelManager;
 use Lunar\Admin\Support\Facades\LunarPanel;
 
@@ -27,12 +32,17 @@ class AppServiceProvider extends ServiceProvider
             StaffResource::class,
             LunarOrderResource::class,
             LunarProductResource::class,
+            LunarTaxZoneResource::class,
         ]);
 
         LunarPanel::panel(fn ($panel) => $panel
             ->authGuard('web')
             ->path('store/dashboard/tk_'.config('app.store_path_token'))
             ->login(null)
+            ->brandName(fn (): string => auth()->user()?->getStoreForPanel()?->name ?? config('app.name'))
+            ->brandLogo(fn (): ?string => auth()->user()?->getStoreForPanel()?->logoUrl())
+            ->darkModeBrandLogo(fn (): ?string => auth()->user()?->getStoreForPanel()?->logoUrl())
+            ->brandLogoHeight('3rem')
             ->discoverResources(
                 in: app_path('Filament/Resources'),
                 for: 'App\\Filament\\Resources'
@@ -45,6 +55,12 @@ class AppServiceProvider extends ServiceProvider
                 in: app_path('Filament/Widgets'),
                 for: 'App\\Filament\\Widgets'
             )
+            ->livewireComponents([
+                ListTaxZones::class,
+                CreateTaxZone::class,
+                EditTaxZone::class,
+            ])
+            ->authMiddleware([EnsureStoreSetupComplete::class])
         )->disableTwoFactorAuth()->register();
     }
 

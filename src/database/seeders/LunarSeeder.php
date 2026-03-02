@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Lunar\Models\Channel;
 use Lunar\Models\CollectionGroup;
+use Lunar\Models\Country;
 use Lunar\Models\Currency;
 use Lunar\Models\CustomerGroup;
 use Lunar\Models\Language;
@@ -76,6 +78,10 @@ class LunarSeeder extends Seeder
                 'default' => true,
                 'active' => true,
             ]);
+        }
+
+        if (! Country::count()) {
+            Artisan::call('lunar:import:address-data');
         }
     }
 }

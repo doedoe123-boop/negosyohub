@@ -2,10 +2,12 @@
 
 namespace App\Filament\Pages;
 
+use App\IndustrySector;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -34,11 +36,23 @@ class StoreProfile extends Page implements HasForms
             abort(403);
         }
 
+        $social = $store->social_links ?? [];
+        $hours = $store->operating_hours ?? SetupWizard::defaultHours();
+
         $this->form->fill([
             'name' => $store->name,
+            'tagline' => $store->tagline,
             'description' => $store->description,
             'logo' => $store->logo,
+            'phone' => $store->phone,
+            'website' => $store->website,
             'address' => $store->address ?? [],
+            'social_facebook' => $social['facebook'] ?? null,
+            'social_instagram' => $social['instagram'] ?? null,
+            'social_tiktok' => $social['tiktok'] ?? null,
+            'social_lazada' => $social['lazada'] ?? null,
+            'social_shopee' => $social['shopee'] ?? null,
+            'hours' => $hours,
         ]);
     }
 
@@ -53,17 +67,38 @@ class StoreProfile extends Page implements HasForms
                             ->required()
                             ->maxLength(255),
 
+                        Forms\Components\TextInput::make('tagline')
+                            ->label('Tagline')
+                            ->placeholder('Your everyday marketplace')
+                            ->maxLength(150)
+                            ->helperText('A short phrase shown beneath your store name.'),
+
                         Forms\Components\Textarea::make('description')
                             ->maxLength(1000)
                             ->rows(4)
                             ->placeholder('Describe your store to customers...')
                             ->columnSpanFull(),
 
-                        Forms\Components\TextInput::make('logo')
-                            ->label('Logo URL')
+                        Forms\Components\FileUpload::make('logo')
+                            ->label('Store Logo')
+                            ->image()
+                            ->imageEditor()
+                            ->disk('public')
+                            ->directory('stores/logos')
+                            ->maxSize(2048)
+                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
+                            ->helperText('Recommended: square image, at least 256×256 px. Max 2 MB.'),
+
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Business Phone')
+                            ->tel()
+                            ->maxLength(20),
+
+                        Forms\Components\TextInput::make('website')
+                            ->label('Website')
                             ->url()
-                            ->maxLength(500)
-                            ->placeholder('https://...'),
+                            ->placeholder('https://yourstore.com')
+                            ->maxLength(500),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Address')
@@ -84,6 +119,60 @@ class StoreProfile extends Page implements HasForms
                             ->label('Zip Code')
                             ->maxLength(10),
                     ])->columns(2),
+
+                Forms\Components\Section::make('Social Media')
+                    ->description('Add links so customers can find you on other platforms.')
+                    ->schema([
+                        Forms\Components\TextInput::make('social_facebook')
+                            ->label('Facebook')
+                            ->url()
+                            ->placeholder('https://facebook.com/yourpage')
+                            ->prefixIcon('heroicon-o-link'),
+
+                        Forms\Components\TextInput::make('social_instagram')
+                            ->label('Instagram')
+                            ->url()
+                            ->placeholder('https://instagram.com/yourhandle')
+                            ->prefixIcon('heroicon-o-link'),
+
+                        Forms\Components\TextInput::make('social_tiktok')
+                            ->label('TikTok')
+                            ->url()
+                            ->placeholder('https://tiktok.com/@yourhandle')
+                            ->prefixIcon('heroicon-o-link'),
+
+                        Forms\Components\TextInput::make('social_lazada')
+                            ->label('Lazada Store')
+                            ->url()
+                            ->placeholder('https://lazada.com.ph/shop/...')
+                            ->prefixIcon('heroicon-o-link'),
+
+                        Forms\Components\TextInput::make('social_shopee')
+                            ->label('Shopee Store')
+                            ->url()
+                            ->placeholder('https://shopee.ph/yourshop')
+                            ->prefixIcon('heroicon-o-link'),
+                    ])->columns(2)
+                    ->hidden(fn () => auth()->user()?->getStoreForPanel()?->sector === IndustrySector::RealEstate),
+
+                Forms\Components\Section::make('Business Hours')
+                    ->description('Toggle each day and set your opening and closing times.')
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\Placeholder::make('_hdr_day')->label('')->content('Day'),
+                                Forms\Components\Placeholder::make('_hdr_open')->label('')->content('Opens'),
+                                Forms\Components\Placeholder::make('_hdr_close')->label('')->content('Closes'),
+                            ]),
+                        ...$this->dayRow('monday', 'Monday'),
+                        ...$this->dayRow('tuesday', 'Tuesday'),
+                        ...$this->dayRow('wednesday', 'Wednesday'),
+                        ...$this->dayRow('thursday', 'Thursday'),
+                        ...$this->dayRow('friday', 'Friday'),
+                        ...$this->dayRow('saturday', 'Saturday'),
+                        ...$this->dayRow('sunday', 'Sunday'),
+                    ])
+                    ->hidden(fn () => auth()->user()?->getStoreForPanel()?->sector === IndustrySector::RealEstate),
             ])
             ->statePath('data');
     }
@@ -95,14 +184,48 @@ class StoreProfile extends Page implements HasForms
 
         $store->update([
             'name' => $data['name'],
-            'description' => $data['description'],
-            'logo' => $data['logo'],
-            'address' => $data['address'],
+            'tagline' => $data['tagline'] ?? null,
+            'description' => $data['description'] ?? null,
+            'logo' => $data['logo'] ?? $store->logo,
+            'phone' => $data['phone'] ?? null,
+            'website' => $data['website'] ?? null,
+            'address' => $data['address'] ?? $store->address,
+            'social_links' => array_filter([
+                'facebook' => $data['social_facebook'] ?? null,
+                'instagram' => $data['social_instagram'] ?? null,
+                'tiktok' => $data['social_tiktok'] ?? null,
+                'lazada' => $data['social_lazada'] ?? null,
+                'shopee' => $data['social_shopee'] ?? null,
+            ]) ?: null,
+            'operating_hours' => $data['hours'] ?? SetupWizard::defaultHours(),
         ]);
 
         Notification::make()
             ->title('Store profile updated')
             ->success()
             ->send();
+    }
+
+    /**
+     * @return array<Forms\Components\Component>
+     */
+    private function dayRow(string $day, string $label): array
+    {
+        return [
+            Forms\Components\Toggle::make("hours.{$day}.is_open")
+                ->label($label)
+                ->live()
+                ->inline(false),
+
+            Forms\Components\TimePicker::make("hours.{$day}.open")
+                ->label('Opens')
+                ->seconds(false)
+                ->hidden(fn (Get $get): bool => ! $get("hours.{$day}.is_open")),
+
+            Forms\Components\TimePicker::make("hours.{$day}.close")
+                ->label('Closes')
+                ->seconds(false)
+                ->hidden(fn (Get $get): bool => ! $get("hours.{$day}.is_open")),
+        ];
     }
 }
