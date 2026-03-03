@@ -26,11 +26,12 @@ const propertiesLoading = ref(true);
 
 const sectors = [
   {
-    label: "Food & Retail",
-    description: "Restaurants, shops, and local businesses",
+    label: "E-Commerce",
+    description: "Shop from local online stores & retailers",
     to: "/stores",
     icon: BuildingStorefrontIcon,
     color: "bg-brand-50 text-brand-600 ring-brand-200",
+    badge: "bg-brand-100 text-brand-700",
   },
   {
     label: "Real Estate",
@@ -38,6 +39,7 @@ const sectors = [
     to: "/properties",
     icon: HomeModernIcon,
     color: "bg-teal-50 text-teal-600 ring-teal-200",
+    badge: "bg-teal-100 text-teal-700",
   },
   {
     label: "Services",
@@ -45,6 +47,7 @@ const sectors = [
     to: null,
     icon: BriefcaseIcon,
     color: "bg-slate-50 text-slate-400 ring-slate-200",
+    badge: "bg-slate-100 text-slate-500",
     soon: true,
   },
 ];
@@ -85,49 +88,56 @@ onMounted(async () => {
     <PhMapHero />
 
     <!-- Sector picker -->
-    <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-      <h2 class="mb-1 text-xl font-bold text-slate-900">Browse by Sector</h2>
-      <p class="mb-6 text-sm text-slate-500">
-        Choose a sector to start discovering.
-      </p>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <component
-          :is="sector.soon ? 'div' : RouterLink"
-          v-for="sector in sectors"
-          :key="sector.label"
-          :to="sector.soon ? undefined : sector.to"
-          class="group flex items-start gap-4 rounded-2xl border bg-white p-5 shadow-sm transition-shadow"
-          :class="
-            sector.soon
-              ? 'cursor-not-allowed opacity-60'
-              : 'cursor-pointer hover:shadow-md'
-          "
-        >
-          <span
-            class="flex size-11 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform group-hover:scale-105"
-            :class="sector.color"
-          >
-            <component :is="sector.icon" class="size-6" />
-          </span>
-          <div class="min-w-0">
-            <p class="font-semibold text-slate-800">
-              {{ sector.label }}
-              <span
-                v-if="sector.soon"
-                class="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-400"
-                >Soon</span
-              >
-            </p>
-            <p class="mt-0.5 line-clamp-1 text-sm text-slate-500">
-              {{ sector.description }}
+    <section class="border-b border-slate-100 bg-white px-4 py-10 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="mb-6 flex items-end justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Browse by Sector</h2>
+            <p class="mt-0.5 text-sm text-slate-500">
+              Choose what you're looking for.
             </p>
           </div>
-        </component>
+        </div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <component
+            :is="sector.soon ? 'div' : RouterLink"
+            v-for="sector in sectors"
+            :key="sector.label"
+            :to="sector.soon ? undefined : sector.to"
+            class="group flex items-start gap-4 rounded-2xl border bg-white p-5 shadow-sm transition-all"
+            :class="
+              sector.soon
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-pointer hover:shadow-md hover:-translate-y-0.5'
+            "
+          >
+            <span
+              class="flex size-11 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform group-hover:scale-105"
+              :class="sector.color"
+            >
+              <component :is="sector.icon" class="size-6" />
+            </span>
+            <div class="min-w-0">
+              <p class="flex items-center gap-2 font-semibold text-slate-800">
+                {{ sector.label }}
+                <span
+                  v-if="sector.soon"
+                  class="rounded-full px-2 py-0.5 text-xs font-medium"
+                  :class="sector.badge"
+                  >Coming Soon</span
+                >
+              </p>
+              <p class="mt-0.5 line-clamp-2 text-sm text-slate-500">
+                {{ sector.description }}
+              </p>
+            </div>
+          </component>
+        </div>
       </div>
     </section>
 
     <!-- Featured Products -->
-    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <section class="mx-auto max-w-7xl px-4 pt-10 pb-8 sm:px-6">
       <div class="mb-6 flex items-end justify-between">
         <div>
           <h2 class="text-xl font-bold text-slate-900">Latest Products</h2>
@@ -249,7 +259,7 @@ onMounted(async () => {
             v-for="property in latestProperties"
             :key="property.id"
             :to="`/properties/${property.slug}`"
-            class="group overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow"
+            class="group overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
           >
             <div class="relative aspect-[16/9] overflow-hidden bg-slate-100">
               <img
@@ -314,7 +324,7 @@ onMounted(async () => {
     </section>
 
     <!-- Featured stores -->
-    <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+    <section class="mx-auto max-w-7xl px-4 pt-4 pb-16 sm:px-6">
       <div class="mb-6 flex items-end justify-between">
         <div>
           <h2 class="text-xl font-bold text-slate-900">Featured Stores</h2>
@@ -356,7 +366,7 @@ onMounted(async () => {
           v-for="store in featuredStores"
           :key="store.id"
           :to="`/stores/${store.slug}`"
-          class="group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow"
+          class="group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
         >
           <!-- Banner -->
           <div class="aspect-[3/2] w-full overflow-hidden bg-slate-100">
@@ -368,7 +378,7 @@ onMounted(async () => {
             />
             <div
               v-else
-              class="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"
+              class="flex h-full items-center justify-center bg-gradient-to-br from-brand-50 to-brand-100"
             >
               <span class="text-3xl">🏪</span>
             </div>

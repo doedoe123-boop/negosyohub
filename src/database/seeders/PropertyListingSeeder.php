@@ -37,7 +37,11 @@ class PropertyListingSeeder extends Seeder
 
             foreach ($listings as $data) {
                 Property::create(array_merge(
-                    ['store_id' => $store->id, 'slug' => Str::slug($data['title']).'-'.Str::random(6)],
+                    [
+                        'store_id' => $store->id,
+                        'slug' => Str::slug($data['title']).'-'.Str::random(6),
+                        'published_at' => now(),
+                    ],
                     $data,
                 ));
             }

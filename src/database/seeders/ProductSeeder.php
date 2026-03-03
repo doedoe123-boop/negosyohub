@@ -157,11 +157,12 @@ class ProductSeeder extends Seeder
             'Home & Living',
             'Food & Grocery',
             'Health & Beauty',
-            'Sports & Outdoors',
+            'Sports & Fitness',
             'Books & Stationery',
             'Toys & Hobbies',
             'Automotive',
-            'Pet Supplies',
+            'Pets & Accessories',
+            'Beverage',
         ];
 
         foreach ($types as $typeName) {

@@ -19,16 +19,16 @@ const slides = [
   },
   {
     id: "food",
-    badge: "🍔 Food & Retail",
-    headline: ["Order from the best", "local restaurants & shops."],
-    body: "Freshly made, locally sourced. Hundreds of stores ready to serve your favourite meals and everyday needs — delivered to your door.",
+    badge: "🛒 E-Commerce",
+    headline: ["Shop local.", "Delivered to your door."],
+    body: "Hundreds of trusted local stores — electronics, fashion, groceries and more. Fast checkout, real-time order tracking, and same-day delivery available.",
     features: [
-      "Same-day delivery",
-      "One store per order for freshness",
+      "Verified local stores",
+      "One store per order for quality",
       "Real-time order tracking",
     ],
     primary: { label: "Browse Stores", to: "/stores" },
-    secondary: { label: "See Featured Restaurants", to: "/stores?sector=food" },
+    secondary: { label: "See All Categories", to: "/stores" },
     accent: "brand",
   },
   {

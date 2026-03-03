@@ -8,10 +8,14 @@ import { useCartStore } from "@/stores/cart";
 const sectorLabels = {
   ecommerce: "E-Commerce",
   real_estate: "Real Estate",
-  electronics: "Electronics",
-  fashion: "Fashion",
-  health_beauty: "Health & Beauty",
   services: "Services",
+};
+
+// Gradient per sector for the banner
+const sectorGradient = {
+  ecommerce: "from-brand-600 via-brand-700 to-brand-800",
+  real_estate: "from-teal-600 via-teal-700 to-teal-800",
+  services: "from-slate-700 via-slate-800 to-slate-900",
 };
 
 const route = useRoute();
@@ -66,10 +70,20 @@ async function addToCart(product) {
 
     <template v-else>
       <!-- Banner -->
-      <div class="relative h-48 w-full overflow-hidden bg-slate-800 sm:h-56">
-        <div
-          class="h-full w-full bg-gradient-to-br from-slate-700 to-slate-900"
+      <div class="relative h-48 w-full overflow-hidden sm:h-56">
+        <img
+          v-if="store.banner"
+          :src="store.banner"
+          :alt="store.name"
+          class="h-full w-full object-cover"
         />
+        <div
+          v-else
+          class="h-full w-full bg-gradient-to-br"
+          :class="sectorGradient[store.sector] ?? 'from-slate-700 to-slate-900'"
+        />
+        <!-- Subtle overlay for text contrast -->
+        <div class="absolute inset-0 bg-black/20" />
       </div>
 
       <div class="mx-auto max-w-7xl px-4 sm:px-6">

@@ -9,7 +9,7 @@ const cart = useCartStore();
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col bg-white">
+  <div class="flex min-h-screen flex-col bg-slate-50">
     <Navbar />
 
     <main class="flex-1">

@@ -29,7 +29,7 @@ function isActive(path) {
 
 <template>
   <header
-    class="sticky top-0 z-40 border-b border-slate-200 bg-white shadow-sm"
+    class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur"
   >
     <div
       class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6"
@@ -37,7 +37,7 @@ function isActive(path) {
       <!-- Logo -->
       <RouterLink to="/" class="flex shrink-0 items-center gap-2">
         <span
-          class="flex size-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-white"
+          class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-sm font-bold text-white shadow-sm"
         >
           N
         </span>
@@ -47,19 +47,23 @@ function isActive(path) {
       </RouterLink>
 
       <!-- Desktop sector nav -->
-      <nav class="hidden items-center gap-1 md:flex">
+      <nav class="hidden items-center gap-0.5 md:flex">
         <RouterLink
           v-for="sector in sectors"
           :key="sector.to"
           :to="sector.to"
-          class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          class="relative px-4 py-2 text-sm font-medium transition-colors"
           :class="
             isActive(sector.to)
-              ? 'bg-brand-50 text-brand-600'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'text-brand-600'
+              : 'text-slate-600 hover:text-slate-900'
           "
         >
           {{ sector.label }}
+          <span
+            v-if="isActive(sector.to)"
+            class="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-brand-500"
+          />
         </RouterLink>
 
         <span class="mx-1 h-4 w-px bg-slate-200" />
