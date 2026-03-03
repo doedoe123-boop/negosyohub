@@ -12,4 +12,13 @@ export const ordersApi = {
   place(payload) {
     return client.post("/api/v1/orders", payload);
   },
+
+  /**
+   * Cancel an order by its ID.
+   *
+   * @param {number} id
+   */
+  cancel(id) {
+    return client.patch(`/api/v1/orders/${id}/cancel`);
+  },
 };

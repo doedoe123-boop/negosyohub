@@ -17,4 +17,23 @@ export const propertiesApi = {
       params: { per_page: limit, featured: true },
     });
   },
+
+  /**
+   * Submit a customer inquiry for a property.
+   *
+   * @param {string} slug
+   * @param {{ name: string, email: string, phone?: string, message?: string, source?: string }} payload
+   */
+  submitInquiry(slug, payload) {
+    return client.post(`/api/v1/properties/${slug}/inquiries`, payload);
+  },
+
+  /**
+   * List upcoming open house events for a property.
+   *
+   * @param {string} slug
+   */
+  openHouses(slug) {
+    return client.get(`/api/v1/properties/${slug}/open-houses`);
+  },
 };

@@ -77,4 +77,18 @@ class OrderPolicy
     {
         return $user->isAdmin();
     }
+
+    /**
+     * Determine whether the user can cancel the order.
+     *
+     * Customers may cancel their own orders; admins may cancel any order.
+     */
+    public function cancel(User $user, Order $order): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $order->user_id === $user->id;
+    }
 }

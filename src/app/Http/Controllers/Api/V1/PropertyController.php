@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\SubmitInquiryRequest;
+use App\Models\Property;
 use App\Services\PropertyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,6 +53,31 @@ class PropertyController extends Controller
     {
         return response()->json(
             $this->propertyService->findBySlugOrFail($slug)
+        );
+    }
+
+    /**
+     * Submit a customer inquiry for a property.
+     *
+     * Public — no authentication required.
+     */
+    public function submitInquiry(SubmitInquiryRequest $request, Property $property): JsonResponse
+    {
+        $inquiry = $this->propertyService->submitInquiry($property, $request->validated());
+
+        return response()->json([
+            'message' => 'Your inquiry has been submitted. We will get back to you shortly.',
+            'id' => $inquiry->id,
+        ], 201);
+    }
+
+    /**
+     * List upcoming open house events for a property.
+     */
+    public function openHouses(Property $property): JsonResponse
+    {
+        return response()->json(
+            $this->propertyService->upcomingOpenHouses($property)
         );
     }
 }

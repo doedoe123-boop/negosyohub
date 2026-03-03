@@ -51,6 +51,21 @@ class OrderController extends Controller
     }
 
     /**
+     * Cancel a pending or confirmed order.
+     */
+    public function cancel(Request $request, Order $order): JsonResponse
+    {
+        $this->authorize('cancel', $order);
+
+        $order = $this->orderService->cancel($order);
+
+        return response()->json([
+            'message' => 'Order cancelled successfully.',
+            'order' => $order,
+        ]);
+    }
+
+    /**
      * Place a new order from the current Lunar cart session.
      */
     public function store(PlaceOrderRequest $request): JsonResponse

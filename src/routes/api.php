@@ -39,11 +39,15 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
         Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
+        Route::get('/stores/{store:slug}/properties', [StoreController::class, 'storeProperties'])->name('properties.store');
+
         Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
         Route::get('/properties/{slug}', [PropertyController::class, 'show'])->name('properties.show');
+        Route::post('/properties/{property:slug}/inquiries', [PropertyController::class, 'submitInquiry'])->name('properties.inquiries.store');
+        Route::get('/properties/{property:slug}/open-houses', [PropertyController::class, 'openHouses'])->name('properties.open-houses');
     });
 
-    // ── Authenticated customer endpoints ──────────────────────────────────
+    // ── Authenticated customer endpoints ──────────────────────────────────────────────
     Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         // Auth
         Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
@@ -53,6 +57,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     });
 
 });

@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use App\InquiryStatus;
+use App\Models\OpenHouse;
 use App\Models\Property;
+use App\Models\PropertyInquiry;
+use App\Models\Store;
 use App\PropertyStatus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -101,5 +105,89 @@ class PropertyService
         $property->increment('views_count');
 
         return $property->fresh(['store']);
+    }
+
+    /**
+     * Browse active published properties scoped to a single approved store.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    public function browseForStore(Store $store, array $params = []): LengthAwarePaginator
+    {
+        $query = Property::query()
+            ->where('store_id', $store->id)
+            ->where('status', PropertyStatus::Active)
+            ->whereNotNull('published_at')
+            ->latest('published_at');
+
+        if (! empty($params['search'])) {
+            $search = $params['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
+            });
+        }
+
+        if (! empty($params['type'])) {
+            $query->where('property_type', $params['type']);
+        }
+
+        if (! empty($params['listing_type'])) {
+            $query->where('listing_type', $params['listing_type']);
+        }
+
+        if (isset($params['min_price']) && $params['min_price'] !== '') {
+            $query->where('price', '>=', $params['min_price']);
+        }
+
+        if (isset($params['max_price']) && $params['max_price'] !== '') {
+            $query->where('price', '<=', $params['max_price']);
+        }
+
+        if (! empty($params['bedrooms'])) {
+            $query->where('bedrooms', '>=', (int) $params['bedrooms']);
+        }
+
+        return $query->paginate($params['per_page'] ?? 12);
+    }
+
+    /**
+     * Create a new inquiry for a property from validated input.
+     *
+     * The observer on PropertyInquiry will fire notifications to the agent.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function submitInquiry(Property $property, array $data): PropertyInquiry
+    {
+        abort_if($property->status !== PropertyStatus::Active, 404);
+
+        return PropertyInquiry::create([
+            'property_id' => $property->id,
+            'store_id' => $property->store_id,
+            'user_id' => auth()->id(),
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'message' => $data['message'] ?? null,
+            'source' => $data['source'] ?? 'website',
+            'status' => InquiryStatus::New,
+        ]);
+    }
+
+    /**
+     * Return upcoming published open house events for a property.
+     *
+     * @return Collection<int, OpenHouse>
+     */
+    public function upcomingOpenHouses(Property $property): Collection
+    {
+        return OpenHouse::query()
+            ->where('property_id', $property->id)
+            ->where('status', 'published')
+            ->where('event_date', '>=', now()->toDateString())
+            ->orderBy('event_date')
+            ->orderBy('start_time')
+            ->get();
     }
 }

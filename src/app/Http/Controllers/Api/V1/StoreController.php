@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Store;
+use App\Services\PropertyService;
 use App\Services\StoreService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,8 @@ use Illuminate\Http\Request;
 class StoreController extends Controller
 {
     public function __construct(
-        private StoreService $storeService
+        private StoreService $storeService,
+        private PropertyService $propertyService,
     ) {}
 
     /**
@@ -40,6 +42,23 @@ class StoreController extends Controller
     {
         return response()->json(
             $this->storeService->findApprovedOrFail($store)
+        );
+    }
+
+    /**
+     * List published properties for a real-estate store.
+     *
+     * Resolves the store by slug. Returns 404 if not approved.
+     */
+    public function storeProperties(Store $store, Request $request): JsonResponse
+    {
+        abort_if(! $store->isApproved(), 404);
+
+        return response()->json(
+            $this->propertyService->browseForStore(
+                $store,
+                $request->only(['search', 'type', 'listing_type', 'min_price', 'max_price', 'bedrooms', 'per_page'])
+            )
         );
     }
 }
