@@ -131,6 +131,17 @@ class ProductService
                     : null,
                 'currency' => $variant->prices->first()?->currency?->code,
             ])->values()->toArray();
+
+            $storeId = $data['store_id'];
+            $store = $storeId ? Store::query()->find($storeId) : null;
+            $data['store'] = $store ? [
+                'id' => $store->id,
+                'name' => $store->name,
+                'slug' => $store->slug,
+                'logo' => $store->logo,
+                'sector' => $store->sector?->value,
+                'city' => $store->address['city'] ?? null,
+            ] : null;
         }
 
         return $data;

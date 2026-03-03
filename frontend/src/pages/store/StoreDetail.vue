@@ -5,6 +5,15 @@ import { ChevronRightIcon, MapPinIcon } from "@heroicons/vue/24/outline";
 import { storesApi } from "@/api/stores";
 import { useCartStore } from "@/stores/cart";
 
+const sectorLabels = {
+  food_and_beverage: "Food & Beverage",
+  real_estate: "Real Estate",
+  electronics: "Electronics",
+  fashion: "Fashion",
+  health_beauty: "Health & Beauty",
+  services: "Services",
+};
+
 const route = useRoute();
 const cart = useCartStore();
 
@@ -58,14 +67,7 @@ async function addToCart(product) {
     <template v-else>
       <!-- Banner -->
       <div class="relative h-48 w-full overflow-hidden bg-slate-800 sm:h-56">
-        <img
-          v-if="store.banner_url"
-          :src="store.banner_url"
-          :alt="store.name"
-          class="h-full w-full object-cover opacity-80"
-        />
         <div
-          v-else
           class="h-full w-full bg-gradient-to-br from-slate-700 to-slate-900"
         />
       </div>
@@ -74,11 +76,11 @@ async function addToCart(product) {
         <!-- Store info bar (overlaps banner) -->
         <div class="relative -mt-10 mb-6 flex items-end gap-4">
           <div
-            v-if="store.logo_url"
+            v-if="store.logo"
             class="size-20 shrink-0 overflow-hidden rounded-2xl bg-white ring-4 ring-white shadow-md"
           >
             <img
-              :src="store.logo_url"
+              :src="store.logo"
               :alt="store.name"
               class="h-full w-full object-cover"
             />
@@ -100,11 +102,11 @@ async function addToCart(product) {
                 v-if="store.sector"
                 class="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-600"
               >
-                {{ store.sector }}
+                {{ sectorLabels[store.sector] ?? store.sector }}
               </span>
-              <span v-if="store.city" class="flex items-center gap-1">
+              <span v-if="store.address?.city" class="flex items-center gap-1">
                 <MapPinIcon class="size-3.5" />
-                {{ store.city }}
+                {{ store.address.city }}
               </span>
             </div>
           </div>
@@ -177,7 +179,14 @@ async function addToCart(product) {
                 </p>
               </RouterLink>
               <p class="mt-1 text-sm font-semibold text-brand-600">
-                {{ product.price != null ? '₱' + parseFloat(product.price).toLocaleString('en-PH', { maximumFractionDigits: 0 }) : '—' }}
+                {{
+                  product.price != null
+                    ? "₱" +
+                      parseFloat(product.price).toLocaleString("en-PH", {
+                        maximumFractionDigits: 0,
+                      })
+                    : "—"
+                }}
               </p>
               <button
                 type="button"

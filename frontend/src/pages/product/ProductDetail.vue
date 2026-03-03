@@ -1,7 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute, RouterLink } from "vue-router";
-import { ChevronRightIcon, MinusIcon, PlusIcon } from "@heroicons/vue/24/outline";
+import {
+  ChevronRightIcon,
+  MinusIcon,
+  PlusIcon,
+} from "@heroicons/vue/24/outline";
 import { productsApi } from "@/api/products";
 import { useCartStore } from "@/stores/cart";
 
@@ -80,9 +84,7 @@ async function addToCart() {
       <div class="grid gap-8 md:grid-cols-2">
         <!-- Gallery -->
         <div>
-          <div
-            class="aspect-square overflow-hidden rounded-2xl bg-slate-100"
-          >
+          <div class="aspect-square overflow-hidden rounded-2xl bg-slate-100">
             <img
               v-if="product.thumbnail"
               :src="product.thumbnail"
@@ -107,12 +109,12 @@ async function addToCart() {
             class="mb-3 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-brand-600 transition-colors"
           >
             <img
-              v-if="product.store.logo_url"
-              :src="product.store.logo_url"
+              v-if="product.store.logo"
+              :src="product.store.logo"
               :alt="product.store.name"
               class="size-5 rounded object-cover"
             />
-            {{ product.store.name }}
+            <span class="font-medium">{{ product.store.name }}</span>
           </RouterLink>
 
           <h1 class="text-2xl font-bold leading-tight text-slate-900">
@@ -120,7 +122,14 @@ async function addToCart() {
           </h1>
 
           <p class="mt-3 text-2xl font-bold text-brand-600">
-            {{ selectedVariant?.price != null ? '₱' + parseFloat(selectedVariant.price).toLocaleString('en-PH', { maximumFractionDigits: 0 }) : '—' }}
+            {{
+              selectedVariant?.price != null
+                ? "₱" +
+                  parseFloat(selectedVariant.price).toLocaleString("en-PH", {
+                    maximumFractionDigits: 0,
+                  })
+                : "—"
+            }}
           </p>
 
           <p
