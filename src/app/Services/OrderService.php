@@ -49,9 +49,7 @@ class OrderService
         $lock = Cache::lock("order-create:{$cart->customer_id}", 15);
 
         if (! $lock->get()) {
-            throw ValidationException::withMessages([
-                'order' => 'Your previous order is still being processed. Please wait a moment and try again.',
-            ]);
+            abort(409, 'Your previous order is still being processed. Please wait a moment and try again.');
         }
 
         try {
