@@ -1,1 +1,0 @@
-import{B as s}from"./index-DK8MpNYq.js";const o={list(t={}){return s.get("/api/v1/stores",{params:t})},show(t){return s.get(`/api/v1/stores/${t}`)},products(t,r={}){return s.get(`/api/v1/stores/${t}/products`,{params:r})}};export{o as s};

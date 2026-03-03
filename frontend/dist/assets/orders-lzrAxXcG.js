@@ -1,1 +1,0 @@
-import{B as e}from"./index-DK8MpNYq.js";const t={list(r={}){return e.get("/api/v1/orders",{params:r})},show(r){return e.get(`/api/v1/orders/${r}`)},place(r){return e.post("/api/v1/orders",r)}};export{t as o};
