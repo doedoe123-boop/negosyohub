@@ -11,7 +11,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Home page", () => {
   test("renders hero and brand name", async ({ page }) => {
     // Mock the featured stores endpoint
-    await page.route("/api/stores*", (route) =>
+    await page.route("**/api/v1/stores*", (route) =>
       route.fulfill({
         json: {
           data: [
@@ -33,20 +33,20 @@ test.describe("Home page", () => {
         },
       }),
     );
-    // Mock /api/user so the auth guard doesn't redirect
-    await page.route("/api/user", (route) =>
+    // Mock /api/v1/user so the auth guard doesn't redirect
+    await page.route("**/api/v1/user", (route) =>
       route.fulfill({ status: 401, json: {} }),
     );
 
     await page.goto("/");
 
     await expect(page.getByRole("link", { name: "NegosyoHub" })).toBeVisible();
-    await expect(page.getByText("Your Local Marketplace")).toBeVisible();
-    await expect(page.getByText("Browse Stores")).toBeVisible();
+    await expect(page.getByText("The Philippine Marketplace")).toBeVisible();
+    await expect(page.getByText("Explore Now")).toBeVisible();
   });
 
   test("featured stores are displayed", async ({ page }) => {
-    await page.route("/api/stores*", (route) =>
+    await page.route("**/api/v1/stores*", (route) =>
       route.fulfill({
         json: {
           data: [
@@ -61,7 +61,7 @@ test.describe("Home page", () => {
         },
       }),
     );
-    await page.route("/api/user", (route) =>
+    await page.route("**/api/v1/user", (route) =>
       route.fulfill({ status: 401, json: {} }),
     );
 
@@ -72,7 +72,7 @@ test.describe("Home page", () => {
 
 test.describe("Stores listing page", () => {
   test("renders list of stores", async ({ page }) => {
-    await page.route("/api/stores*", (route) =>
+    await page.route("**/api/v1/stores*", (route) =>
       route.fulfill({
         json: {
           data: [
@@ -94,7 +94,7 @@ test.describe("Stores listing page", () => {
         },
       }),
     );
-    await page.route("/api/user", (route) =>
+    await page.route("**/api/v1/user", (route) =>
       route.fulfill({ status: 401, json: {} }),
     );
 
@@ -106,10 +106,10 @@ test.describe("Stores listing page", () => {
   });
 
   test("search form is present", async ({ page }) => {
-    await page.route("/api/stores*", (route) =>
+    await page.route("**/api/v1/stores*", (route) =>
       route.fulfill({ json: { data: [] } }),
     );
-    await page.route("/api/user", (route) =>
+    await page.route("**/api/v1/user", (route) =>
       route.fulfill({ status: 401, json: {} }),
     );
 
@@ -121,7 +121,7 @@ test.describe("Stores listing page", () => {
 
 test.describe("404 page", () => {
   test("shows not found for unknown route", async ({ page }) => {
-    await page.route("/api/user", (route) =>
+    await page.route("**/api/v1/user", (route) =>
       route.fulfill({ status: 401, json: {} }),
     );
     await page.goto("/this-route-does-not-exist-at-all");

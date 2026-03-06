@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             PropertyListingSeeder::class,
             ShippingSeeder::class,
+            CategorySeeder::class,
         ]);
 
         $this->assignStoreOwnerRoles();

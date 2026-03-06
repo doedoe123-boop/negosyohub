@@ -15,7 +15,6 @@ import DicedHeroSection from "@/components/DicedHeroSection.vue";
 import CategoryStrip from "@/components/CategoryStrip.vue";
 
 // New homepage components
-import UniversalSearch from "@/components/homepage/UniversalSearch.vue";
 import VerifiedProperties from "@/components/homepage/VerifiedProperties.vue";
 import TrendingCarousel from "@/components/homepage/TrendingCarousel.vue";
 import TrustStrip from "@/components/homepage/TrustStrip.vue";
@@ -119,47 +118,7 @@ onMounted(async () => {
         :on-grid-image-click="(i) => $router.push(i > 1 ? '/properties' : '/stores')"
         background-color="transparent"
       />
-
-      <!-- Hero secondary CTA + social proof -->
-      <div class="mx-auto max-w-7xl px-4 pb-8 sm:px-6">
-        <div class="flex flex-wrap items-center justify-center gap-6 sm:justify-start lg:pl-8">
-          <a
-            :href="`${backendUrl}/register/sector`"
-            target="_blank"
-            class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-          >
-            List Your Business
-            <svg class="size-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-          </a>
-          <span class="hidden h-4 w-px bg-white/20 sm:block" />
-          <div class="flex items-center gap-4 text-xs text-white/50">
-            <span class="flex items-center gap-1">
-              <svg class="size-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-              </svg>
-              <strong class="text-white/80 font-semibold">{{ formatCount(stats.stores) }}</strong> Verified Sellers
-            </span>
-            <span class="flex items-center gap-1">
-              <span class="text-sm">🏡</span>
-              <strong class="text-white/80 font-semibold">{{ formatCount(stats.properties) }}</strong> Properties
-            </span>
-            <span v-if="stats.average_rating" class="flex items-center gap-1">
-              <span class="text-sm text-amber-400">⭐</span>
-              <strong class="text-white/80 font-semibold">{{ stats.average_rating }}</strong> Avg Rating
-            </span>
-            <span v-else class="flex items-center gap-1">
-              <span class="text-sm">🛍️</span>
-              <strong class="text-white/80 font-semibold">{{ formatCount(stats.products) }}</strong> Products
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
-
-    <!-- ── 2. Universal Search (floating) ──────────────────────────── -->
-    <UniversalSearch />
 
     <!-- ── 3. Category strip ───────────────────────────────────────── -->
     <CategoryStrip />

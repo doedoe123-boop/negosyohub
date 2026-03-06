@@ -111,6 +111,16 @@ async function withAuth(page) {
       route.fallback();
     }
   });
+  // Prevent cart fetch from triggering auth:unauthenticated redirect
+  await page.route("**/api/v1/cart", (route) => {
+    if (route.request().method() === "GET") {
+      route.fulfill({
+        json: { lines: [], total: { formatted: "₱0.00", value: 0 } },
+      });
+    } else {
+      route.fallback();
+    }
+  });
 }
 
 // Mock GET /api/v1/user → 401 unauthenticated

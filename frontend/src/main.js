@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import router from "./router";
 import App from "./App.vue";
+import { useCartStore } from "@/stores/cart";
 import "./style.css";
 
 const app = createApp(App);
@@ -11,16 +12,22 @@ app.use(pinia);
 app.use(router);
 
 // When a 401 fires mid-session (token expired), the API client emits this
-// event. Clear auth state and redirect to login so the user isn't stuck
-// on a protected page with broken requests.
+// event. Only redirect to login if the user is on a protected page —
+// public pages (homepage, stores, properties) should NOT bounce to login.
 window.addEventListener("auth:unauthenticated", async () => {
   const { useAuthStore } = await import("@/stores/auth");
   const auth = useAuthStore();
   auth.user = null;
-  useCartStore().reset();
-  router.push({ name: "auth.login" });
-});
 
-import { useCartStore } from "@/stores/cart";
+  const currentRoute = router.currentRoute.value;
+  const isProtected =
+    currentRoute.meta?.requiresAuth ||
+    currentRoute.matched.some((r) => r.meta?.requiresAuth);
+
+  if (isProtected) {
+    useCartStore().reset();
+    router.push({ name: "auth.login", query: { redirect: currentRoute.fullPath } });
+  }
+});
 
 app.mount("#app");

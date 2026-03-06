@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Property;
 use App\Models\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Lunar\Models\Product;
 
 /**
  * Lightweight stats endpoint for the public storefront homepage.
@@ -21,12 +21,12 @@ class HomepageStatsController extends Controller
     public function __invoke(): JsonResponse
     {
         $stats = Cache::remember('homepage_stats', now()->addMinutes(5), function () {
-            $storeCount    = Store::approved()->count();
-            $productCount  = Product::count();
+            $storeCount = Store::approved()->count();
+            $productCount = Product::count();
             $propertyCount = Property::whereNotNull('published_at')->count();
 
             // Average rating across all published reviews
-            $avgRating   = null;
+            $avgRating = null;
             $reviewCount = 0;
             try {
                 $avgRating = DB::table('reviews')
@@ -43,11 +43,11 @@ class HomepageStatsController extends Controller
             }
 
             return [
-                'stores'          => $storeCount,
-                'products'        => $productCount,
-                'properties'      => $propertyCount,
-                'average_rating'  => $avgRating,
-                'total_reviews'   => $reviewCount,
+                'stores' => $storeCount,
+                'products' => $productCount,
+                'properties' => $propertyCount,
+                'average_rating' => $avgRating,
+                'total_reviews' => $reviewCount,
             ];
         });
 

@@ -17,6 +17,7 @@ const loading = ref(true);
 const error = ref(false);
 const search = ref(route.query.search ?? "");
 const sector = ref(route.query.sector ?? "");
+const collectionId = ref(route.query.collection_id ?? "");
 
 const sectorLabels = {
   ecommerce: "E-Commerce",
@@ -38,6 +39,7 @@ async function load(page = 1) {
     const { data } = await storesApi.list({
       search: search.value || undefined,
       sector: sector.value || undefined,
+      collection_id: collectionId.value || undefined,
       page,
     });
     stores.value = data.data ?? data;
@@ -54,6 +56,7 @@ function onSearch() {
     query: {
       search: search.value || undefined,
       sector: sector.value || undefined,
+      collection_id: collectionId.value || undefined,
     },
   });
   load();
@@ -67,7 +70,12 @@ function setSector(value) {
 onMounted(() => load());
 watch(
   () => route.query,
-  () => load(),
+  (q) => {
+    search.value = q.search ?? "";
+    sector.value = q.sector ?? "";
+    collectionId.value = q.collection_id ?? "";
+    load();
+  },
 );
 </script>
 

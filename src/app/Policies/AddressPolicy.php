@@ -31,8 +31,6 @@ class AddressPolicy
     {
         return $user->id === $address->user_id;
     }
-}
-
 
     /**
      * Determine whether the user can restore the model.

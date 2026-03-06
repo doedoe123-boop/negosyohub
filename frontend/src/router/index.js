@@ -171,7 +171,12 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore();
 
   if (!auth.initialized) {
-    await auth.fetchUser();
+    const hasToken = !!localStorage.getItem("api_token");
+    if (hasToken) {
+      await auth.fetchUser();
+    } else {
+      auth.initialized = true;
+    }
   }
 
   if (to.meta.requiresAuth && !auth.isLoggedIn) {

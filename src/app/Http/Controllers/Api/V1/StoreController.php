@@ -26,12 +26,12 @@ class StoreController extends Controller
     ) {}
 
     /**
-     * List approved stores, with optional sector/city/search filtering.
+     * List approved stores, with optional sector/city/search/collection_id filtering.
      */
     public function index(Request $request): JsonResponse
     {
         return response()->json(
-            $this->storeService->browseApproved($request->only(['sector', 'city', 'search', 'per_page']))
+            $this->storeService->browseApproved($request->only(['sector', 'city', 'search', 'per_page', 'collection_id']))
         );
     }
 

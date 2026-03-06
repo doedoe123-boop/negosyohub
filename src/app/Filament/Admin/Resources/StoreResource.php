@@ -119,8 +119,16 @@ class StoreResource extends Resource
                         Infolists\Components\TextEntry::make('sector')
                             ->label('Industry Sector')
                             ->badge()
-                            ->formatStateUsing(fn (?string $state): string => \App\Models\Sector::where('slug', $state)->value('name') ?? $state ?? '—')
-                            ->color(fn (?string $state): string => \App\Models\Sector::where('slug', $state)->value('color') ?? 'gray'),
+                            ->formatStateUsing(function (\App\IndustrySector|string|null $state): string {
+                                $slug = $state instanceof \App\IndustrySector ? $state->value : $state;
+
+                                return \App\Models\Sector::where('slug', $slug)->value('name') ?? $slug ?? '—';
+                            })
+                            ->color(function (\App\IndustrySector|string|null $state): string {
+                                $slug = $state instanceof \App\IndustrySector ? $state->value : $state;
+
+                                return \App\Models\Sector::where('slug', $slug)->value('color') ?? 'gray';
+                            }),
                         Infolists\Components\TextEntry::make('commission_rate')
                             ->suffix('%'),
                     ])->columns(2),

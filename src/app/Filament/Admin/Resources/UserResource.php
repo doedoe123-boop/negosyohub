@@ -74,8 +74,7 @@ class UserResource extends Resource
                             }),
                         Infolists\Components\TextEntry::make('email_verified_at')
                             ->label('Email Verified')
-                            ->dateTime()
-                            ->default('Not verified'),
+                            ->formatStateUsing(fn ($state): string => $state ? \Carbon\Carbon::parse($state)->format('M d, Y H:i') : 'Not verified'),
                         Infolists\Components\TextEntry::make('created_at')
                             ->dateTime(),
                     ])->columns(2),
