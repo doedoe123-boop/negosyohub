@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AddressController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\HomepageStatsController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PaymentMethodController;
@@ -38,6 +39,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     // ── Public browse (no auth required) ─────────────────────────────────
     Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/homepage-stats', HomepageStatsController::class)->name('homepage.stats');
         Route::get('/stores', [StoreController::class, 'index'])->name('stores.index');
         Route::get('/stores/{store:slug}', [StoreController::class, 'show'])->name('stores.show');
         Route::get('/stores/{store:slug}/products', [ProductController::class, 'storeProducts'])->name('products.store');

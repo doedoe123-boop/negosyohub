@@ -42,7 +42,7 @@ function isActive(path) {
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 shadow-md" style="background: #0f2044">
+  <header class="sticky top-0 z-40 bg-navy-900 shadow-md">
     <div
       class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6"
     >
@@ -275,8 +275,7 @@ function isActive(path) {
     >
       <nav
         v-if="mobileOpen"
-        class="border-t border-white/10 px-4 py-2 md:hidden"
-        style="background: #0f2044"
+        class="border-t border-white/10 bg-navy-900 px-4 py-2 md:hidden"
       >
         <RouterLink
           v-for="sector in sectors"

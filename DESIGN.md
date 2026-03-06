@@ -337,6 +337,7 @@ The existing `--color-teal-*` tokens cover the real estate accent. The `--color-
 | Stitch URL               | `https://stitch.google.com/projects/3964431837404061634` |
 | Screen: Property Listing | `screens/d4144332ef124da89badb661bb85048e`               |
 | Screen: Shop Dashboard   | `screens/ecc899e627324e479bf479c5d9c0c4c6`               |
+| Screen: Luxury Homepage  | `screens/55a278bdf02f48d3917a24dc1cf8c48d`               |
 | Device Type              | Desktop (2560px canvas)                                  |
 | Font                     | Inter                                                    |
 | Color Mode               | Light                                                    |

@@ -39,7 +39,7 @@ function select(cat) {
           class="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all"
           :class="
             active === cat.value
-              ? 'bg-[#0F2044] text-white shadow-sm'
+              ? 'bg-navy-900 text-white shadow-sm'
               : 'border border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700'
           "
           @click="select(cat)"

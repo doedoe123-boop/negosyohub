@@ -9,8 +9,20 @@ import {
 import { storesApi } from "@/api/stores";
 import { productsApi } from "@/api/products";
 import { propertiesApi } from "@/api/properties";
+
+// Hero + existing
 import DicedHeroSection from "@/components/DicedHeroSection.vue";
 import CategoryStrip from "@/components/CategoryStrip.vue";
+
+// New homepage components
+import UniversalSearch from "@/components/homepage/UniversalSearch.vue";
+import VerifiedProperties from "@/components/homepage/VerifiedProperties.vue";
+import TrendingCarousel from "@/components/homepage/TrendingCarousel.vue";
+import TrustStrip from "@/components/homepage/TrustStrip.vue";
+
+// Live backend stats composable
+import { useHomepageStats } from "@/composables/useHomepageStats";
+const { stats, loaded: statsLoaded, formatCount } = useHomepageStats();
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
@@ -55,35 +67,6 @@ const sectors = [
   },
 ];
 
-// Category icon row data
-const categoryIcons = [
-  { label: "Electronics",   icon: "📱", to: "/stores?category=electronics" },
-  { label: "Fashion",       icon: "👗", to: "/stores?category=fashion" },
-  { label: "Home & Living", icon: "🛋️", to: "/stores?category=home" },
-  { label: "Food",          icon: "🛒", to: "/stores?category=food" },
-  { label: "Gadgets",       icon: "💻", to: "/stores?category=gadgets" },
-  { label: "Beauty",        icon: "💄", to: "/stores?category=beauty" },
-  { label: "Sports",        icon: "⚽", to: "/stores?category=sports" },
-  { label: "Properties",    icon: "🏡", to: "/properties"             },
-  { label: "Services",      icon: "🔧", to: "/stores?category=services" },
-];
-
-// Discount helper — works if product has compare_at_price field
-function discount(product) {
-  const orig = parseFloat(product.compare_at_price ?? product.original_price ?? 0);
-  const curr = parseFloat(product.price ?? 0);
-  if (!orig || !curr || orig <= curr) return null;
-  return {
-    pct: Math.round((1 - curr / orig) * 100),
-    save: Math.round(orig - curr),
-    original: orig,
-  };
-}
-
-function peso(val) {
-  return "₱" + parseFloat(val ?? 0).toLocaleString("en-PH", { maximumFractionDigits: 0 });
-}
-
 // Spotlight uses first 3 stores; assign each a visual theme
 const spotlightThemes = [
   { bg: "#0F2044", accent: "#059669", label: "Top Pick"   },
@@ -91,18 +74,9 @@ const spotlightThemes = [
   { bg: "#1a1a2e", accent: "#f95d2f", label: "Trending"   },
 ];
 
-const listingLabel = {
-  for_sale:    "For Sale",
-  for_rent:    "For Rent",
-  for_lease:   "For Lease",
-  pre_selling: "Pre-Selling",
-};
-const listingBadgeClass = {
-  for_sale:    "bg-emerald-100 text-emerald-700",
-  for_rent:    "bg-sky-100 text-sky-700",
-  for_lease:   "bg-amber-100 text-amber-700",
-  pre_selling: "bg-purple-100 text-purple-700",
-};
+function peso(val) {
+  return "₱" + parseFloat(val ?? 0).toLocaleString("en-PH", { maximumFractionDigits: 0 });
+}
 
 onMounted(async () => {
   try {
@@ -112,7 +86,7 @@ onMounted(async () => {
   finally { loading.value = false; }
 
   try {
-    const { data } = await productsApi.list({ per_page: 8 });
+    const { data } = await productsApi.list({ per_page: 12 });
     featuredProducts.value = data.data ?? data;
   } catch { featuredProducts.value = []; }
   finally { productsLoading.value = false; }
@@ -128,8 +102,8 @@ onMounted(async () => {
 <template>
   <div>
 
-    <!-- ── Diced Hero ──────────────────────────────────────────────────── -->
-    <div style="background: #0F2044;">
+    <!-- ── 1. Hero ──────────────────────────────────────────────────── -->
+    <div class="bg-navy-900">
       <DicedHeroSection
         top-text="The Philippine Marketplace"
         main-text="Shop. Invest. Discover."
@@ -145,12 +119,52 @@ onMounted(async () => {
         :on-grid-image-click="(i) => $router.push(i > 1 ? '/properties' : '/stores')"
         background-color="transparent"
       />
+
+      <!-- Hero secondary CTA + social proof -->
+      <div class="mx-auto max-w-7xl px-4 pb-8 sm:px-6">
+        <div class="flex flex-wrap items-center justify-center gap-6 sm:justify-start lg:pl-8">
+          <a
+            :href="`${backendUrl}/register/sector`"
+            target="_blank"
+            class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+          >
+            List Your Business
+            <svg class="size-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </a>
+          <span class="hidden h-4 w-px bg-white/20 sm:block" />
+          <div class="flex items-center gap-4 text-xs text-white/50">
+            <span class="flex items-center gap-1">
+              <svg class="size-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+              <strong class="text-white/80 font-semibold">{{ formatCount(stats.stores) }}</strong> Verified Sellers
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="text-sm">🏡</span>
+              <strong class="text-white/80 font-semibold">{{ formatCount(stats.properties) }}</strong> Properties
+            </span>
+            <span v-if="stats.average_rating" class="flex items-center gap-1">
+              <span class="text-sm text-amber-400">⭐</span>
+              <strong class="text-white/80 font-semibold">{{ stats.average_rating }}</strong> Avg Rating
+            </span>
+            <span v-else class="flex items-center gap-1">
+              <span class="text-sm">🛍️</span>
+              <strong class="text-white/80 font-semibold">{{ formatCount(stats.products) }}</strong> Products
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- ── Category strip ─────────────────────────────────────────────── -->
+    <!-- ── 2. Universal Search (floating) ──────────────────────────── -->
+    <UniversalSearch />
+
+    <!-- ── 3. Category strip ───────────────────────────────────────── -->
     <CategoryStrip />
 
-    <!-- ── Sector picker ──────────────────────────────────────────────── -->
+    <!-- ── 4. Sector picker ────────────────────────────────────────── -->
     <section class="border-b border-slate-100 bg-white px-4 py-12 sm:px-6">
       <div class="mx-auto max-w-7xl">
         <div class="mb-7 text-center">
@@ -167,7 +181,7 @@ onMounted(async () => {
             :class="
               sector.soon
                 ? 'cursor-not-allowed bg-slate-50 opacity-60'
-                : 'cursor-pointer bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5'
+                : 'cursor-pointer bg-white sector-card hover:-translate-y-0.5'
             "
           >
             <span
@@ -199,91 +213,19 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- ── Featured Products ───────────────────────────────────────────── -->
-    <section class="mx-auto max-w-7xl px-4 pt-12 pb-8 sm:px-6">
-      <!-- Header -->
-      <div class="mb-6 flex items-end justify-between">
-        <div>
-          <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-brand-500">E-Commerce</p>
-          <h2 class="text-2xl font-bold text-slate-900">Latest Products</h2>
-          <p class="mt-1 text-sm text-slate-500">Shop from local stores across the Philippines.</p>
-        </div>
-        <RouterLink
-          to="/stores"
-          class="flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-        >
-          View All
-          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
-        </RouterLink>
-      </div>
+    <!-- ── 5. Verified Properties ──────────────────────────────────── -->
+    <VerifiedProperties
+      :properties="latestProperties"
+      :loading="propertiesLoading"
+    />
 
-      <!-- Skeleton -->
-      <div v-if="productsLoading" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <div v-for="i in 8" :key="i" class="animate-pulse rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-          <div class="aspect-square rounded-t-2xl bg-slate-100" />
-          <div class="p-3 space-y-2">
-            <div class="h-4 w-3/4 rounded bg-slate-100" />
-            <div class="h-4 w-1/2 rounded bg-slate-200" />
-            <div class="h-3 w-1/3 rounded bg-slate-100" />
-          </div>
-        </div>
-      </div>
+    <!-- ── 6. Trending Products Carousel ───────────────────────────── -->
+    <TrendingCarousel
+      :products="featuredProducts"
+      :loading="productsLoading"
+    />
 
-      <!-- Empty -->
-      <div v-else-if="featuredProducts.length === 0" class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center">
-        <p class="text-2xl mb-2">🛍️</p>
-        <p class="text-sm font-medium text-slate-500">No products yet — check back soon!</p>
-      </div>
-
-      <!-- UPGRADED Product Grid -->
-      <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <RouterLink
-          v-for="product in featuredProducts"
-          :key="product.id"
-          :to="`/products/${product.id}`"
-          class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md"
-        >
-          <!-- Image area -->
-          <div class="relative aspect-square overflow-hidden bg-white">
-            <img
-              v-if="product.thumbnail"
-              :src="product.thumbnail"
-              :alt="product.name"
-              class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
-            />
-            <div v-else class="flex h-full items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100 text-4xl">🛍️</div>
-
-            <!-- Discount badge -->
-            <span
-              v-if="discount(product)"
-              class="absolute right-2 top-2 rounded-lg bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm"
-            >
-              {{ discount(product).pct }}% OFF
-            </span>
-          </div>
-
-          <!-- Info -->
-          <div class="flex flex-1 flex-col p-3">
-            <p class="line-clamp-2 text-sm font-medium leading-snug text-slate-700 transition-colors group-hover:text-emerald-700">
-              {{ product.name }}
-            </p>
-            <div class="mt-auto pt-2">
-              <!-- Current price -->
-              <p class="text-sm font-bold text-slate-900">{{ peso(product.price) }}</p>
-              <!-- Original + savings (conditional) -->
-              <template v-if="discount(product)">
-                <p class="text-xs text-slate-400 line-through">{{ peso(discount(product).original) }}</p>
-                <p class="text-xs font-semibold text-emerald-600">Save {{ peso(discount(product).save) }}</p>
-              </template>
-            </div>
-          </div>
-        </RouterLink>
-      </div>
-    </section>
-
-    <!-- ── Store Spotlight (3-col branded banners) ─────────────────────── -->
+    <!-- ── 7. Featured Stores Spotlight ─────────────────────────────── -->
     <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div class="mb-5 flex items-end justify-between">
         <div>
@@ -308,7 +250,7 @@ onMounted(async () => {
           v-for="(store, i) in featuredStores.slice(0, 3)"
           :key="store.id"
           :to="`/stores/${store.slug}`"
-          class="group relative flex h-36 overflow-hidden rounded-2xl shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
+          class="group relative flex h-36 overflow-hidden rounded-2xl transition-all hover:-translate-y-0.5 spotlight-card"
           :style="{ background: spotlightThemes[i].bg }"
         >
           <!-- BG image overlay -->
@@ -351,7 +293,7 @@ onMounted(async () => {
           v-for="store in featuredStores.slice(3)"
           :key="store.id"
           :to="`/stores/${store.slug}`"
-          class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+          class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white hover:-translate-y-0.5 transition-all store-card"
         >
           <div class="aspect-[3/2] w-full overflow-hidden bg-slate-100">
             <img
@@ -393,90 +335,11 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- ── Latest Properties ────────────────────────────────────────────── -->
-    <section class="bg-gradient-to-b from-slate-50 to-white py-12">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6">
-        <div class="mb-7 flex items-end justify-between">
-          <div>
-            <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-emerald-600">Real Estate</p>
-            <h2 class="text-2xl font-bold text-slate-900">Latest Properties</h2>
-            <p class="mt-1 text-sm text-slate-500">Houses, condos, and commercial spaces for sale or rent.</p>
-          </div>
-          <RouterLink
-            to="/properties"
-            class="flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-          >
-            View All
-            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </RouterLink>
-        </div>
+    <!-- ── 8. Trust Signals Strip ──────────────────────────────────── -->
+    <TrustStrip :stats="stats" />
 
-        <!-- Skeleton -->
-        <div v-if="propertiesLoading" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div v-for="i in 4" :key="i" class="animate-pulse rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
-            <div class="aspect-[16/9] rounded-t-2xl bg-slate-100" />
-            <div class="p-4 space-y-2">
-              <div class="h-4 w-3/4 rounded bg-slate-100" />
-              <div class="h-3 w-1/2 rounded bg-slate-100" />
-              <div class="h-5 w-1/3 rounded bg-slate-200" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty -->
-        <div v-else-if="latestProperties.length === 0" class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center">
-          <p class="text-2xl mb-2">🏡</p>
-          <p class="text-sm font-medium text-slate-500">No listings yet — check back soon!</p>
-        </div>
-
-        <!-- Grid -->
-        <div v-else class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <RouterLink
-            v-for="property in latestProperties"
-            :key="property.id"
-            :to="`/properties/${property.slug}`"
-            class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all"
-          >
-            <div class="relative aspect-[16/9] overflow-hidden bg-slate-100">
-              <img
-                v-if="property.images && property.images[0]"
-                :src="property.images[0]"
-                :alt="property.title"
-                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div v-else class="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-4xl">🏡</div>
-              <!-- Listing badge -->
-              <span
-                class="absolute left-2.5 top-2.5 rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm"
-                :class="listingBadgeClass[property.listing_type] ?? 'bg-slate-100 text-slate-600'"
-              >
-                {{ listingLabel[property.listing_type] ?? property.listing_type }}
-              </span>
-            </div>
-            <div class="p-4">
-              <p class="line-clamp-2 font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug">
-                {{ property.title }}
-              </p>
-              <p class="mt-1 flex items-center gap-1 text-xs text-slate-400">
-                <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                </svg>
-                {{ property.city }}
-              </p>
-              <p class="mt-2 text-base font-bold text-brand-500">
-                {{ peso(property.price) }}
-              </p>
-            </div>
-          </RouterLink>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Seller CTA banner ────────────────────────────────────────────── -->
-    <section style="background: #0F2044;" class="py-14 text-white">
+    <!-- ── 9. Seller CTA banner ────────────────────────────────────── -->
+    <section class="bg-navy-900 py-14 text-white">
       <div class="mx-auto max-w-7xl px-4 text-center sm:px-6">
         <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-emerald-400">For Business Owners</p>
         <h2 class="text-3xl font-bold">Grow your business with NegosyoHub</h2>
@@ -501,6 +364,14 @@ onMounted(async () => {
             Browse stores
           </RouterLink>
         </div>
+
+        <!-- Trust note -->
+        <p class="mt-6 flex items-center justify-center gap-1.5 text-xs text-white/40">
+          <svg class="size-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+          🔒 Your data is protected · Trusted by {{ formatCount(stats.stores) }} sellers
+        </p>
       </div>
     </section>
 
@@ -508,6 +379,23 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.scrollbar-none::-webkit-scrollbar { display: none; }
-.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+/* Quiet Luxury card shadows from DESIGN.md */
+.sector-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.sector-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+.spotlight-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.spotlight-card:hover {
+  box-shadow: 0 8px 24px rgba(15, 32, 68, 0.2);
+}
+.store-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.store-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
 </style>
