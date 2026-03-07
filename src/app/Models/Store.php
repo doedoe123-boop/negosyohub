@@ -214,6 +214,30 @@ class Store extends Model
     }
 
     /**
+     * Moving service add-ons offered by a Lipat Bahay store.
+     */
+    public function movingAddOns(): HasMany
+    {
+        return $this->hasMany(MovingAddOn::class);
+    }
+
+    /**
+     * Moving bookings received by a Lipat Bahay store.
+     */
+    public function movingBookings(): HasMany
+    {
+        return $this->hasMany(MovingBooking::class);
+    }
+
+    /**
+     * Rental agreements created by a Paupahan store.
+     */
+    public function rentalAgreements(): HasMany
+    {
+        return $this->hasMany(RentalAgreement::class);
+    }
+
+    /**
      * Get the average rating from published reviews.
      */
     public function averageReviewRating(): float
@@ -290,6 +314,36 @@ class Store extends Model
     }
 
     /**
+     * Determine if the store belongs to the Paupahan (rental) sector.
+     */
+    public function isPaupahan(): bool
+    {
+        return $this->sector === IndustrySector::Paupahan;
+    }
+
+    /**
+     * Determine if the store belongs to the Lipat Bahay (moving service) sector.
+     */
+    public function isLipatBahay(): bool
+    {
+        return $this->sector === IndustrySector::LipatBahay;
+    }
+
+    /**
+     * Determine if the store uses the property-based Realty panel.
+     *
+     * Both Real Estate agencies and Paupahan (rental) landlords manage
+     * property listings, so they share the same panel.
+     */
+    public function usesRealtyPanel(): bool
+    {
+        return in_array($this->sector, [
+            IndustrySector::RealEstate,
+            IndustrySector::Paupahan,
+        ], true);
+    }
+
+    /**
      * Get a human-readable label for the store's sector/business type.
      *
      * Maps enum values to friendly names (e.g. "Real Estate Agency", "Food & Beverage Store").
@@ -299,6 +353,8 @@ class Store extends Model
         return match ($this->sector) {
             IndustrySector::Ecommerce => 'E-Commerce Store',
             IndustrySector::RealEstate => 'Real Estate Agency',
+            IndustrySector::Paupahan => 'Rental Landlord',
+            IndustrySector::LipatBahay => 'Moving Company',
             default => 'Business',
         };
     }
@@ -306,12 +362,18 @@ class Store extends Model
     /**
      * Get the panel dashboard path for this store's sector.
      *
-     * Real estate stores go to the Realty panel, all others to the Lunar panel.
+     * Real estate and Paupahan stores go to the Realty panel.
+     * Lipat Bahay stores go to the LipatBahay panel.
+     * All others go to the Lunar store panel.
      */
     public function dashboardPath(): string
     {
-        if ($this->isRealEstate()) {
+        if ($this->usesRealtyPanel()) {
             return '/realty/dashboard/tk_'.config('app.realty_path_token');
+        }
+
+        if ($this->isLipatBahay()) {
+            return '/lipat-bahay/dashboard/tk_'.config('app.lipat_bahay_path_token');
         }
 
         return '/store/dashboard/tk_'.config('app.store_path_token');

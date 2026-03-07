@@ -43,6 +43,38 @@ class SectorSeeder extends Seeder
                     ['key' => 'dhsud_license',         'label' => 'DHSUD License to Sell',            'description' => 'DHSUD license to sell for property developers.',                                 'is_required' => false, 'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 5],
                 ],
             ],
+            [
+                'name' => 'Paupahan (Rentals)',
+                'slug' => 'paupahan',
+                'description' => 'Residential rental listings — apartments, houses, bedspace, and condos for rent.',
+                'icon' => 'heroicon-o-building-office-2',
+                'color' => 'sky',
+                'registration_button_text' => 'List Your Rental Property',
+                'is_active' => true,
+                'sort_order' => 3,
+                'documents' => [
+                    ['key' => 'bir_tin',       'label' => 'BIR TIN / Certificate of Registration', 'description' => 'Proof of BIR registration (Form 2303 or TIN card).',                    'is_required' => true,  'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 1],
+                    ['key' => 'government_id', 'label' => 'Valid Government-Issued ID',            'description' => 'Any government-issued photo ID (passport, driver\'s license, etc.).', 'is_required' => true,  'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 2],
+                    ['key' => 'proof_of_ownership', 'label' => 'Proof of Property Ownership',     'description' => 'TCT, CCT, tax declaration, or authorisation letter from the owner.',   'is_required' => true,  'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 3],
+                ],
+            ],
+            [
+                'name' => 'Lipat Bahay (Moving Service)',
+                'slug' => 'lipat_bahay',
+                'description' => 'House-moving and relocation services — packing, transport, and unpacking.',
+                'icon' => 'heroicon-o-truck',
+                'color' => 'violet',
+                'registration_button_text' => 'Register as Moving Service',
+                'is_active' => true,
+                'sort_order' => 4,
+                'documents' => [
+                    ['key' => 'dti_sec_registration', 'label' => 'DTI / SEC Registration',           'description' => 'Certificate of business name registration (DTI) or SEC incorporation papers.',    'is_required' => true,  'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 1],
+                    ['key' => 'business_permit',       'label' => "Mayor's Permit / Business Permit", 'description' => 'Valid local business permit from your city or municipality.',                      'is_required' => true,  'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 2],
+                    ['key' => 'bir_registration',      'label' => 'BIR Certificate of Registration',  'description' => 'BIR Form 2303 — Certificate of Registration.',                                     'is_required' => true,  'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 3],
+                    ['key' => 'vehicle_photo',         'label' => 'Fleet / Vehicle Photo(s)',          'description' => 'Clear photos of at least one moving vehicle in your fleet.',                       'is_required' => true,  'mimes' => 'jpg,jpeg,png',     'sort_order' => 4],
+                    ['key' => 'insurance_cert',        'label' => 'Cargo / Transit Insurance Certificate', 'description' => 'Insurance certificate covering customer belongings during transit.',          'is_required' => false, 'mimes' => 'pdf,jpg,jpeg,png', 'sort_order' => 5],
+                ],
+            ],
         ];
 
         foreach ($sectors as $sectorData) {

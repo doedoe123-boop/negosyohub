@@ -21,7 +21,7 @@
         </div>
 
         {{-- Tab Switcher --}}
-        <div class="flex items-center justify-center gap-2 mb-10">
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-10">
             <button @click="activeTab = 'ecommerce'"
                     class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300"
                     :class="activeTab === 'ecommerce'
@@ -38,18 +38,34 @@
                 <x-heroicon-o-home-modern class="w-4 h-4" />
                 Real Estate
             </button>
+            <button @click="activeTab = 'paupahan'"
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300"
+                    :class="activeTab === 'paupahan'
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
+                        : 'bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500'">
+                <x-heroicon-o-building-office-2 class="w-4 h-4" />
+                Paupahan
+            </button>
+            <button @click="activeTab = 'lipat_bahay'"
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300"
+                    :class="activeTab === 'lipat_bahay'
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
+                        : 'bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500'">
+                <x-heroicon-o-truck class="w-4 h-4" />
+                Lipat Bahay
+            </button>
         </div>
 
         {{-- ============================================================
              E-COMMERCE: Lunar Dark Dashboard
              ============================================================ --}}
         <div x-show="activeTab === 'ecommerce'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-6xl mx-auto">
-            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-slate-700/50 bg-[#0a0a12]">
+            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-slate-900/10 dark:shadow-black/30 border border-slate-200 dark:border-slate-700/50 dark:bg-[#0a0a12]">
                 <div class="flex min-h-[520px]">
                     {{-- Sidebar --}}
-                    <div class="hidden sm:flex w-16 flex-col items-center py-6 gap-6 border-r border-slate-800/60 bg-[#08080e]">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                            <x-heroicon-s-squares-2x2 class="w-4 h-4 text-emerald-400" />
+                    <div class="hidden sm:flex w-16 flex-col items-center py-6 gap-6 border-r border-slate-200 dark:border-slate-800/60 dark:bg-[#08080e]">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                            <x-heroicon-s-squares-2x2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div class="w-8 h-8 rounded-lg hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer">
                             <x-heroicon-o-shopping-bag class="w-4 h-4 text-slate-500" />
@@ -70,16 +86,16 @@
                         {{-- Header --}}
                         <div class="flex items-center justify-between mb-6">
                             <div>
-                                <h3 class="text-base font-bold text-white">Dashboard Overview</h3>
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white">Dashboard Overview</h3>
                                 <p class="text-xs text-slate-500 mt-0.5">Welcome back to NegosyoHub</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/50">
+                                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50">
                                     <x-heroicon-o-magnifying-glass class="w-3.5 h-3.5 text-slate-500" />
                                     <span class="text-xs text-slate-500">Search...</span>
                                 </div>
-                                <div class="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                    <x-heroicon-s-user class="w-3.5 h-3.5 text-emerald-400" />
+                                <div class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                                    <x-heroicon-s-user class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                 </div>
                             </div>
                         </div>
@@ -95,12 +111,12 @@
                                 ];
                             @endphp
                             @foreach($kpis as $kpi)
-                                <div class="rounded-xl bg-slate-800/40 border border-slate-700/40 p-3.5 backdrop-blur-sm">
+                                <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-3.5">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{{ $kpi['label'] }}</span>
+                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">{{ $kpi['label'] }}</span>
                                         <x-dynamic-component :component="$kpi['icon']" class="w-4 h-4 text-slate-600" />
                                     </div>
-                                    <div class="text-xl font-black text-white">{{ $kpi['value'] }}</div>
+                                    <div class="text-xl font-black text-slate-900 dark:text-white">{{ $kpi['value'] }}</div>
                                     <div class="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold {{ $kpi['positive'] ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10' }}">
                                         {{ $kpi['change'] }}
                                     </div>
@@ -109,13 +125,13 @@
                         </div>
 
                         {{-- Revenue Chart --}}
-                        <div class="rounded-xl bg-slate-800/40 border border-slate-700/40 p-4 mb-6">
+                        <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 mb-6">
                             <div class="flex items-center justify-between mb-4">
                                 <div>
-                                    <h4 class="text-sm font-bold text-white">Revenue Overview</h4>
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Revenue Overview</h4>
                                     <p class="text-[10px] text-slate-500 mt-0.5">Jan – Jun Performance</p>
                                 </div>
-                                <div class="flex items-center gap-1 px-2 py-1 rounded-md bg-slate-700/50 text-[10px] text-slate-400 font-medium">
+                                <div class="flex items-center gap-1 px-2 py-1 rounded-md bg-slate-200 dark:bg-slate-700/50 text-[10px] text-slate-600 dark:text-slate-400 font-medium">
                                     Last 6 months
                                 </div>
                             </div>
@@ -129,9 +145,9 @@
                                         </linearGradient>
                                     </defs>
                                     {{-- Grid lines --}}
-                                    <line x1="0" y1="40" x2="600" y2="40" stroke="#1e293b" stroke-width="0.5"/>
-                                    <line x1="0" y1="80" x2="600" y2="80" stroke="#1e293b" stroke-width="0.5"/>
-                                    <line x1="0" y1="120" x2="600" y2="120" stroke="#1e293b" stroke-width="0.5"/>
+                                    <line x1="0" y1="40" x2="600" y2="40" stroke="#cbd5e1" stroke-width="0.5"/>
+                                    <line x1="0" y1="80" x2="600" y2="80" stroke="#cbd5e1" stroke-width="0.5"/>
+                                    <line x1="0" y1="120" x2="600" y2="120" stroke="#cbd5e1" stroke-width="0.5"/>
                                     {{-- Area fill --}}
                                     <path d="M0,120 C50,110 100,95 150,80 C200,65 250,70 300,55 C350,40 400,50 450,35 C500,20 550,25 600,15 L600,160 L0,160 Z" fill="url(#chartGrad)"/>
                                     {{-- Line --}}
@@ -150,8 +166,8 @@
                         {{-- Bottom Row --}}
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             {{-- Top Products --}}
-                            <div class="rounded-xl bg-slate-800/40 border border-slate-700/40 p-4">
-                                <h4 class="text-sm font-bold text-white mb-3">Top Products</h4>
+                            <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-3">Top Products</h4>
                                 @php
                                     $products = [
                                         ['name' => 'Premium Wireless Earbuds', 'sales' => '₱128K', 'pct' => 85],
@@ -165,10 +181,10 @@
                                         <div class="flex items-center gap-3">
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center justify-between mb-1">
-                                                    <span class="text-xs text-slate-300 font-medium truncate">{{ $p['name'] }}</span>
-                                                    <span class="text-xs text-slate-400 font-bold ml-2 shrink-0">{{ $p['sales'] }}</span>
+                                                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium truncate">{{ $p['name'] }}</span>
+                                                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold ml-2 shrink-0">{{ $p['sales'] }}</span>
                                                 </div>
-                                                <div class="h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
+                                                <div class="h-1.5 rounded-full bg-slate-300 dark:bg-slate-700/60 overflow-hidden">
                                                     <div class="h-full rounded-full bg-emerald-500/80" style="width: {{ $p['pct'] }}%"></div>
                                                 </div>
                                             </div>
@@ -178,8 +194,8 @@
                             </div>
 
                             {{-- Recent Orders --}}
-                            <div class="rounded-xl bg-slate-800/40 border border-slate-700/40 p-4">
-                                <h4 class="text-sm font-bold text-white mb-3">Recent Orders</h4>
+                            <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-3">Recent Orders</h4>
                                 @php
                                     $orders = [
                                         ['id' => '#84729', 'time' => '2 mins ago',  'status' => 'Completed', 'color' => 'emerald'],
@@ -190,9 +206,9 @@
                                 @endphp
                                 <div class="space-y-2.5">
                                     @foreach($orders as $o)
-                                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/40 border border-slate-700/30">
+                                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700/30">
                                             <div>
-                                                <span class="text-xs font-bold text-white">Order {{ $o['id'] }}</span>
+                                                <span class="text-xs font-bold text-slate-900 dark:text-white">Order {{ $o['id'] }}</span>
                                                 <span class="text-[10px] text-slate-500 ml-2">{{ $o['time'] }}</span>
                                             </div>
                                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-{{ $o['color'] }}-500/10 text-{{ $o['color'] }}-400">{{ $o['status'] }}</span>
@@ -398,6 +414,344 @@
                 <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">Portfolio tracking, lead intelligence, and property performance analytics — built for brokers and agents.</p>
                 <a href="{{ route('register.sector') }}" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 transition-all duration-300">
                     List Properties <x-heroicon-o-arrow-right class="w-4 h-4" />
+                </a>
+            </div>
+        </div>
+
+        {{-- ============================================================
+             PAUPAHAN: Rental Management Dashboard
+             ============================================================ --}}
+        <div x-show="activeTab === 'paupahan'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-6xl mx-auto">
+            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-slate-900/10 dark:shadow-black/30 border border-slate-200 dark:border-slate-700/50 dark:bg-[#0a0a12]">
+                <div class="flex min-h-[520px]">
+                    {{-- Sidebar --}}
+                    <div class="hidden sm:flex w-48 flex-col border-r border-sky-100 dark:border-sky-900/30 bg-sky-50/60 dark:bg-[#060e17] p-5">
+                        <div class="flex items-center gap-2 mb-8">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center">
+                                <x-heroicon-s-building-office-2 class="w-4 h-4 text-white" />
+                            </div>
+                            <span class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">CasaMia</span>
+                        </div>
+                        @php
+                            $paupahanLinks = [
+                                ['icon' => 'heroicon-o-squares-2x2',        'label' => 'Dashboard',   'active' => true],
+                                ['icon' => 'heroicon-o-building-office-2',  'label' => 'Properties',  'active' => false],
+                                ['icon' => 'heroicon-o-users',              'label' => 'Tenants',     'active' => false],
+                                ['icon' => 'heroicon-o-document-text',      'label' => 'Agreements',  'active' => false],
+                                ['icon' => 'heroicon-o-banknotes',          'label' => 'Payments',    'active' => false],
+                            ];
+                        @endphp
+                        <nav class="space-y-1">
+                            @foreach($paupahanLinks as $link)
+                                <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer {{ $link['active'] ? 'bg-sky-100 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400' : 'text-slate-500 dark:text-slate-500 hover:bg-sky-50 dark:hover:bg-sky-900/30' }}">
+                                    <x-dynamic-component :component="$link['icon']" class="w-4 h-4" />
+                                    {{ $link['label'] }}
+                                </div>
+                            @endforeach
+                        </nav>
+                        <div class="mt-auto pt-6 flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-500/20 flex items-center justify-center">
+                                <x-heroicon-s-user class="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Maria Santos</div>
+                                <div class="text-[9px] text-slate-400">Property Owner</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Main Content --}}
+                    <div class="flex-1 p-5 sm:p-6">
+                        {{-- Header --}}
+                        <div class="mb-6">
+                            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Rental Overview</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Welcome back, Maria. Here's your portfolio at a glance.</p>
+                        </div>
+
+                        {{-- KPI Cards --}}
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                            @php
+                                $rentalKpis = [
+                                    ['label' => 'Active Tenants',     'value' => '18',      'sub' => '↗ +2 this month',  'accent' => 'sky'],
+                                    ['label' => 'Monthly Income',     'value' => '₱182K',   'sub' => '+8% vs last mo.',  'accent' => 'emerald'],
+                                    ['label' => 'Occupancy Rate',     'value' => '92%',     'sub' => 'Above average',    'accent' => 'sky'],
+                                    ['label' => 'Expiring in 30d',    'value' => '3',       'sub' => 'Renewals due',     'accent' => 'amber'],
+                                ];
+                            @endphp
+                            @foreach($rentalKpis as $kpi)
+                                <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-3.5">
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">{{ $kpi['label'] }}</span>
+                                    <div class="text-xl font-black text-slate-900 dark:text-white mt-1">{{ $kpi['value'] }}</div>
+                                    <div class="text-[10px] font-bold text-{{ $kpi['accent'] }}-600 dark:text-{{ $kpi['accent'] }}-400 mt-1">{{ $kpi['sub'] }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Occupancy + Recent Agreements Row --}}
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
+                            {{-- Occupancy by Property (3/5) --}}
+                            <div class="lg:col-span-3 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 shadow-sm">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Occupancy by Property</h4>
+                                @php
+                                    $rentalProps = [
+                                        ['name' => 'Makati Studio Units (12)',    'occupied' => 11, 'total' => 12, 'pct' => 92],
+                                        ['name' => 'QC Bedspace House (8)',       'occupied' => 8,  'total' => 8,  'pct' => 100],
+                                        ['name' => 'Pasig Condo (4 units)',       'occupied' => 3,  'total' => 4,  'pct' => 75],
+                                        ['name' => 'Mandaluyong 1BR (6)',         'occupied' => 5,  'total' => 6,  'pct' => 83],
+                                    ];
+                                @endphp
+                                <div class="space-y-3.5">
+                                    @foreach($rentalProps as $rp)
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-[11px] text-slate-600 dark:text-slate-400 font-medium">{{ $rp['name'] }}</span>
+                                                <span class="text-[11px] font-bold text-sky-700 dark:text-sky-400">{{ $rp['occupied'] }}/{{ $rp['total'] }}</span>
+                                            </div>
+                                            <div class="h-2 rounded-full bg-sky-100 dark:bg-sky-900/40 overflow-hidden">
+                                                <div class="h-full rounded-full bg-sky-500" style="width: {{ $rp['pct'] }}%"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Upcoming Renewals (2/5) --}}
+                            <div class="lg:col-span-2 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 shadow-sm">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-3">Upcoming Renewals</h4>
+                                @php
+                                    $renewals = [
+                                        ['tenant' => 'J. Reyes',    'unit' => 'Studio 3B', 'days' => 7,  'urgency' => 'red'],
+                                        ['tenant' => 'C. Cruz',     'unit' => 'Studio 8A', 'days' => 14, 'urgency' => 'amber'],
+                                        ['tenant' => 'A. Lim',      'unit' => '1BR #201',  'days' => 28, 'urgency' => 'sky'],
+                                    ];
+                                @endphp
+                                <div class="space-y-2.5">
+                                    @foreach($renewals as $r)
+                                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40">
+                                            <div>
+                                                <div class="text-xs font-bold text-slate-800 dark:text-white">{{ $r['tenant'] }}</div>
+                                                <div class="text-[10px] text-slate-400">{{ $r['unit'] }}</div>
+                                            </div>
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-{{ $r['urgency'] }}-100 dark:bg-{{ $r['urgency'] }}-500/10 text-{{ $r['urgency'] }}-700 dark:text-{{ $r['urgency'] }}-400">
+                                                {{ $r['days'] }}d
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Recent Agreements --}}
+                        <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white">Recent Agreements</h4>
+                                <span class="text-[10px] font-bold text-sky-600 dark:text-sky-400 cursor-pointer hover:underline">View All →</span>
+                            </div>
+                            @php
+                                $agreements = [
+                                    ['tenant' => 'Juan dela Cruz',  'unit' => 'Studio 3B, Makati',   'rent' => '₱12,500/mo', 'start' => 'Mar 1',  'status' => 'Active',   'color' => 'emerald'],
+                                    ['tenant' => 'Ana Reyes',       'unit' => '1BR #201, Mandaluyong','rent' => '₱18,000/mo', 'start' => 'Feb 15', 'status' => 'Active',   'color' => 'emerald'],
+                                    ['tenant' => 'Mark Lim',        'unit' => 'Bedspace C, QC',      'rent' => '₱4,500/mo',  'start' => 'Jan 1',  'status' => 'Expiring', 'color' => 'amber'],
+                                ];
+                            @endphp
+                            <div class="space-y-2">
+                                @foreach($agreements as $ag)
+                                    <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs font-bold text-slate-800 dark:text-white truncate">{{ $ag['tenant'] }}</div>
+                                            <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                                                <x-heroicon-o-map-pin class="w-2.5 h-2.5" /> {{ $ag['unit'] }}
+                                            </div>
+                                        </div>
+                                        <div class="ml-3 text-right shrink-0">
+                                            <div class="text-xs font-bold text-sky-700 dark:text-sky-400">{{ $ag['rent'] }}</div>
+                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-{{ $ag['color'] }}-100 dark:bg-{{ $ag['color'] }}-500/10 text-{{ $ag['color'] }}-700 dark:text-{{ $ag['color'] }}-400">{{ $ag['status'] }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Caption under dashboard --}}
+            <div class="text-center mt-8">
+                <p class="text-sm font-bold text-slate-900 dark:text-white">Landlord Dashboard — Paupahan (Rentals)</p>
+                <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">Manage occupancy, rental agreements, and upcoming renewals — all in one place for landlords and property managers.</p>
+                <a href="{{ route('register.sector') }}" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-sky-600 hover:bg-sky-500 shadow-lg shadow-sky-600/20 transition-all duration-300">
+                    List Your Property <x-heroicon-o-arrow-right class="w-4 h-4" />
+                </a>
+            </div>
+        </div>
+
+        {{-- ============================================================
+             LIPAT BAHAY: Moving Service Dashboard
+             ============================================================ --}}
+        <div x-show="activeTab === 'lipat_bahay'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-6xl mx-auto">
+            <div class="rounded-2xl overflow-hidden shadow-2xl shadow-slate-900/10 dark:shadow-black/30 border border-slate-200 dark:border-slate-700/50 dark:bg-[#0a0a12]">
+                <div class="flex min-h-[520px]">
+                    {{-- Sidebar --}}
+                    <div class="hidden sm:flex w-48 flex-col border-r border-violet-100 dark:border-violet-900/30 bg-violet-50/60 dark:bg-[#09071a] p-5">
+                        <div class="flex items-center gap-2 mb-8">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center">
+                                <x-heroicon-s-truck class="w-4 h-4 text-white" />
+                            </div>
+                            <span class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">LipPro Movers</span>
+                        </div>
+                        @php
+                            $lipatLinks = [
+                                ['icon' => 'heroicon-o-squares-2x2',     'label' => 'Dashboard',   'active' => true],
+                                ['icon' => 'heroicon-o-clipboard-document-list', 'label' => 'Bookings', 'active' => false],
+                                ['icon' => 'heroicon-o-truck',           'label' => 'Fleet',       'active' => false],
+                                ['icon' => 'heroicon-o-puzzle-piece',    'label' => 'Add-ons',     'active' => false],
+                                ['icon' => 'heroicon-o-star',            'label' => 'Reviews',     'active' => false],
+                            ];
+                        @endphp
+                        <nav class="space-y-1">
+                            @foreach($lipatLinks as $link)
+                                <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer {{ $link['active'] ? 'bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400' : 'text-slate-500 dark:text-slate-500 hover:bg-violet-50 dark:hover:bg-violet-900/30' }}">
+                                    <x-dynamic-component :component="$link['icon']" class="w-4 h-4" />
+                                    {{ $link['label'] }}
+                                </div>
+                            @endforeach
+                        </nav>
+                        <div class="mt-auto pt-6 flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+                                <x-heroicon-s-user class="w-3.5 h-3.5 text-violet-700 dark:text-violet-400" />
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Carlo Mendez</div>
+                                <div class="text-[9px] text-slate-400">Operations Manager</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Main Content --}}
+                    <div class="flex-1 p-5 sm:p-6">
+                        {{-- Header --}}
+                        <div class="mb-6">
+                            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Operations Overview</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Welcome back, Carlo. Here's today's moving schedule.</p>
+                        </div>
+
+                        {{-- KPI Cards --}}
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                            @php
+                                $moversKpis = [
+                                    ['label' => "Today's Moves",   'value' => '7',      'sub' => '3 in progress',  'accent' => 'violet'],
+                                    ['label' => 'Monthly Revenue', 'value' => '₱374K',  'sub' => '+18% vs last mo.','accent' => 'emerald'],
+                                    ['label' => 'Avg Rating',      'value' => '4.8★',   'sub' => '142 reviews',    'accent' => 'amber'],
+                                    ['label' => 'Fleet Active',    'value' => '5/6',    'sub' => '1 under service', 'accent' => 'violet'],
+                                ];
+                            @endphp
+                            @foreach($moversKpis as $kpi)
+                                <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-3.5 shadow-sm">
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">{{ $kpi['label'] }}</span>
+                                    <div class="text-xl font-black text-slate-900 dark:text-white mt-1">{{ $kpi['value'] }}</div>
+                                    <div class="text-[10px] font-bold text-{{ $kpi['accent'] }}-600 dark:text-{{ $kpi['accent'] }}-400 mt-1">{{ $kpi['sub'] }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Today's Schedule + Add-on Revenue --}}
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
+                            {{-- Today's Schedule (3/5) --}}
+                            <div class="lg:col-span-3 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 shadow-sm">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-3">Today's Schedule</h4>
+                                @php
+                                    $todayMoves = [
+                                        ['time' => '08:00', 'from' => 'Quezon City',  'to' => 'Makati',       'status' => 'Completed',    'color' => 'emerald'],
+                                        ['time' => '10:30', 'from' => 'Parañaque',    'to' => 'Las Piñas',    'status' => 'In Progress',  'color' => 'violet'],
+                                        ['time' => '13:00', 'from' => 'Pasig',        'to' => 'Mandaluyong',  'status' => 'In Progress',  'color' => 'violet'],
+                                        ['time' => '15:30', 'from' => 'Caloocan',     'to' => 'Malabon',      'status' => 'Confirmed',    'color' => 'sky'],
+                                        ['time' => '17:00', 'from' => 'Marikina',     'to' => 'Pasig',        'status' => 'Pending',      'color' => 'amber'],
+                                    ];
+                                @endphp
+                                <div class="space-y-2">
+                                    @foreach($todayMoves as $move)
+                                        <div class="flex items-center gap-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40">
+                                            <span class="text-[10px] font-bold text-slate-400 w-10 shrink-0">{{ $move['time'] }}</span>
+                                            <div class="flex-1 min-w-0 flex items-center gap-1 text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate">
+                                                <x-heroicon-o-map-pin class="w-3 h-3 text-slate-400 shrink-0" />
+                                                {{ $move['from'] }}
+                                                <x-heroicon-o-arrow-right class="w-3 h-3 text-slate-400 shrink-0" />
+                                                {{ $move['to'] }}
+                                            </div>
+                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-{{ $move['color'] }}-100 dark:bg-{{ $move['color'] }}-500/10 text-{{ $move['color'] }}-700 dark:text-{{ $move['color'] }}-400 shrink-0">{{ $move['status'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Add-on Revenue (2/5) --}}
+                            <div class="lg:col-span-2 rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 shadow-sm">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Add-on Revenue</h4>
+                                @php
+                                    $addOns = [
+                                        ['name' => 'Packing Service',  'amount' => '₱42K', 'pct' => 85, 'color' => 'violet'],
+                                        ['name' => 'Disassembly',      'amount' => '₱28K', 'pct' => 57, 'color' => 'violet'],
+                                        ['name' => 'Storage (1 wk)',   'amount' => '₱19K', 'pct' => 38, 'color' => 'sky'],
+                                        ['name' => 'Insurance',        'amount' => '₱14K', 'pct' => 28, 'color' => 'emerald'],
+                                        ['name' => 'Cleaning',         'amount' => '₱8K',  'pct' => 16, 'color' => 'amber'],
+                                    ];
+                                @endphp
+                                <div class="space-y-3">
+                                    @foreach($addOns as $ao)
+                                        <div>
+                                            <div class="flex items-center justify-between mb-1">
+                                                <span class="text-[11px] font-medium text-slate-600 dark:text-slate-400">{{ $ao['name'] }}</span>
+                                                <span class="text-[11px] font-bold text-violet-700 dark:text-violet-400">{{ $ao['amount'] }}</span>
+                                            </div>
+                                            <div class="h-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 overflow-hidden">
+                                                <div class="h-full rounded-full bg-{{ $ao['color'] }}-500" style="width: {{ $ao['pct'] }}%"></div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Recent Bookings --}}
+                        <div class="rounded-xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white">Recent Bookings</h4>
+                                <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400 cursor-pointer hover:underline">View All →</span>
+                            </div>
+                            @php
+                                $recentBookings = [
+                                    ['id' => '#BK-1041', 'customer' => 'Rosa Villanueva', 'date' => 'Mar 7 — 08:00', 'price' => '₱6,500',  'status' => 'Completed',   'color' => 'emerald'],
+                                    ['id' => '#BK-1042', 'customer' => 'Eric Santos',     'date' => 'Mar 7 — 10:30', 'price' => '₱4,200',  'status' => 'In Progress', 'color' => 'violet'],
+                                    ['id' => '#BK-1043', 'customer' => 'Luz Ramos',       'date' => 'Mar 8 — 09:00', 'price' => '₱8,800',  'status' => 'Confirmed',   'color' => 'sky'],
+                                    ['id' => '#BK-1044', 'customer' => 'Danny Ong',       'date' => 'Mar 9 — 14:00', 'price' => '₱5,500',  'status' => 'Pending',     'color' => 'amber'],
+                                ];
+                            @endphp
+                            <div class="space-y-2">
+                                @foreach($recentBookings as $bk)
+                                    <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40">
+                                        <div class="flex-1 min-w-0">
+                                            <span class="text-xs font-bold text-slate-800 dark:text-white">{{ $bk['id'] }}</span>
+                                            <span class="text-[10px] text-slate-400 ml-2">{{ $bk['customer'] }}</span>
+                                            <div class="text-[10px] text-slate-400">{{ $bk['date'] }}</div>
+                                        </div>
+                                        <div class="ml-3 text-right shrink-0">
+                                            <div class="text-xs font-bold text-violet-700 dark:text-violet-400">{{ $bk['price'] }}</div>
+                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-{{ $bk['color'] }}-100 dark:bg-{{ $bk['color'] }}-500/10 text-{{ $bk['color'] }}-700 dark:text-{{ $bk['color'] }}-400">{{ $bk['status'] }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Caption under dashboard --}}
+            <div class="text-center mt-8">
+                <p class="text-sm font-bold text-slate-900 dark:text-white">Operations Dashboard — Lipat Bahay (Moving Service)</p>
+                <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">Schedule moves, track your fleet, and grow with add-on services — purpose-built for moving companies.</p>
+                <a href="{{ route('register.sector') }}" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-600/20 transition-all duration-300">
+                    Register Your Fleet <x-heroicon-o-arrow-right class="w-4 h-4" />
                 </a>
             </div>
         </div>

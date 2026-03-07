@@ -8,6 +8,10 @@ use App\Filament\Resources\TaxZoneResource\Pages\ListTaxZones;
 use App\Http\Middleware\EnsureStoreSetupComplete;
 use App\Http\Responses\LunarLogoutResponse;
 use App\Listeners\RecordLoginHistory;
+use App\Models\MovingBooking;
+use App\Models\RentalAgreement;
+use App\Observers\MovingBookingObserver;
+use App\Observers\RentalAgreementObserver;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -107,6 +111,12 @@ class AppServiceProvider extends ServiceProvider
         // Record all login attempts (success + failure) for security audit
         Event::listen(Login::class, [RecordLoginHistory::class, 'handleLogin']);
         Event::listen(Failed::class, [RecordLoginHistory::class, 'handleFailed']);
+
+        // Rental agreement observer: marks property as Rented and notifies tenant + landlord
+        RentalAgreement::observe(RentalAgreementObserver::class);
+
+        // Moving booking observer: notifies moving company on new booking, customer on status change
+        MovingBooking::observe(MovingBookingObserver::class);
     }
 
     /**

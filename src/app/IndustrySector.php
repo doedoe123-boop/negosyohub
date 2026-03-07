@@ -14,6 +14,8 @@ enum IndustrySector: string
 {
     case Ecommerce = 'ecommerce';
     case RealEstate = 'real_estate';
+    case Paupahan = 'paupahan';
+    case LipatBahay = 'lipat_bahay';
 
     public function label(): string
     {

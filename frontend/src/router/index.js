@@ -44,6 +44,17 @@ const routes = [
         name: "properties.show",
         component: () => import("@/pages/realty/PropertyDetail.vue"),
       },
+      // ─── Lipat Bahay / Moving Service ────────────────────────────────
+      {
+        path: "movers",
+        name: "movers.index",
+        component: () => import("@/pages/movers/MoversPage.vue"),
+      },
+      {
+        path: "movers/:slug",
+        name: "movers.show",
+        component: () => import("@/pages/movers/MoverDetail.vue"),
+      },
     ],
   },
 
@@ -144,6 +155,17 @@ const routes = [
             path: "settings",
             name: "account.settings",
             component: () => import("@/pages/account/SettingsPage.vue"),
+          },
+          // ─── Moving bookings ────────────────────────────────────────
+          {
+            path: "moving",
+            name: "account.moving",
+            component: () => import("@/pages/moving/MovingBookingsPage.vue"),
+          },
+          {
+            path: "moving/:id",
+            name: "account.moving.show",
+            component: () => import("@/pages/moving/MovingBookingDetail.vue"),
           },
         ],
       },

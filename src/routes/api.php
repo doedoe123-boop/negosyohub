@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\HomepageStatsController;
+use App\Http\Controllers\Api\V1\MoverController;
+use App\Http\Controllers\Api\V1\MovingBookingController;
+use App\Http\Controllers\Api\V1\MovingReviewController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PaymentMethodController;
@@ -56,6 +59,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/properties/{slug}', [PropertyController::class, 'show'])->name('properties.show');
         Route::post('/properties/{property:slug}/inquiries', [PropertyController::class, 'submitInquiry'])->name('properties.inquiries.store');
         Route::get('/properties/{property:slug}/open-houses', [PropertyController::class, 'openHouses'])->name('properties.open-houses');
+
+        // Movers (Lipat Bahay / Moving Service)
+        Route::get('/movers', [MoverController::class, 'index'])->name('movers.index');
+        Route::get('/movers/{store:slug}', [MoverController::class, 'show'])->name('movers.show');
     });
 
     // ── Authenticated customer endpoints ──────────────────────────────────────────────
@@ -107,6 +114,18 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
             // Payment intent creation shares the same tight throttle as order placement.
             Route::post('/orders/{order}/intent', [PaymentController::class, 'intent'])->name('orders.intent');
+        });
+
+        // Moving bookings (Lipat Bahay)
+        Route::get('/moving-bookings', [MovingBookingController::class, 'index'])->name('moving-bookings.index');
+        Route::get('/moving-bookings/{movingBooking}', [MovingBookingController::class, 'show'])->name('moving-bookings.show');
+        Route::patch('/moving-bookings/{movingBooking}/cancel', [MovingBookingController::class, 'cancel'])->name('moving-bookings.cancel');
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::post('/moving-bookings', [MovingBookingController::class, 'store'])->name('moving-bookings.store');
+            Route::post('/moving-bookings/{movingBooking}/review', [MovingReviewController::class, 'store'])->name('moving-bookings.review.store');
+        });
+        Route::middleware('throttle:30,1')->group(function () {
+            Route::patch('/moving-bookings/{movingBooking}/status', [MovingBookingController::class, 'updateStatus'])->name('moving-bookings.status');
         });
 
         // Orders — store-owner progression (store owner / admin only, enforced by policy)

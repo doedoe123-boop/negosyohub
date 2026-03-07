@@ -4,8 +4,10 @@ namespace App\Filament\Realty\Resources;
 
 use App\Filament\Realty\Resources\PropertyResource\Pages;
 use App\Filament\Realty\Resources\PropertyResource\RelationManagers;
+use App\IndustrySector;
 use App\ListingType;
 use App\Models\Development;
+use App\Models\RentalAgreement;
 use App\PropertyStatus;
 use App\PropertyType;
 use Filament\Forms;
@@ -79,9 +81,16 @@ class PropertyResource extends Resource
                                     ->live(),
 
                                 Forms\Components\Select::make('listing_type')
-                                    ->options(collect(ListingType::cases())->mapWithKeys(
-                                        fn (ListingType $type) => [$type->value => $type->label()]
-                                    ))
+                                    ->options(function (): array {
+                                        $sector = auth()->user()?->getStoreForPanel()?->sector;
+                                        $allowed = $sector === IndustrySector::Paupahan
+                                            ? [ListingType::ForRent, ListingType::ForLease]
+                                            : ListingType::cases();
+
+                                        return collect($allowed)->mapWithKeys(
+                                            fn (ListingType $type) => [$type->value => $type->label()]
+                                        )->toArray();
+                                    })
                                     ->required()
                                     ->native(false)
                                     ->live(),
@@ -569,6 +578,80 @@ class PropertyResource extends Resource
                         return $data;
                     })
                     ->successNotificationTitle('Property cloned as draft'),
+
+                Tables\Actions\Action::make('mark_rented')
+                    ->label('Mark as Rented')
+                    ->icon('heroicon-o-key')
+                    ->color('warning')
+                    ->slideOver()
+                    ->form([
+                        Forms\Components\TextInput::make('tenant_name')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('tenant_email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('tenant_phone')
+                            ->tel()
+                            ->maxLength(30),
+
+                        Forms\Components\TextInput::make('monthly_rent')
+                            ->label('Monthly Rent (₱)')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1),
+
+                        Forms\Components\TextInput::make('security_deposit')
+                            ->label('Security Deposit (₱)')
+                            ->numeric()
+                            ->minValue(0),
+
+                        Forms\Components\DatePicker::make('move_in_date')
+                            ->required()
+                            ->native(false)
+                            ->default(now()),
+
+                        Forms\Components\TextInput::make('lease_term_months')
+                            ->label('Lease Term (months)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(120),
+
+                        Forms\Components\Textarea::make('notes')
+                            ->rows(2),
+                    ])
+                    ->action(function (Model $record, array $data): void {
+                        RentalAgreement::create([
+                            'property_id' => $record->id,
+                            'store_id' => $record->store_id,
+                            'tenant_name' => $data['tenant_name'],
+                            'tenant_email' => $data['tenant_email'],
+                            'tenant_phone' => $data['tenant_phone'] ?? null,
+                            'monthly_rent' => (int) round($data['monthly_rent'] * 100),
+                            'security_deposit' => isset($data['security_deposit'])
+                                ? (int) round($data['security_deposit'] * 100)
+                                : null,
+                            'move_in_date' => $data['move_in_date'],
+                            'lease_term_months' => $data['lease_term_months'] ?? null,
+                            'notes' => $data['notes'] ?? null,
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Property marked as rented')
+                            ->body('A rental agreement has been created and the tenant has been notified.')
+                            ->send();
+                    })
+                    ->visible(fn (Model $record): bool => in_array($record->status, [
+                        PropertyStatus::Active,
+                        PropertyStatus::UnderOffer,
+                    ], true) && in_array($record->listing_type, [
+                        ListingType::ForRent,
+                        ListingType::ForLease,
+                    ], true)),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

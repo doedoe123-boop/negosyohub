@@ -65,6 +65,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Lipat Bahay Panel Path Token
+    |--------------------------------------------------------------------------
+    |
+    | An obscure token used in the moving company panel URL path to
+    | prevent discovery by automated scanners. Change via LIPAT_BAHAY_PATH_TOKEN.
+    |
+    */
+
+    'lipat_bahay_path_token' => env('LIPAT_BAHAY_PATH_TOKEN', 'f3n8yb2v7p'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
