@@ -126,7 +126,7 @@
                             @php
                                 $barWidth = round(($sectorData->total / $maxCount) * 100);
                                 $colors = $barColors[$idx % count($barColors)];
-                                $sectorSlug = $sectorData->sector instanceof \App\IndustrySector ? $sectorData->sector->value : (string) $sectorData->sector;
+                                $sectorSlug = (string) $sectorData->sector;
                                 $sectorName = $activeSectors[$sectorSlug] ?? ucwords(str_replace('_', ' ', $sectorSlug));
                             @endphp
                             <div class="group">

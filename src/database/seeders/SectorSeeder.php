@@ -13,6 +13,7 @@ class SectorSeeder extends Seeder
             [
                 'name' => 'E-Commerce',
                 'slug' => 'ecommerce',
+                'template' => 'ecommerce',
                 'description' => 'Online retail stores, marketplaces, and digital product sellers.',
                 'icon' => 'heroicon-o-shopping-cart',
                 'color' => 'orange',
@@ -29,6 +30,7 @@ class SectorSeeder extends Seeder
             [
                 'name' => 'Real Estate & Property',
                 'slug' => 'real_estate',
+                'template' => 'real_estate',
                 'description' => 'Property listings, real estate services, and property management.',
                 'icon' => 'heroicon-o-home-modern',
                 'color' => 'emerald',
@@ -46,6 +48,7 @@ class SectorSeeder extends Seeder
             [
                 'name' => 'Paupahan (Rentals)',
                 'slug' => 'paupahan',
+                'template' => 'rental',
                 'description' => 'Residential rental listings — apartments, houses, bedspace, and condos for rent.',
                 'icon' => 'heroicon-o-building-office-2',
                 'color' => 'sky',
@@ -61,6 +64,7 @@ class SectorSeeder extends Seeder
             [
                 'name' => 'Lipat Bahay (Moving Service)',
                 'slug' => 'lipat_bahay',
+                'template' => 'logistics',
                 'description' => 'House-moving and relocation services — packing, transport, and unpacking.',
                 'icon' => 'heroicon-o-truck',
                 'color' => 'violet',

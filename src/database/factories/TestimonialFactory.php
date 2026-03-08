@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\IndustrySector;
 use App\Models\Store;
 use App\Models\Testimonial;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,7 +30,7 @@ class TestimonialFactory extends Factory
     public function definition(): array
     {
         return [
-            'store_id' => Store::factory()->create(['sector' => IndustrySector::RealEstate])->id,
+            'store_id' => Store::factory()->create(['sector' => 'real_estate'])->id,
             'property_id' => null,
             'client_name' => fake()->name(),
             'client_email' => fake()->optional(0.5)->safeEmail(),

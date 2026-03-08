@@ -1,6 +1,5 @@
 <?php
 
-use App\IndustrySector;
 use App\Livewire\Store\StoreLogin;
 use App\Models\Store;
 use App\Models\User;
@@ -11,6 +10,8 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
+    (new \Database\Seeders\SectorSeeder)->run();
+
     $role = Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => 'web']);
 
     $permissions = [
@@ -193,7 +194,7 @@ it('redirects authenticated user from subdomain root to Lunar panel', function (
     $store = Store::factory()->for($owner, 'owner')->create([
         'slug' => 'test-store',
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::Ecommerce,
+        'sector' => 'ecommerce',
     ]);
 
     $this->actingAs($owner)
@@ -207,7 +208,7 @@ it('redirects authenticated user from subdomain root to Realty panel for real es
     $store = Store::factory()->for($owner, 'owner')->create([
         'slug' => 'test-store',
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::RealEstate,
+        'sector' => 'real_estate',
     ]);
 
     $this->actingAs($owner)

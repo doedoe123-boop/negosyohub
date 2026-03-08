@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Property;
+use App\Models\Sector;
 use App\Models\Store;
 use App\PropertyStatus;
 use App\StoreStatus;
@@ -50,17 +51,17 @@ class GlobalSearchService
         ];
 
         // ── Stores ───────────────────────────────────────────────────
-        if (! $sector || $sector === 'all' || $sector === 'ecommerce' || $sector === 'real_estate' || $sector === 'services') {
+        if (! $sector || $sector === 'all' || $this->sectorSearches($sector, 'stores')) {
             $result['stores'] = $this->searchStores($query, $sector, $perSection);
         }
 
-        // ── Products (e-commerce) ────────────────────────────────────
-        if (! $sector || $sector === 'all' || $sector === 'ecommerce') {
+        // ── Products (e-commerce / service templates) ────────────────
+        if (! $sector || $sector === 'all' || $this->sectorSearches($sector, 'products')) {
             $result['products'] = $this->searchProducts($query, $perSection);
         }
 
-        // ── Properties (real estate) ─────────────────────────────────
-        if (! $sector || $sector === 'all' || $sector === 'real_estate') {
+        // ── Properties (real estate / rental templates) ──────────────
+        if (! $sector || $sector === 'all' || $this->sectorSearches($sector, 'properties')) {
             $result['properties'] = $this->searchProperties($query, $perSection);
         }
 
@@ -77,11 +78,18 @@ class GlobalSearchService
         $builder = Store::query()
             ->where('status', StoreStatus::Approved);
 
-        // Sector filtering — map frontend sector labels to IndustrySector enum values
+        // Sector filtering by slug
         if ($sector && $sector !== 'all') {
-            if ($sector === 'services') {
-                // "services" covers lipat_bahay and paupahan
-                $builder->whereIn('sector', ['lipat_bahay', 'paupahan']);
+            // Look up the sector — it may map to multiple slugs via template grouping
+            $sectorRecord = Sector::query()->where('slug', $sector)->first();
+
+            if ($sectorRecord?->template) {
+                // Find all sector slugs sharing this template
+                $slugs = Sector::query()
+                    ->where('template', $sectorRecord->template)
+                    ->pluck('slug')
+                    ->toArray();
+                $builder->whereIn('sector', $slugs);
             } else {
                 $builder->where('sector', $sector);
             }
@@ -103,7 +111,7 @@ class GlobalSearchService
                 'name' => $store->name,
                 'slug' => $store->slug,
                 'logo_url' => $store->logo_url,
-                'sector' => $store->sector?->value,
+                'sector' => $store->sector,
                 'city' => $store->address['city'] ?? null,
                 'description' => $store->description ? \Illuminate\Support\Str::limit($store->description, 100) : null,
             ])
@@ -175,5 +183,16 @@ class GlobalSearchService
             ])
             ->values()
             ->toArray();
+    }
+
+    /**
+     * Check if a given sector slug's template includes a search category.
+     */
+    private function sectorSearches(string $sectorSlug, string $category): bool
+    {
+        $sector = Sector::query()->where('slug', $sectorSlug)->first();
+
+        return $sector?->template
+            && in_array($category, $sector->template->searchCategories(), true);
     }
 }

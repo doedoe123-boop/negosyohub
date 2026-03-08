@@ -140,7 +140,7 @@ class ProductService
                 'name' => $store->name,
                 'slug' => $store->slug,
                 'logo' => $store->logo,
-                'sector' => $store->sector?->value,
+                'sector' => $store->sector,
                 'city' => $store->address['city'] ?? null,
             ] : null;
         }

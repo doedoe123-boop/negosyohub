@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\IndustrySector;
 use App\Models\OpenHouse;
 use App\Models\Property;
 use App\Models\Store;
@@ -29,7 +28,7 @@ class OpenHouseFactory extends Factory
 
     public function definition(): array
     {
-        $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+        $store = Store::factory()->create(['sector' => 'real_estate']);
         $eventDate = fake()->dateTimeBetween('+1 day', '+30 days');
 
         return [

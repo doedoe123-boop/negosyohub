@@ -2,7 +2,7 @@
 @props(['store'])
 
 @php
-    $sectorSlug = $store->sector?->value;
+    $sectorSlug = $store->sector;
     $sectorColors = [
         'ecommerce' => 'emerald',
         'real_estate' => 'violet',

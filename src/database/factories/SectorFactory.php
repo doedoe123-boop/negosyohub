@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\SectorTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -27,6 +28,7 @@ class SectorFactory extends Factory
             'description' => fake()->sentence(),
             'icon' => 'heroicon-o-building-storefront',
             'color' => fake()->randomElement(['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet']),
+            'template' => fake()->randomElement(SectorTemplate::cases()),
             'registration_button_text' => null,
             'is_active' => true,
             'sort_order' => fake()->numberBetween(1, 20),

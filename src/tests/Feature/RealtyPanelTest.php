@@ -1,6 +1,5 @@
 <?php
 
-use App\IndustrySector;
 use App\Models\Development;
 use App\Models\Property;
 use App\Models\PropertyInquiry;
@@ -13,6 +12,8 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
+    (new \Database\Seeders\SectorSeeder)->run();
+
     $role = Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => 'web']);
     $permissions = [
         'settings', 'settings:core', 'settings:manage-staff', 'settings:manage-attributes',
@@ -39,7 +40,7 @@ it('allows approved real estate store owners to access the realty panel', functi
     $owner->assignRole('store_owner');
     Store::factory()->for($owner, 'owner')->create([
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::RealEstate,
+        'sector' => 'real_estate',
     ]);
 
     $this->actingAs($owner)
@@ -52,7 +53,7 @@ it('blocks pending real estate store owners from the realty panel', function () 
     $owner->assignRole('store_owner');
     Store::factory()->for($owner, 'owner')->create([
         'status' => StoreStatus::Pending,
-        'sector' => IndustrySector::RealEstate,
+        'sector' => 'real_estate',
     ]);
 
     $this->actingAs($owner)
@@ -65,7 +66,7 @@ it('blocks non-real-estate store owners from the realty panel', function () {
     $owner->assignRole('store_owner');
     Store::factory()->for($owner, 'owner')->create([
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::Ecommerce,
+        'sector' => 'ecommerce',
     ]);
 
     $this->actingAs($owner)
@@ -99,7 +100,7 @@ it('blocks real estate store owners from the Lunar panel', function () {
     $owner->assignRole('store_owner');
     Store::factory()->for($owner, 'owner')->create([
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::RealEstate,
+        'sector' => 'real_estate',
     ]);
 
     $this->actingAs($owner)
@@ -114,7 +115,7 @@ it('blocks real estate store owners from the Lunar panel', function () {
 it('auto-generates a slug when creating a property', function () {
     $store = Store::factory()->create([
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::RealEstate,
+        'sector' => 'real_estate',
     ]);
 
     $property = Property::factory()->for($store)->create([
@@ -128,8 +129,8 @@ it('auto-generates a slug when creating a property', function () {
 });
 
 it('scopes properties to a specific store', function () {
-    $storeA = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
-    $storeB = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $storeA = Store::factory()->create(['sector' => 'real_estate']);
+    $storeB = Store::factory()->create(['sector' => 'real_estate']);
 
     Property::factory()->for($storeA)->count(3)->create();
     Property::factory()->for($storeB)->count(2)->create();
@@ -139,7 +140,7 @@ it('scopes properties to a specific store', function () {
 });
 
 it('scopes active properties correctly', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
 
     Property::factory()->for($store)->create(['status' => PropertyStatus::Active]);
     Property::factory()->for($store)->create(['status' => PropertyStatus::Active]);
@@ -211,7 +212,7 @@ it('schedules a viewing for an inquiry', function () {
 });
 
 it('scopes new inquiries', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
     $property = Property::factory()->for($store)->create();
 
     PropertyInquiry::factory()->for($property)->create(['store_id' => $store->id]);
@@ -225,14 +226,14 @@ it('scopes new inquiries', function () {
 // =========================================================
 
 it('accesses properties through the store relationship', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
     Property::factory()->for($store)->count(3)->create();
 
     expect($store->properties)->toHaveCount(3);
 });
 
 it('accesses property inquiries through the store relationship', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
     $property = Property::factory()->for($store)->create();
     PropertyInquiry::factory()->for($property)->create(['store_id' => $store->id]);
     PropertyInquiry::factory()->for($property)->create(['store_id' => $store->id]);
@@ -245,7 +246,7 @@ it('accesses property inquiries through the store relationship', function () {
 // =========================================================
 
 it('auto-generates a slug when creating a development', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
 
     $development = Development::factory()->for($store)->create([
         'name' => 'Sunrise Towers Manila',
@@ -258,8 +259,8 @@ it('auto-generates a slug when creating a development', function () {
 });
 
 it('scopes developments to a specific store', function () {
-    $storeA = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
-    $storeB = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $storeA = Store::factory()->create(['sector' => 'real_estate']);
+    $storeB = Store::factory()->create(['sector' => 'real_estate']);
 
     Development::factory()->for($storeA)->count(3)->create();
     Development::factory()->for($storeB)->count(2)->create();
@@ -269,7 +270,7 @@ it('scopes developments to a specific store', function () {
 });
 
 it('scopes active developments correctly', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
 
     Development::factory()->for($store)->create(['status' => 'active']);
     Development::factory()->for($store)->create(['status' => 'active']);
@@ -309,7 +310,7 @@ it('formats full location correctly', function () {
 });
 
 it('syncs available units from property listings', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
     $development = Development::factory()->for($store)->create(['available_units' => 0]);
 
     Property::factory()->for($store)->create([
@@ -331,14 +332,14 @@ it('syncs available units from property listings', function () {
 });
 
 it('accesses developments through the store relationship', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
     Development::factory()->for($store)->count(4)->create();
 
     expect($store->developments)->toHaveCount(4);
 });
 
 it('links properties to a development', function () {
-    $store = Store::factory()->create(['sector' => IndustrySector::RealEstate]);
+    $store = Store::factory()->create(['sector' => 'real_estate']);
     $development = Development::factory()->for($store)->create();
 
     $property = Property::factory()->for($store)->create([

@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\SectorResource\Pages;
 use App\Models\Sector;
+use App\SectorTemplate;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -43,6 +44,14 @@ class SectorResource extends Resource
                         ->maxLength(120)
                         ->unique(ignoreRecord: true)
                         ->helperText('URL identifier — auto-generated from name. Must match the value stored in stores.sector.'),
+
+                    Forms\Components\Select::make('template')
+                        ->options(collect(SectorTemplate::cases())->mapWithKeys(
+                            fn (SectorTemplate $t): array => [$t->value => $t->label()]
+                        ))
+                        ->required()
+                        ->helperText('Determines which panel, features, and layout stores in this sector use.')
+                        ->columnSpanFull(),
 
                     Forms\Components\Textarea::make('description')
                         ->maxLength(500)
@@ -150,6 +159,10 @@ class SectorResource extends Resource
                         Infolists\Components\TextEntry::make('name'),
                         Infolists\Components\TextEntry::make('slug')
                             ->copyable(),
+                        Infolists\Components\TextEntry::make('template')
+                            ->badge()
+                            ->formatStateUsing(fn (?SectorTemplate $state): string => $state?->label() ?? '—')
+                            ->color('info'),
                         Infolists\Components\TextEntry::make('description')
                             ->columnSpanFull()
                             ->placeholder('No description'),
@@ -216,6 +229,12 @@ class SectorResource extends Resource
                     ->searchable()
                     ->copyable()
                     ->color('gray'),
+
+                Tables\Columns\TextColumn::make('template')
+                    ->badge()
+                    ->formatStateUsing(fn (?SectorTemplate $state): string => $state?->label() ?? '—')
+                    ->color('info')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('documents_count')
                     ->counts('documents')

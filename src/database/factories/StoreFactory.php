@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\IndustrySector;
+use App\Models\Sector;
 use App\Models\User;
 use App\StoreStatus;
 use App\UserRole;
@@ -29,7 +29,7 @@ class StoreFactory extends Factory
             'description' => fake()->sentence(),
             'commission_rate' => 15.00,
             'status' => StoreStatus::Approved,
-            'sector' => fake()->randomElement(IndustrySector::cases()),
+            'sector' => fn () => Sector::inRandomOrder()->value('slug') ?? 'ecommerce',
             'address' => [
                 'line_one' => fake()->streetAddress(),
                 'city' => fake()->city(),
@@ -62,12 +62,12 @@ class StoreFactory extends Factory
     }
 
     /**
-     * Set a specific industry sector for the store.
+     * Set a specific sector slug for the store.
      */
-    public function sector(IndustrySector $sector): static
+    public function sector(string $sectorSlug): static
     {
         return $this->state(fn (array $attributes) => [
-            'sector' => $sector,
+            'sector' => $sectorSlug,
         ]);
     }
 }

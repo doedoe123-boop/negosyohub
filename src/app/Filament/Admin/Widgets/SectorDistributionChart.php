@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Widgets;
 
-use App\IndustrySector;
+use App\Models\Sector;
 use App\Models\Store;
 use Filament\Widgets\ChartWidget;
 
@@ -21,21 +21,28 @@ class SectorDistributionChart extends ChartWidget
         $colors = [];
 
         $colorMap = [
-            'construction' => 'rgb(245, 158, 11)',
-            'technology' => 'rgb(59, 130, 246)',
-            'ecommerce' => 'rgb(249, 115, 22)',
-            'healthcare' => 'rgb(239, 68, 68)',
-            'chemicals' => 'rgb(139, 92, 246)',
-            'logistics' => 'rgb(99, 102, 241)',
-            'real_estate' => 'rgb(16, 185, 129)',
-            'agriculture' => 'rgb(34, 197, 94)',
+            'orange' => 'rgb(249, 115, 22)',
+            'emerald' => 'rgb(16, 185, 129)',
+            'sky' => 'rgb(14, 165, 233)',
+            'violet' => 'rgb(139, 92, 246)',
+            'indigo' => 'rgb(99, 102, 241)',
+            'red' => 'rgb(239, 68, 68)',
+            'amber' => 'rgb(245, 158, 11)',
+            'green' => 'rgb(34, 197, 94)',
+            'blue' => 'rgb(59, 130, 246)',
+            'purple' => 'rgb(168, 85, 247)',
+            'pink' => 'rgb(236, 72, 153)',
+            'teal' => 'rgb(20, 184, 166)',
+            'cyan' => 'rgb(6, 182, 212)',
+            'lime' => 'rgb(132, 204, 22)',
+            'yellow' => 'rgb(234, 179, 8)',
         ];
 
-        foreach (IndustrySector::cases() as $sector) {
-            $count = Store::query()->where('sector', $sector->value)->count();
+        foreach (Sector::active()->get() as $sector) {
+            $count = Store::query()->where('sector', $sector->slug)->count();
             $data[] = $count;
-            $labels[] = $sector->label();
-            $colors[] = $colorMap[$sector->value] ?? 'rgb(107, 114, 128)';
+            $labels[] = $sector->name;
+            $colors[] = $colorMap[$sector->color] ?? 'rgb(107, 114, 128)';
         }
 
         // Add unclassified

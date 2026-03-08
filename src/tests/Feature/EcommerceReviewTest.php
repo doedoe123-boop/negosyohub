@@ -1,13 +1,12 @@
 <?php
 
-use App\IndustrySector;
 use App\Models\Review;
 use App\Models\Store;
 use App\Models\User;
 
 beforeEach(function () {
     $this->store = Store::factory()->create([
-        'sector' => IndustrySector::Ecommerce,
+        'sector' => 'ecommerce',
     ]);
 });
 

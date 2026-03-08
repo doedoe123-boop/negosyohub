@@ -4,12 +4,12 @@ namespace App\Filament\Realty\Resources;
 
 use App\Filament\Realty\Resources\PropertyResource\Pages;
 use App\Filament\Realty\Resources\PropertyResource\RelationManagers;
-use App\IndustrySector;
 use App\ListingType;
 use App\Models\Development;
 use App\Models\RentalAgreement;
 use App\PropertyStatus;
 use App\PropertyType;
+use App\SectorTemplate;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
@@ -82,8 +82,8 @@ class PropertyResource extends Resource
 
                                 Forms\Components\Select::make('listing_type')
                                     ->options(function (): array {
-                                        $sector = auth()->user()?->getStoreForPanel()?->sector;
-                                        $allowed = $sector === IndustrySector::Paupahan
+                                        $store = auth()->user()?->getStoreForPanel();
+                                        $allowed = $store?->template() === SectorTemplate::Rental
                                             ? [ListingType::ForRent, ListingType::ForLease]
                                             : ListingType::cases();
 

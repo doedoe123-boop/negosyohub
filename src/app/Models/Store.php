@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\IndustrySector;
+use App\SectorTemplate;
 use App\StoreStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,7 +32,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property ?array $compliance_documents
  * @property float $commission_rate
  * @property StoreStatus $status
- * @property ?IndustrySector $sector
+ * @property ?string $sector
  * @property ?string $agent_bio
  * @property ?string $agent_photo
  * @property ?array $agent_certifications
@@ -106,7 +106,7 @@ class Store extends Model
     ];
 
     /** @var list<string> */
-    protected $appends = ['logo_url', 'banner_url', 'agent_photo_url'];
+    protected $appends = ['logo_url', 'banner_url', 'agent_photo_url', 'sector_template', 'sector_label', 'sector_theme'];
 
     /**
      * @return array<string, string>
@@ -120,7 +120,7 @@ class Store extends Model
             'compliance_documents' => 'encrypted:array',
             'commission_rate' => 'decimal:2',
             'status' => StoreStatus::class,
-            'sector' => IndustrySector::class,
+            'sector' => 'string',
             'agent_certifications' => 'array',
             'agent_specializations' => 'array',
             'social_links' => 'array',
@@ -202,6 +202,28 @@ class Store extends Model
     public function collections(): BelongsToMany
     {
         return $this->belongsToMany(Collection::class, 'store_collection');
+    }
+
+    /**
+     * Look up the Sector model record for this store's sector slug.
+     *
+     * Uses slug-based resolution (not FK) for backward compatibility.
+     */
+    public function sectorModel(): ?Sector
+    {
+        if (! $this->sector) {
+            return null;
+        }
+
+        return Sector::query()->where('slug', $this->sector)->first();
+    }
+
+    /**
+     * Get the SectorTemplate for this store via its Sector record.
+     */
+    public function template(): ?SectorTemplate
+    {
+        return $this->sectorModel()?->template;
     }
 
     /**
@@ -371,12 +393,27 @@ class Store extends Model
         return $this->agentPhotoUrl();
     }
 
+    public function getSectorTemplateAttribute(): ?string
+    {
+        return $this->template()?->value;
+    }
+
+    public function getSectorLabelAttribute(): string
+    {
+        return $this->sectorLabel();
+    }
+
+    public function getSectorThemeAttribute(): ?string
+    {
+        return $this->template()?->themeGradient();
+    }
+
     /**
      * Determine if the store belongs to the real estate sector.
      */
     public function isRealEstate(): bool
     {
-        return $this->sector === IndustrySector::RealEstate;
+        return $this->template() === SectorTemplate::RealEstate;
     }
 
     /**
@@ -384,7 +421,7 @@ class Store extends Model
      */
     public function isPaupahan(): bool
     {
-        return $this->sector === IndustrySector::Paupahan;
+        return $this->template() === SectorTemplate::Rental;
     }
 
     /**
@@ -392,7 +429,7 @@ class Store extends Model
      */
     public function isLipatBahay(): bool
     {
-        return $this->sector === IndustrySector::LipatBahay;
+        return $this->template() === SectorTemplate::Logistics;
     }
 
     /**
@@ -403,46 +440,31 @@ class Store extends Model
      */
     public function usesRealtyPanel(): bool
     {
-        return in_array($this->sector, [
-            IndustrySector::RealEstate,
-            IndustrySector::Paupahan,
-        ], true);
+        return $this->template()?->panelId() === 'realty';
     }
 
     /**
      * Get a human-readable label for the store's sector/business type.
-     *
-     * Maps enum values to friendly names (e.g. "Real Estate Agency", "Food & Beverage Store").
      */
     public function sectorLabel(): string
     {
-        return match ($this->sector) {
-            IndustrySector::Ecommerce => 'E-Commerce Store',
-            IndustrySector::RealEstate => 'Real Estate Agency',
-            IndustrySector::Paupahan => 'Rental Landlord',
-            IndustrySector::LipatBahay => 'Moving Company',
-            default => 'Business',
-        };
+        return $this->sectorModel()?->name ?? $this->template()?->label() ?? 'Business';
     }
 
     /**
      * Get the panel dashboard path for this store's sector.
      *
-     * Real estate and Paupahan stores go to the Realty panel.
-     * Lipat Bahay stores go to the LipatBahay panel.
-     * All others go to the Lunar store panel.
+     * Uses the sector template's panel ID to determine the correct path.
      */
     public function dashboardPath(): string
     {
-        if ($this->usesRealtyPanel()) {
-            return '/realty/dashboard/tk_'.config('app.realty_path_token');
-        }
+        $panelId = $this->template()?->panelId();
 
-        if ($this->isLipatBahay()) {
-            return '/lipat-bahay/dashboard/tk_'.config('app.lipat_bahay_path_token');
-        }
-
-        return '/store/dashboard/tk_'.config('app.store_path_token');
+        return match ($panelId) {
+            'realty' => '/realty/dashboard/tk_'.config('app.realty_path_token'),
+            'lipat-bahay' => '/lipat-bahay/dashboard/tk_'.config('app.lipat_bahay_path_token'),
+            default => '/store/dashboard/tk_'.config('app.store_path_token'),
+        };
     }
 
     /**

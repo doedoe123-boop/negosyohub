@@ -2,7 +2,6 @@
 
 namespace Tests\Browser\Concerns;
 
-use App\IndustrySector;
 use App\Models\Store;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -34,7 +33,7 @@ trait CreatesTestUsers
     protected function createStoreOwner(): array
     {
         $store = Store::factory()
-            ->sector(IndustrySector::Ecommerce)
+            ->sector('ecommerce')
             ->create();
 
         $user = $store->owner;
@@ -52,7 +51,7 @@ trait CreatesTestUsers
     protected function createRealtyAgent(): array
     {
         $store = Store::factory()
-            ->sector(IndustrySector::RealEstate)
+            ->sector('real_estate')
             ->create();
 
         $user = $store->owner;

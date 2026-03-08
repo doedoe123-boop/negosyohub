@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\IndustrySector;
 use App\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -204,71 +203,24 @@ class User extends Authenticatable implements FilamentUser, LunarUserInterface
     /**
      * Determine if the user can access the given Filament panel.
      *
-     * - Admin panel (/admin): admins only
-     * - Lunar panel (/lunar): approved store owners and their staff
+     * - Admin panel: admins only
+     * - Store panels (lunar, realty, lipat-bahay): resolved via sector template
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return match ($panel->getId()) {
-            'admin' => $this->isAdmin(),
-            'realty' => $this->canAccessRealtyPanel(),
-            'lipat-bahay' => $this->canAccessLipatBahayPanel(),
-            'lunar' => $this->canAccessLunarPanel(),
-            default => false,
-        };
-    }
+        if ($panel->getId() === 'admin') {
+            return $this->isAdmin();
+        }
 
-    /**
-     * Check if the user can access the Lunar store panel.
-     *
-     * Store owners: must have an approved, regular e-commerce store.
-     * Staff: must belong to an approved, regular e-commerce store.
-     */
-    private function canAccessLunarPanel(): bool
-    {
         $store = $this->getStoreForPanel();
 
         if (! $store?->isApproved()) {
             return false;
         }
 
-        return ! in_array($store->sector, [
-            IndustrySector::RealEstate,
-            IndustrySector::Paupahan,
-            IndustrySector::LipatBahay,
-        ], true);
-    }
+        $storePanelId = $store->template()?->panelId() ?? 'lunar';
 
-    /**
-     * Check if the user can access the Real Estate / Paupahan panel.
-     *
-     * Only approved stores in the real_estate or paupahan sectors.
-     */
-    private function canAccessRealtyPanel(): bool
-    {
-        $store = $this->getStoreForPanel();
-
-        if (! $store?->isApproved()) {
-            return false;
-        }
-
-        return in_array($store->sector, [IndustrySector::RealEstate, IndustrySector::Paupahan], true);
-    }
-
-    /**
-     * Check if the user can access the Lipat Bahay (moving company) panel.
-     *
-     * Only approved stores in the lipat_bahay sector.
-     */
-    private function canAccessLipatBahayPanel(): bool
-    {
-        $store = $this->getStoreForPanel();
-
-        if (! $store?->isApproved()) {
-            return false;
-        }
-
-        return $store->sector === IndustrySector::LipatBahay;
+        return $panel->getId() === $storePanelId;
     }
 
     /**

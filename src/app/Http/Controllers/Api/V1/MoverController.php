@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\IndustrySector;
 use App\Models\Store;
+use App\SectorTemplate;
 use App\Services\MovingBookingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,7 +32,7 @@ class MoverController extends Controller
 
     public function show(Store $store): JsonResponse
     {
-        abort_if($store->sector !== IndustrySector::LipatBahay, 404);
+        abort_if($store->template() !== SectorTemplate::Logistics, 404);
 
         $store->load(['movingAddOns' => fn ($q) => $q->where('is_active', true)->orderBy('name')]);
 

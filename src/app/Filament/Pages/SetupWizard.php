@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\IndustrySector;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -74,12 +73,12 @@ class SetupWizard extends Page implements HasForms
     public function form(Form $form): Form
     {
         $store = auth()->user()->getStoreForPanel();
-        $isRealEstate = $store?->sector === IndustrySector::RealEstate;
+        $hasAgentProfile = $store && in_array('agent_profile', $store->sectorModel()?->supportedFeatures() ?? [], true);
 
-        $step3Label = $isRealEstate ? 'Agent Profile' : 'Business Hours';
-        $step3Icon = $isRealEstate ? 'heroicon-o-identification' : 'heroicon-o-clock';
-        $step3Desc = $isRealEstate ? 'Your agent credentials' : 'When you\'re open for business';
-        $step3Schema = $isRealEstate ? $this->realEstateSchema() : $this->operatingHoursSchema();
+        $step3Label = $hasAgentProfile ? 'Agent Profile' : 'Business Hours';
+        $step3Icon = $hasAgentProfile ? 'heroicon-o-identification' : 'heroicon-o-clock';
+        $step3Desc = $hasAgentProfile ? 'Your agent credentials' : 'When you\'re open for business';
+        $step3Schema = $hasAgentProfile ? $this->realEstateSchema() : $this->operatingHoursSchema();
 
         return $form
             ->schema([

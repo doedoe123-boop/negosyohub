@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\IndustrySector;
 use App\Models\MovingBooking;
+use App\Models\Sector;
 use App\Models\Store;
 use App\Models\User;
 use App\MovingBookingStatus;
 use App\PaymentStatus;
+use App\SectorTemplate;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
@@ -22,8 +23,13 @@ class MovingBookingService
      */
     public function browseMovers(array $params = []): LengthAwarePaginator
     {
+        $logisticsSlugs = Sector::query()
+            ->where('template', SectorTemplate::Logistics)
+            ->pluck('slug')
+            ->toArray();
+
         $query = Store::query()
-            ->where('sector', IndustrySector::LipatBahay)
+            ->whereIn('sector', $logisticsSlugs)
             ->where('status', 'approved');
 
         if (! empty($params['search'])) {
@@ -46,9 +52,14 @@ class MovingBookingService
      */
     public function createBooking(User $customer, array $data): MovingBooking
     {
+        $logisticsSlugs = Sector::query()
+            ->where('template', SectorTemplate::Logistics)
+            ->pluck('slug')
+            ->toArray();
+
         $store = Store::query()
             ->where('id', $data['store_id'])
-            ->where('sector', IndustrySector::LipatBahay)
+            ->whereIn('sector', $logisticsSlugs)
             ->firstOrFail();
 
         // Gather selected add-ons from this store

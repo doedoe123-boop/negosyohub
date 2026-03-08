@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\SectorTemplate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $description
  * @property string $icon
  * @property string $color
+ * @property SectorTemplate|null $template
  * @property string|null $registration_button_text
  * @property bool $is_active
  * @property int $sort_order
@@ -26,6 +28,7 @@ class Sector extends Model
     protected $fillable = [
         'name',
         'slug',
+        'template',
         'description',
         'registration_button_text',
         'icon',
@@ -37,6 +40,7 @@ class Sector extends Model
     protected function casts(): array
     {
         return [
+            'template' => SectorTemplate::class,
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
@@ -63,6 +67,34 @@ class Sector extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)->orderBy('sort_order');
+    }
+
+    // ── Template Helpers ───────────────────────────────────────────────
+
+    /**
+     * Get the Filament panel ID for this sector.
+     */
+    public function panelId(): string
+    {
+        return $this->template?->panelId() ?? 'lunar';
+    }
+
+    /**
+     * Get the supported features for this sector.
+     *
+     * @return list<string>
+     */
+    public function supportedFeatures(): array
+    {
+        return $this->template?->supportedFeatures() ?? [];
+    }
+
+    /**
+     * Determine if this sector supports a given feature.
+     */
+    public function supportsFeature(string $feature): bool
+    {
+        return in_array($feature, $this->supportedFeatures(), true);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────

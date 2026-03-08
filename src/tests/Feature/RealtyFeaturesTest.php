@@ -1,6 +1,5 @@
 <?php
 
-use App\IndustrySector;
 use App\ListingType;
 use App\Models\OpenHouse;
 use App\Models\OpenHouseRsvp;
@@ -15,7 +14,7 @@ use App\PropertyType;
 
 beforeEach(function () {
     $this->store = Store::factory()->create([
-        'sector' => IndustrySector::RealEstate,
+        'sector' => 'real_estate',
     ]);
 });
 

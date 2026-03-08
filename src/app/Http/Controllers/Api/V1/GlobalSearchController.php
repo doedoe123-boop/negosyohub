@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Sector;
 use App\Services\GlobalSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,9 +32,11 @@ class GlobalSearchController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
+        $validSectors = Sector::active()->pluck('slug')->prepend('all')->implode(',');
+
         $validated = $request->validate([
             'q' => ['required', 'string', 'min:1', 'max:200'],
-            'sector' => ['nullable', 'string', 'in:all,ecommerce,real_estate,services'],
+            'sector' => ['nullable', 'string', 'in:'.$validSectors],
             'per_section' => ['nullable', 'integer', 'min:1', 'max:20'],
         ]);
 

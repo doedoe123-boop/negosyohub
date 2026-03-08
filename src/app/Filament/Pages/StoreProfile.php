@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\IndustrySector;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -189,7 +188,7 @@ class StoreProfile extends Page implements HasForms
                             ->placeholder('https://shopee.ph/yourshop')
                             ->prefixIcon('heroicon-o-link'),
                     ])->columns(2)
-                    ->hidden(fn () => auth()->user()?->getStoreForPanel()?->sector === IndustrySector::RealEstate),
+                    ->hidden(fn () => in_array('agent_profile', auth()->user()?->getStoreForPanel()?->sectorModel()?->supportedFeatures() ?? [], true)),
 
                 Forms\Components\Section::make('Business Hours')
                     ->description('Toggle each day and set your opening and closing times.')
@@ -208,7 +207,7 @@ class StoreProfile extends Page implements HasForms
                         ...$this->dayRow('saturday', 'Saturday'),
                         ...$this->dayRow('sunday', 'Sunday'),
                     ])
-                    ->hidden(fn () => auth()->user()?->getStoreForPanel()?->sector === IndustrySector::RealEstate),
+                    ->hidden(fn () => in_array('agent_profile', auth()->user()?->getStoreForPanel()?->sectorModel()?->supportedFeatures() ?? [], true)),
             ])
             ->statePath('data');
     }

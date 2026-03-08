@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\IndustrySector;
 use App\Models\Store;
 use App\Models\User;
 use App\StoreStatus;
@@ -23,16 +22,16 @@ class StoreSeeder extends Seeder
         $stores = require __DIR__.'/data/stores.php';
 
         foreach ($stores['ecommerce'] as $data) {
-            $this->createStore($data, IndustrySector::Ecommerce);
+            $this->createStore($data, 'ecommerce');
         }
 
         foreach ($stores['real_estate'] as $data) {
-            $this->createStore($data, IndustrySector::RealEstate, realEstate: true);
+            $this->createStore($data, 'real_estate', realEstate: true);
         }
     }
 
     /** @param array<string, mixed> $data */
-    private function createStore(array $data, IndustrySector $sector, bool $realEstate = false): void
+    private function createStore(array $data, string $sector, bool $realEstate = false): void
     {
         $owner = User::factory()->create([
             'name' => fake()->name(),

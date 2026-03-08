@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StoreResource\Pages;
-use App\IndustrySector;
 use App\Mail\StoreReinstated;
 use App\Mail\StoreSuspended;
+use App\Models\Sector;
 use App\Models\Store;
 use App\Services\StoreService;
 use App\StoreStatus;
@@ -62,9 +62,7 @@ class StoreResource extends Resource
                             ->required(),
                         Forms\Components\Select::make('sector')
                             ->label('Industry Sector')
-                            ->options(collect(IndustrySector::cases())->mapWithKeys(
-                                fn (IndustrySector $sector) => [$sector->value => $sector->label()]
-                            ))
+                            ->options(fn () => Sector::active()->pluck('name', 'slug')->toArray())
                             ->searchable(),
                         Forms\Components\TextInput::make('commission_rate')
                             ->numeric()
@@ -108,17 +106,14 @@ class StoreResource extends Resource
                 Tables\Columns\TextColumn::make('sector')
                     ->label('Sector')
                     ->badge()
-                    ->formatStateUsing(fn (?IndustrySector $state): string => $state?->label() ?? '—')
-                    ->color(fn (?IndustrySector $state): string => match ($state) {
-                        IndustrySector::Construction => 'warning',
-                        IndustrySector::Technology => 'info',
-                        IndustrySector::Ecommerce => 'warning',
-                        IndustrySector::Healthcare => 'danger',
-                        IndustrySector::Chemicals => 'gray',
-                        IndustrySector::Logistics => 'info',
-                        IndustrySector::RealEstate => 'success',
-                        IndustrySector::Agriculture => 'success',
-                        null => 'gray',
+                    ->formatStateUsing(function (?string $state): string {
+                        return Sector::where('slug', $state)->value('name') ?? ($state ?? '—');
+                    })
+                    ->color(function (?string $state): string {
+                        $colorMap = ['indigo' => 'info', 'emerald' => 'success', 'amber' => 'warning', 'rose' => 'danger', 'sky' => 'info', 'violet' => 'info'];
+                        $color = Sector::where('slug', $state)->value('color');
+
+                        return $colorMap[$color] ?? 'gray';
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('commission_rate')
@@ -136,9 +131,7 @@ class StoreResource extends Resource
                     )),
                 Tables\Filters\SelectFilter::make('sector')
                     ->label('Industry Sector')
-                    ->options(collect(IndustrySector::cases())->mapWithKeys(
-                        fn (IndustrySector $sector) => [$sector->value => $sector->label()]
-                    )),
+                    ->options(fn () => Sector::active()->pluck('name', 'slug')->toArray()),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

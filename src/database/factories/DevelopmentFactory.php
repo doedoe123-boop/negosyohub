@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\IndustrySector;
 use App\Models\Development;
 use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -76,7 +75,7 @@ class DevelopmentFactory extends Factory
         $totalUnits = fake()->numberBetween(20, 500);
 
         return [
-            'store_id' => Store::factory()->state(['sector' => IndustrySector::RealEstate]),
+            'store_id' => Store::factory()->state(['sector' => 'real_estate']),
             'name' => $name,
             'slug' => null,
             'description' => fake()->paragraphs(2, true),

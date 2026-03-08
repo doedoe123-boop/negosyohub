@@ -1,6 +1,5 @@
 <?php
 
-use App\IndustrySector;
 use App\Livewire\Store\StoreLogin;
 use App\Models\Store;
 use App\Models\User;
@@ -55,7 +54,7 @@ function createOwnerWithStore(string $slug = 'test-store'): array
     $store = Store::factory()->for($owner, 'owner')->create([
         'slug' => $slug,
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::Ecommerce,
+        'sector' => 'ecommerce',
     ]);
 
     return [$owner, $store];
@@ -192,7 +191,7 @@ it('rejects staff login on a different store subdomain', function () {
     $store2 = Store::factory()->for($owner2, 'owner')->create([
         'slug' => 'store-two',
         'status' => StoreStatus::Approved,
-        'sector' => IndustrySector::Ecommerce,
+        'sector' => 'ecommerce',
     ]);
 
     // Try to login on store2's subdomain with staff from store1

@@ -1,6 +1,5 @@
 <?php
 
-use App\IndustrySector;
 use App\Livewire\SectorBrowse;
 use App\Livewire\Store\SectorSelection;
 use App\Livewire\Store\StoreOwnerRegistration;
@@ -157,7 +156,7 @@ it('creates a user and store with compliance documents on registration', functio
         ->and($store->user_id)->toBe($user->id)
         ->and($store->name)->toBe('Juan Kitchen')
         ->and($store->status)->toBe(StoreStatus::Pending)
-        ->and($store->sector)->toBe(IndustrySector::Ecommerce)
+        ->and($store->sector)->toBe('ecommerce')
         ->and($store->id_type)->toBe('passport')
         ->and($store->id_number)->toBe('P1234567')
         ->and($store->compliance_documents)->toBeArray()
@@ -415,7 +414,7 @@ it('has different required documents per sector', function () {
 });
 
 it('returns required document keys for a sector', function () {
-    $required = IndustrySector::Ecommerce->requiredDocumentKeys();
+    $required = \App\Models\Sector::where('slug', 'ecommerce')->first()->requiredDocumentKeys();
 
     expect($required)->toContain('dti_sec_registration')
         ->toContain('business_permit')
