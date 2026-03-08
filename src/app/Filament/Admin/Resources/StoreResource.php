@@ -85,8 +85,8 @@ class StoreResource extends Resource
                             ->disabled(),
                         Forms\Components\Placeholder::make('business_permit_link')
                             ->label('Business Permit')
-                            ->content(function (Store $record): string {
-                                if (! $record->business_permit) {
+                            ->content(function (?Store $record): string {
+                                if (! $record?->business_permit) {
                                     return 'No document uploaded';
                                 }
 

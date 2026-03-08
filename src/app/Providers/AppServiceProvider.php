@@ -26,16 +26,6 @@ use Lunar\Admin\Filament\Resources\TaxZoneResource as LunarTaxZoneResource;
 use Lunar\Admin\LunarPanelManager;
 use Lunar\Admin\Support\Facades\LunarPanel;
 use Lunar\Facades\ModelManifest;
-use Lunar\Shipping\Filament\Resources\ShippingExclusionListResource\Pages\EditShippingExclusionList;
-use Lunar\Shipping\Filament\Resources\ShippingExclusionListResource\Pages\ListShippingExclusionLists;
-use Lunar\Shipping\Filament\Resources\ShippingMethodResource\Pages\EditShippingMethod;
-use Lunar\Shipping\Filament\Resources\ShippingMethodResource\Pages\ListShippingMethod;
-use Lunar\Shipping\Filament\Resources\ShippingMethodResource\Pages\ManageShippingMethodAvailability;
-use Lunar\Shipping\Filament\Resources\ShippingZoneResource\Pages\EditShippingZone;
-use Lunar\Shipping\Filament\Resources\ShippingZoneResource\Pages\ListShippingZones;
-use Lunar\Shipping\Filament\Resources\ShippingZoneResource\Pages\ManageShippingExclusions;
-use Lunar\Shipping\Filament\Resources\ShippingZoneResource\Pages\ManageShippingRates;
-use Lunar\Shipping\ShippingPlugin;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -60,7 +50,6 @@ class AppServiceProvider extends ServiceProvider
             ->brandLogo(fn (): ?string => auth()->user()?->getStoreForPanel()?->logoUrl())
             ->darkModeBrandLogo(fn (): ?string => auth()->user()?->getStoreForPanel()?->logoUrl())
             ->brandLogoHeight('3rem')
-            ->plugin(new ShippingPlugin)
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->discoverResources(
@@ -79,16 +68,6 @@ class AppServiceProvider extends ServiceProvider
                 ListTaxZones::class,
                 CreateTaxZone::class,
                 EditTaxZone::class,
-                // Shipping plugin pages
-                ListShippingZones::class,
-                EditShippingZone::class,
-                ManageShippingRates::class,
-                ManageShippingExclusions::class,
-                ListShippingMethod::class,
-                EditShippingMethod::class,
-                ManageShippingMethodAvailability::class,
-                ListShippingExclusionLists::class,
-                EditShippingExclusionList::class,
             ])
             ->authMiddleware([EnsureStoreSetupComplete::class])
         )->disableTwoFactorAuth()->register();
