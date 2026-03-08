@@ -13,6 +13,8 @@ use Filament\Pages\Page;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
+use Lunar\Models\Collection;
+use Lunar\Models\CollectionGroup;
 
 class SetupWizard extends Page implements HasForms
 {
@@ -52,6 +54,7 @@ class SetupWizard extends Page implements HasForms
             'description' => $store->description,
             'logo' => $store->logo,
             'banner' => $store->banner,
+            'collection_ids' => $store->collections()->pluck('lunar_collections.id')->toArray(),
             'phone' => $store->phone,
             'website' => $store->website,
             'address' => $store->address ?? [],
@@ -129,12 +132,29 @@ class SetupWizard extends Page implements HasForms
                         ->disk('public')
                         ->directory('stores/banners')
                         ->maxSize(5120)
-                        ->minImageWidth(800)
-                        ->minImageHeight(200)
-                        ->maxImageWidth(3840)
-                        ->maxImageHeight(1080)
+                        ->rules(['dimensions:min_width=800,min_height=200,max_width=3840,max_height=1080'])
                         ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
-                        ->helperText('Recommended: 1200×300 px (4:1 landscape). Min 800×200 px, max 5 MB. Displayed at the top of your store page.')
+                        ->helperText('Recommended: 1200x300 px (4:1 landscape). Min 800x200 px, max 5 MB. Displayed at the top of your store page.')
+                        ->columnSpanFull(),
+
+                    Forms\Components\CheckboxList::make('collection_ids')
+                        ->label('Store Categories')
+                        ->helperText('Select the categories that best describe your store.')
+                        ->options(function (): array {
+                            $group = CollectionGroup::where('handle', 'marketplace-categories')->first();
+
+                            if (! $group) {
+                                return [];
+                            }
+
+                            return Collection::where('collection_group_id', $group->id)
+                                ->orderBy('sort')
+                                ->orderBy('id')
+                                ->get()
+                                ->mapWithKeys(fn (Collection $c): array => [$c->id => $c->translateAttribute('name')])
+                                ->toArray();
+                        })
+                        ->columns(3)
                         ->columnSpanFull(),
 
                     Forms\Components\TextInput::make('name')
@@ -373,6 +393,8 @@ class SetupWizard extends Page implements HasForms
         $agentPhotoPath = is_array($data['agent_photo'] ?? null)
             ? (collect($data['agent_photo'])->first() ?? $store->agent_photo)
             : ($data['agent_photo'] ?? $store->agent_photo);
+
+        $store->collections()->sync($data['collection_ids'] ?? []);
 
         $store->update([
             'name' => $data['name'],

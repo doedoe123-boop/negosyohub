@@ -129,13 +129,7 @@ class StoreService
 
         if (! empty($filters['collection_id'])) {
             $collectionId = (int) $filters['collection_id'];
-            $query->whereIn('id', function ($sub) use ($collectionId): void {
-                $sub->selectRaw("(attribute_data->>'store_id')::integer")
-                    ->from('lunar_products')
-                    ->join('lunar_collection_product', 'lunar_collection_product.product_id', '=', 'lunar_products.id')
-                    ->where('lunar_collection_product.collection_id', $collectionId)
-                    ->whereRaw("attribute_data->>'store_id' is not null");
-            });
+            $query->whereHas('collections', fn ($q) => $q->where('lunar_collections.id', $collectionId));
         }
 
         return $query->paginate($filters['per_page'] ?? 15);

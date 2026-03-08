@@ -80,7 +80,7 @@ class LunarSeeder extends Seeder
             ]);
         }
 
-        if (! Country::count()) {
+        if (! Country::count() && ! app()->environment('testing')) {
             Artisan::call('lunar:import:address-data');
         }
     }

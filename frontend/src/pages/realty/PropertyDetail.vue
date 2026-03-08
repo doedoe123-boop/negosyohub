@@ -552,8 +552,8 @@ function formatSocialUrl(url) {
               <div class="p-5">
                 <div class="mb-4 flex items-center gap-3">
                   <img
-                    v-if="property.store.agent_photo"
-                    :src="property.store.agent_photo"
+                    v-if="property.store.agent_photo_url || property.store.logo_url"
+                    :src="property.store.agent_photo_url || property.store.logo_url"
                     class="size-12 rounded-full object-cover ring-2 ring-emerald-100"
                   />
                   <UserCircleIcon v-else class="size-12 shrink-0 text-slate-300" />

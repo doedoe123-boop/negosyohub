@@ -147,7 +147,15 @@ class Property extends Model implements HasMedia
                     }
                 }
 
-                return json_decode($value ?? '[]', true) ?? [];
+                $paths = json_decode($value ?? '[]', true) ?? [];
+
+                return array_map(function ($path) {
+                    if (str_starts_with($path, 'http')) {
+                        return $path;
+                    }
+
+                    return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+                }, $paths);
             },
             set: fn ($value) => is_array($value) ? json_encode($value) : $value,
         );

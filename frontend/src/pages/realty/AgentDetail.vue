@@ -227,8 +227,8 @@ const typeLabel = {
             <!-- Image Area -->
             <div class="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
               <img
-                v-if="prop.thumbnail"
-                :src="prop.thumbnail"
+                v-if="prop.images && prop.images.length > 0"
+                :src="prop.images[0]"
                 :alt="prop.title"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               />

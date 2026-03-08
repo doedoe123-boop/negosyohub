@@ -92,7 +92,7 @@ class GlobalSearchService
 
         $builder->where(function ($q) use ($query, $like) {
             $q->where('name', $like, "%{$query}%")
-              ->orWhere('description', $like, "%{$query}%");
+                ->orWhere('description', $like, "%{$query}%");
         });
 
         return $builder
@@ -152,8 +152,8 @@ class GlobalSearchService
             ->whereNotNull('published_at')
             ->where(function ($q) use ($query, $like) {
                 $q->where('title', $like, "%{$query}%")
-                  ->orWhere('city', $like, "%{$query}%")
-                  ->orWhere('address_line', $like, "%{$query}%");
+                    ->orWhere('city', $like, "%{$query}%")
+                    ->orWhere('address_line', $like, "%{$query}%");
             })
             ->latest('published_at')
             ->limit($limit)
