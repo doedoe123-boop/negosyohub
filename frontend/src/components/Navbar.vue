@@ -74,9 +74,9 @@ function submitSearch() {
 
 function goToSearchResult(type, idOrSlug) {
   closeSearch();
-  if (type === 'store') router.push(`/stores/${idOrSlug}`);
-  else if (type === 'product') router.push(`/products/${idOrSlug}`);
-  else if (type === 'property') router.push(`/properties/${idOrSlug}`);
+  if (type === "store") router.push(`/stores/${idOrSlug}`);
+  else if (type === "product") router.push(`/products/${idOrSlug}`);
+  else if (type === "property") router.push(`/properties/${idOrSlug}`);
 }
 
 const navbarListingLabels = {
@@ -307,10 +307,10 @@ function isActive(path) {
             leave-to-class="scale-50 opacity-0"
           >
             <span
-              v-if="cart.totalQuantity > 0"
+              v-if="cart.lineCount > 0"
               class="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white ring-2 ring-[#0F2044]"
             >
-              {{ cart.totalQuantity > 9 ? "9+" : cart.totalQuantity }}
+              {{ cart.lineCount > 9 ? "9+" : cart.lineCount }}
             </span>
           </Transition>
         </button>
@@ -455,7 +455,11 @@ function isActive(path) {
           <form @submit.prevent="submitSearch">
             <div
               class="flex items-center gap-3 rounded-t-2xl border border-slate-200 bg-white px-4 py-3 shadow-2xl"
-              :class="searchResults && searchQuery.trim().length >= 2 ? '' : 'rounded-b-2xl'"
+              :class="
+                searchResults && searchQuery.trim().length >= 2
+                  ? ''
+                  : 'rounded-b-2xl'
+              "
             >
               <MagnifyingGlassIcon class="size-5 shrink-0 text-slate-400" />
               <input
@@ -472,8 +476,19 @@ function isActive(path) {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
               <kbd
                 v-else
@@ -489,16 +504,28 @@ function isActive(path) {
             class="max-h-80 overflow-y-auto rounded-b-2xl border border-t-0 border-slate-200 bg-white shadow-2xl"
           >
             <!-- No results -->
-            <div v-if="!hasNavResults()" class="py-6 text-center text-sm text-slate-400">
+            <div
+              v-if="!hasNavResults()"
+              class="py-6 text-center text-sm text-slate-400"
+            >
               <p class="text-lg mb-1">🔍</p>
-              No results for "<span class="font-medium text-slate-600">{{ searchQuery.trim() }}</span>"
+              No results for "<span class="font-medium text-slate-600">{{
+                searchQuery.trim()
+              }}</span
+              >"
             </div>
 
             <template v-else>
               <!-- Stores -->
-              <div v-if="searchResults.stores?.length" class="border-b border-slate-100">
+              <div
+                v-if="searchResults.stores?.length"
+                class="border-b border-slate-100"
+              >
                 <div class="px-4 py-2 bg-slate-50/80">
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Stores</span>
+                  <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    >Stores</span
+                  >
                 </div>
                 <button
                   v-for="s in searchResults.stores"
@@ -507,22 +534,44 @@ function isActive(path) {
                   class="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-emerald-50/50 transition-colors"
                   @click="goToSearchResult('store', s.slug)"
                 >
-                  <img v-if="s.logo_url" :src="s.logo_url" :alt="s.name" class="size-8 rounded-lg bg-slate-100 object-cover" />
-                  <div v-else class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm">🏪</div>
+                  <img
+                    v-if="s.logo_url"
+                    :src="s.logo_url"
+                    :alt="s.name"
+                    class="size-8 rounded-lg bg-slate-100 object-cover"
+                  />
+                  <div
+                    v-else
+                    class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm"
+                  >
+                    🏪
+                  </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-slate-800">{{ s.name }}</p>
+                    <p class="truncate text-sm font-semibold text-slate-800">
+                      {{ s.name }}
+                    </p>
                     <p class="truncate text-xs text-slate-400">
-                      <span v-if="s.sector" class="mr-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500">{{ s.sector_label ?? s.sector }}</span>
-                      {{ s.city ?? '' }}
+                      <span
+                        v-if="s.sector"
+                        class="mr-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500"
+                        >{{ s.sector_label ?? s.sector }}</span
+                      >
+                      {{ s.city ?? "" }}
                     </p>
                   </div>
                 </button>
               </div>
 
               <!-- Products -->
-              <div v-if="searchResults.products?.length" class="border-b border-slate-100">
+              <div
+                v-if="searchResults.products?.length"
+                class="border-b border-slate-100"
+              >
                 <div class="px-4 py-2 bg-slate-50/80">
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Products</span>
+                  <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    >Products</span
+                  >
                 </div>
                 <button
                   v-for="p in searchResults.products"
@@ -531,11 +580,28 @@ function isActive(path) {
                   class="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-emerald-50/50 transition-colors"
                   @click="goToSearchResult('product', p.id)"
                 >
-                  <img v-if="p.thumbnail" :src="p.thumbnail" :alt="p.name" class="size-8 rounded-lg bg-slate-100 object-cover" />
-                  <div v-else class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm">🛍️</div>
+                  <img
+                    v-if="p.thumbnail"
+                    :src="p.thumbnail"
+                    :alt="p.name"
+                    class="size-8 rounded-lg bg-slate-100 object-cover"
+                  />
+                  <div
+                    v-else
+                    class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm"
+                  >
+                    🛍️
+                  </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-slate-800">{{ p.name ?? 'Untitled Product' }}</p>
-                    <p v-if="p.price" class="text-xs font-medium text-brand-500">{{ formatNavPrice(p.price, p.currency) }}</p>
+                    <p class="truncate text-sm font-semibold text-slate-800">
+                      {{ p.name ?? "Untitled Product" }}
+                    </p>
+                    <p
+                      v-if="p.price"
+                      class="text-xs font-medium text-brand-500"
+                    >
+                      {{ formatNavPrice(p.price, p.currency) }}
+                    </p>
                   </div>
                 </button>
               </div>
@@ -543,7 +609,10 @@ function isActive(path) {
               <!-- Properties -->
               <div v-if="searchResults.properties?.length">
                 <div class="px-4 py-2 bg-slate-50/80">
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Properties</span>
+                  <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    >Properties</span
+                  >
                 </div>
                 <button
                   v-for="pr in searchResults.properties"
@@ -552,14 +621,37 @@ function isActive(path) {
                   class="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-emerald-50/50 transition-colors"
                   @click="goToSearchResult('property', pr.slug)"
                 >
-                  <img v-if="pr.images?.[0]" :src="pr.images[0]" :alt="pr.title" class="size-8 rounded-lg bg-slate-100 object-cover" />
-                  <div v-else class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm">🏠</div>
+                  <img
+                    v-if="pr.images?.[0]"
+                    :src="pr.images[0]"
+                    :alt="pr.title"
+                    class="size-8 rounded-lg bg-slate-100 object-cover"
+                  />
+                  <div
+                    v-else
+                    class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm"
+                  >
+                    🏠
+                  </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-slate-800">{{ pr.title }}</p>
+                    <p class="truncate text-sm font-semibold text-slate-800">
+                      {{ pr.title }}
+                    </p>
                     <p class="truncate text-xs text-slate-400">
-                      <span v-if="pr.listing_type" class="mr-1 rounded bg-emerald-50 px-1 py-0.5 text-[10px] font-semibold text-emerald-600">{{ navbarListingLabels[pr.listing_type] ?? pr.listing_type }}</span>
-                      {{ pr.city ?? '' }}
-                      <span v-if="pr.price" class="ml-1 font-medium text-brand-500">{{ formatNavPrice(pr.price, pr.price_currency) }}</span>
+                      <span
+                        v-if="pr.listing_type"
+                        class="mr-1 rounded bg-emerald-50 px-1 py-0.5 text-[10px] font-semibold text-emerald-600"
+                        >{{
+                          navbarListingLabels[pr.listing_type] ??
+                          pr.listing_type
+                        }}</span
+                      >
+                      {{ pr.city ?? "" }}
+                      <span
+                        v-if="pr.price"
+                        class="ml-1 font-medium text-brand-500"
+                        >{{ formatNavPrice(pr.price, pr.price_currency) }}</span
+                      >
                     </p>
                   </div>
                 </button>

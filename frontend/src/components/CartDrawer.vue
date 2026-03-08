@@ -38,10 +38,10 @@ const cart = useCartStore();
           <h2 class="text-base font-semibold text-slate-900">
             Your Cart
             <span
-              v-if="cart.totalQuantity > 0"
+              v-if="cart.lineCount > 0"
               class="ml-1.5 rounded-full bg-brand-100 px-1.5 py-0.5 text-xs font-bold text-brand-600"
             >
-              {{ cart.totalQuantity }}
+              {{ cart.lineCount }}
             </span>
           </h2>
         </div>

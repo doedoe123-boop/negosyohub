@@ -30,17 +30,11 @@ const error = ref(null);
 onMounted(async () => {
   await cart.fetch();
 
-  const [shippingRes, addressRes] = await Promise.allSettled([
-    cartApi.shippingOptions(),
-    addressesApi.list(),
-  ]);
+  const addressRes = await addressesApi.list().catch(() => null);
 
-  shippingOptions.value =
-    shippingRes.status === "fulfilled" ? shippingRes.value.data : [];
-
-  if (addressRes.status === "fulfilled") {
+  if (addressRes) {
     const addresses =
-      addressRes.value.data?.data ?? addressRes.value.data ?? [];
+      addressRes.data?.data ?? addressRes.data ?? [];
     const def = addresses.find((a) => a.is_default) ?? addresses[0];
 
     if (def) {
@@ -65,6 +59,11 @@ async function saveAddress() {
   error.value = null;
   try {
     await cartApi.setAddress(address.value);
+
+    // Fetch shipping options now that the address is on the cart
+    const { data } = await cartApi.shippingOptions();
+    shippingOptions.value = data ?? [];
+
     step.value = "shipping";
   } catch (e) {
     error.value = "Failed to save address.";

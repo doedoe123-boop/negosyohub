@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Lunar\DataTypes\ShippingOption;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Cart;
+use Lunar\Models\Country;
 use Lunar\Models\ProductVariant;
 
 /**
@@ -162,8 +163,15 @@ class CartController extends Controller
      */
     public function setAddress(SetCartAddressRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
+        // Resolve ISO2 country code to Lunar's country_id.
+        $country = Country::where('iso2', $data['country'])->first();
+        unset($data['country']);
+        $data['country_id'] = $country?->id;
+
         $cart = CartSession::manager();
-        $cart->setShippingAddress($request->validated());
+        $cart->setShippingAddress($data);
 
         return response()->json(['message' => 'Address saved.']);
     }
@@ -175,17 +183,21 @@ class CartController extends Controller
      */
     private function cartResource(Cart $cart): array
     {
+        // Eager-load product media on each purchasable without re-loading
+        // the lines collection (which would wipe calculated price values).
+        $cart->lines->each(fn ($line) => $line->purchasable?->load('product.media'));
+
         return [
             'id' => $cart->id,
             'meta' => $cart->meta,
 
-            'lines' => $cart->lines->map(fn ($line): array => [
+            'lines' => $cart->lines->sortBy('id')->map(fn ($line): array => [
                 'id' => $line->id,
                 'quantity' => $line->quantity,
                 'purchasable' => [
                     'id' => $line->purchasable?->id,
-                    'name' => $line->purchasable?->translateAttribute('name'),
-                    'thumbnail' => $line->purchasable?->thumbnail?->getUrl('small'),
+                    'name' => $line->purchasable?->product?->translateAttribute('name'),
+                    'thumbnail' => $line->purchasable?->product?->getFirstMediaUrl('images') ?: null,
                 ],
                 'unit_price' => [
                     'formatted' => '₱'.number_format($line->unitPrice?->decimal ?? 0, 2),

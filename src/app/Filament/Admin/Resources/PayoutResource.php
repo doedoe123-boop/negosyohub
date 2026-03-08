@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\PayoutResource\Pages;
 use App\Models\Payout;
 use App\Models\Store;
+use App\PayoutMethod;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -102,6 +103,26 @@ class PayoutResource extends Resource
                             ->formatStateUsing(fn ($state): string => $state ? $state->format('M d, Y H:i') : '—'),
                         Infolists\Components\TextEntry::make('created_at')
                             ->dateTime(),
+                    ])->columns(2),
+
+                Infolists\Components\Section::make('Recipient Details')
+                    ->description('Payout destination configured by the store owner.')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('store.payout_method')
+                            ->label('Payout Method')
+                            ->formatStateUsing(fn ($state): string => $state instanceof PayoutMethod ? $state->label() : '—'),
+                        Infolists\Components\TextEntry::make('store.payout_details.bank_name')
+                            ->label('Bank Name')
+                            ->default('—'),
+                        Infolists\Components\TextEntry::make('store.payout_details.account_name')
+                            ->label('Account Name')
+                            ->default('—'),
+                        Infolists\Components\TextEntry::make('store.payout_details.account_number')
+                            ->label('Account Number')
+                            ->default('—'),
+                        Infolists\Components\TextEntry::make('store.payout_details.mobile_number')
+                            ->label('Mobile Number')
+                            ->default('—'),
                     ])->columns(2),
             ]);
     }

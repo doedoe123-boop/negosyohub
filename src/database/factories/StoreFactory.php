@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Sector;
 use App\Models\User;
+use App\PayoutMethod;
 use App\StoreStatus;
 use App\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -69,5 +70,29 @@ class StoreFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'sector' => $sectorSlug,
         ]);
+    }
+
+    /**
+     * Set payout information for the store.
+     */
+    public function withPayout(PayoutMethod $method = PayoutMethod::GCash): static
+    {
+        return $this->state(fn (array $attributes) => match ($method) {
+            PayoutMethod::BankTransfer => [
+                'payout_method' => $method,
+                'payout_details' => [
+                    'account_name' => fake()->name(),
+                    'account_number' => fake()->numerify('##########'),
+                    'bank_name' => fake()->randomElement(['BDO', 'BPI', 'Metrobank', 'UnionBank', 'RCBC']),
+                ],
+            ],
+            default => [
+                'payout_method' => $method,
+                'payout_details' => [
+                    'account_name' => fake()->name(),
+                    'mobile_number' => '09'.fake()->numerify('#########'),
+                ],
+            ],
+        });
     }
 }

@@ -7,6 +7,7 @@
 - Approve or suspend a store.
 - Assign `store_owner` to a user.
 - Track store revenue and payout status.
+- Configure store payout method (Bank Transfer, GCash, Maya).
 - Restrict access: store owners only see their store data.
 
 **Key Files:**
@@ -15,6 +16,7 @@
 - Model: `app/Models/Store.php`
 - Policy: `app/Policies/StorePolicy.php`
 - Enum: `app/StoreStatus.php` (Pending, Approved, Suspended)
+- Enum: `app/PayoutMethod.php` (BankTransfer, GCash, Maya)
 
 **Phase 1 (Auth Foundation) - COMPLETED:**
 
@@ -34,6 +36,7 @@
 - Product management (CRUD via Lunar)
 - Order viewing and management
 - Earnings and payout dashboard
+- Payout configuration (see `skills/payout-configuration.md`)
 
 **Notes:**
 

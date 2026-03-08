@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\PayoutMethod;
 use App\SectorTemplate;
 use App\StoreStatus;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,6 +47,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property ?string $phone
  * @property ?string $website
  * @property ?array $operating_hours
+ * @property ?PayoutMethod $payout_method
+ * @property ?array $payout_details
  * @property ?\Illuminate\Support\Carbon $suspended_at
  * @property ?string $suspension_reason
  * @property ?\Illuminate\Support\Carbon $setup_completed_at
@@ -100,6 +103,8 @@ class Store extends Model
         'phone',
         'website',
         'operating_hours',
+        'payout_method',
+        'payout_details',
         'suspended_at',
         'suspension_reason',
         'setup_completed_at',
@@ -127,6 +132,8 @@ class Store extends Model
             'default_interest_rate' => 'decimal:2',
             'default_down_payment_percent' => 'decimal:2',
             'operating_hours' => 'array',
+            'payout_method' => PayoutMethod::class,
+            'payout_details' => 'encrypted:array',
             'suspended_at' => 'datetime',
             'setup_completed_at' => 'datetime',
         ];

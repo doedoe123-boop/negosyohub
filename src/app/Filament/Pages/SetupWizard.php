@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\PayoutMethod;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -67,6 +68,11 @@ class SetupWizard extends Page implements HasForms
             'prc_license_number' => $store->prc_license_number,
             'agent_specializations' => $store->agent_specializations ?? [],
             'hours' => $store->operating_hours ?? static::defaultHours(),
+            'payout_method' => $store->payout_method?->value,
+            'payout_account_name' => $store->payout_details['account_name'] ?? null,
+            'payout_account_number' => $store->payout_details['account_number'] ?? null,
+            'payout_bank_name' => $store->payout_details['bank_name'] ?? null,
+            'payout_mobile_number' => $store->payout_details['mobile_number'] ?? null,
         ]);
     }
 
@@ -97,6 +103,11 @@ class SetupWizard extends Page implements HasForms
                         ->icon($step3Icon)
                         ->description($step3Desc)
                         ->schema($step3Schema),
+
+                    Forms\Components\Wizard\Step::make('Payout Info')
+                        ->icon('heroicon-o-banknotes')
+                        ->description('How you receive your earnings')
+                        ->schema($this->payoutInfoSchema()),
                 ])
                     ->submitAction(new HtmlString(Blade::render(
                         '<x-filament::button type="submit" size="lg" color="success" icon="heroicon-o-check-circle">Complete Setup</x-filament::button>'
@@ -376,6 +387,54 @@ class SetupWizard extends Page implements HasForms
         ];
     }
 
+    /**
+     * @return array<Forms\Components\Component>
+     */
+    private function payoutInfoSchema(): array
+    {
+        return [
+            Forms\Components\Section::make('Payout Information')
+                ->description('Tell us how you want to receive your store earnings. This information is encrypted and only visible to platform administrators.')
+                ->schema([
+                    Forms\Components\Select::make('payout_method')
+                        ->label('Payout Method')
+                        ->options(collect(PayoutMethod::cases())->mapWithKeys(
+                            fn (PayoutMethod $m): array => [$m->value => $m->label()]
+                        ))
+                        ->native(false)
+                        ->live(),
+
+                    Forms\Components\TextInput::make('payout_bank_name')
+                        ->label('Bank Name')
+                        ->placeholder('e.g. BDO, BPI, Metrobank')
+                        ->maxLength(255)
+                        ->visible(fn (Get $get): bool => $get('payout_method') === PayoutMethod::BankTransfer->value),
+
+                    Forms\Components\TextInput::make('payout_account_name')
+                        ->label('Account Name')
+                        ->placeholder('Name on the account')
+                        ->maxLength(255)
+                        ->visible(fn (Get $get): bool => filled($get('payout_method'))),
+
+                    Forms\Components\TextInput::make('payout_account_number')
+                        ->label('Account Number')
+                        ->placeholder('Bank account number')
+                        ->maxLength(50)
+                        ->visible(fn (Get $get): bool => $get('payout_method') === PayoutMethod::BankTransfer->value),
+
+                    Forms\Components\TextInput::make('payout_mobile_number')
+                        ->label('Mobile Number')
+                        ->placeholder('09XX XXX XXXX')
+                        ->tel()
+                        ->maxLength(20)
+                        ->visible(fn (Get $get): bool => in_array($get('payout_method'), [
+                            PayoutMethod::GCash->value,
+                            PayoutMethod::Maya->value,
+                        ])),
+                ])->columns(2),
+        ];
+    }
+
     public function completeSetup(): void
     {
         $data = $this->form->getState();
@@ -394,6 +453,13 @@ class SetupWizard extends Page implements HasForms
             : ($data['agent_photo'] ?? $store->agent_photo);
 
         $store->collections()->sync($data['collection_ids'] ?? []);
+
+        $payoutDetails = array_filter([
+            'account_name' => $data['payout_account_name'] ?? null,
+            'account_number' => $data['payout_account_number'] ?? null,
+            'bank_name' => $data['payout_bank_name'] ?? null,
+            'mobile_number' => $data['payout_mobile_number'] ?? null,
+        ]) ?: null;
 
         $store->update([
             'name' => $data['name'],
@@ -418,6 +484,8 @@ class SetupWizard extends Page implements HasForms
                 ? $data['agent_specializations']
                 : null,
             'operating_hours' => $data['hours'] ?? static::defaultHours(),
+            'payout_method' => $data['payout_method'] ?? null,
+            'payout_details' => $payoutDetails,
             'setup_completed_at' => now(),
         ]);
 
