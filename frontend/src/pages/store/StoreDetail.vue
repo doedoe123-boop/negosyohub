@@ -6,19 +6,6 @@ import { ChevronRightIcon, MapPinIcon } from "@heroicons/vue/24/outline";
 import { storesApi } from "@/api/stores";
 import { useCartStore } from "@/stores/cart";
 
-const sectorLabels = {
-  ecommerce: "E-Commerce",
-  real_estate: "Real Estate",
-  services: "Services",
-};
-
-// Gradient per sector for the banner
-const sectorGradient = {
-  ecommerce: "from-brand-600 via-brand-700 to-brand-800",
-  real_estate: "from-[#0F2044] via-[#162d5a] to-[#0F2044]",
-  services: "from-slate-700 via-slate-800 to-slate-900",
-};
-
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
@@ -117,7 +104,7 @@ async function addToCart(product) {
         <div
           v-else
           class="h-full w-full bg-gradient-to-br"
-          :class="sectorGradient[store.sector] ?? 'from-slate-700 to-slate-900'"
+          :class="store.sector_theme ?? 'from-slate-700 to-slate-900'"
         />
         <!-- Subtle overlay for text contrast -->
         <div class="absolute inset-0 bg-black/20" />
@@ -153,7 +140,7 @@ async function addToCart(product) {
                 v-if="store.sector"
                 class="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-600"
               >
-                {{ sectorLabels[store.sector] ?? store.sector }}
+                {{ store.sector_label ?? store.sector }}
               </span>
               <span v-if="store.address?.city" class="flex items-center gap-1">
                 <MapPinIcon class="size-3.5" />

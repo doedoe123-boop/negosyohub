@@ -33,12 +33,6 @@ const loading = ref(true);
 const productsLoading = ref(true);
 const propertiesLoading = ref(true);
 
-const sectorLabels = {
-  ecommerce: "E-Commerce",
-  real_estate: "Real Estate",
-  services: "Services",
-};
-
 const sectors = [
   {
     label: "E-Commerce",
@@ -152,7 +146,12 @@ onMounted(async () => {
         :on-main-button-click="() => $router.push('/stores')"
         :on-grid-image-click="
           (i) => {
-            const routes = ['/stores', '/properties', '/movers', '/properties?listing_type=for_rent'];
+            const routes = [
+              '/stores',
+              '/properties',
+              '/movers',
+              '/properties?listing_type=for_rent',
+            ];
             $router.push(routes[i] ?? '/stores');
           }
         "
@@ -323,7 +322,7 @@ onMounted(async () => {
                 {{ store.name }}
               </p>
               <p class="mt-0.5 text-xs text-white/60">
-                {{ sectorLabels[store.sector] ?? "Local Store" }}
+                {{ store.sector_label ?? "Local Store" }}
               </p>
               <p
                 class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-white/90 transition-all group-hover:gap-2"
@@ -357,13 +356,13 @@ onMounted(async () => {
               v-else
               class="flex h-full items-center justify-center"
               :class="
-                store.sector === 'real_estate'
+                store.sector_template === 'real_estate'
                   ? 'bg-gradient-to-br from-slate-100 to-slate-200'
                   : 'bg-gradient-to-br from-brand-50 to-brand-100'
               "
             >
               <span class="text-3xl">{{
-                store.sector === "real_estate" ? "🏠" : "🛍️"
+                store.sector_template === "real_estate" ? "🏠" : "🛍️"
               }}</span>
             </div>
           </div>
@@ -387,7 +386,7 @@ onMounted(async () => {
                 {{ store.name }}
               </p>
               <p class="text-xs text-slate-400">
-                {{ sectorLabels[store.sector] ?? store.sector }}
+                {{ store.sector_label ?? store.sector }}
               </p>
             </div>
           </div>

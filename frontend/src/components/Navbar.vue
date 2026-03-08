@@ -79,13 +79,6 @@ function goToSearchResult(type, idOrSlug) {
   else if (type === 'property') router.push(`/properties/${idOrSlug}`);
 }
 
-const navbarSectorLabels = {
-  ecommerce: "E-Commerce",
-  real_estate: "Real Estate",
-  lipat_bahay: "Lipat Bahay",
-  paupahan: "Paupahan",
-};
-
 const navbarListingLabels = {
   for_sale: "For Sale",
   for_rent: "For Rent",
@@ -519,7 +512,7 @@ function isActive(path) {
                   <div class="min-w-0 flex-1">
                     <p class="truncate text-sm font-semibold text-slate-800">{{ s.name }}</p>
                     <p class="truncate text-xs text-slate-400">
-                      <span v-if="s.sector" class="mr-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500">{{ navbarSectorLabels[s.sector] ?? s.sector }}</span>
+                      <span v-if="s.sector" class="mr-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500">{{ s.sector_label ?? s.sector }}</span>
                       {{ s.city ?? '' }}
                     </p>
                   </div>

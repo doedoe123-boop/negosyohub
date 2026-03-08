@@ -57,8 +57,7 @@ function handleSubmit() {
       path: "/stores",
       query: {
         search: q,
-        sector:
-          activeFilter.value === "all" ? undefined : activeFilter.value,
+        sector: activeFilter.value === "all" ? undefined : activeFilter.value,
       },
     });
   }
@@ -90,8 +89,7 @@ function viewAllStores() {
     path: "/stores",
     query: {
       search: q,
-      sector:
-        activeFilter.value === "all" ? undefined : activeFilter.value,
+      sector: activeFilter.value === "all" ? undefined : activeFilter.value,
     },
   });
 }
@@ -101,13 +99,6 @@ function viewAllProperties() {
   results.value = null;
   router.push({ path: "/properties", query: { search: q } });
 }
-
-const sectorLabels = {
-  ecommerce: "E-Commerce",
-  real_estate: "Real Estate",
-  lipat_bahay: "Lipat Bahay",
-  paupahan: "Paupahan",
-};
 
 const listingLabels = {
   for_sale: "For Sale",
@@ -226,13 +217,12 @@ const hasResults = () => {
             >
               <p class="text-2xl mb-2">🔍</p>
               <p>
-                No results found for "<span class="font-medium text-slate-600">{{
-                  query.trim()
-                }}</span>"
+                No results found for "<span
+                  class="font-medium text-slate-600"
+                  >{{ query.trim() }}</span
+                >"
               </p>
-              <p class="mt-1 text-xs">
-                Try a different search term or filter.
-              </p>
+              <p class="mt-1 text-xs">Try a different search term or filter.</p>
             </div>
 
             <template v-else>
@@ -244,7 +234,8 @@ const hasResults = () => {
                 <div
                   class="flex items-center justify-between px-4 py-2.5 bg-slate-50/80"
                 >
-                  <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400"
+                  <span
+                    class="text-[11px] font-bold uppercase tracking-widest text-slate-400"
                     >Stores</span
                   >
                   <button
@@ -275,18 +266,14 @@ const hasResults = () => {
                     🏪
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p
-                      class="truncate text-sm font-semibold text-slate-800"
-                    >
+                    <p class="truncate text-sm font-semibold text-slate-800">
                       {{ store.name }}
                     </p>
                     <p class="truncate text-xs text-slate-400">
                       <span
                         v-if="store.sector"
                         class="mr-1.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500"
-                        >{{
-                          sectorLabels[store.sector] ?? store.sector
-                        }}</span
+                        >{{ store.sector_label ?? store.sector }}</span
                       >
                       {{ store.city ?? "Philippines" }}
                     </p>
@@ -327,9 +314,7 @@ const hasResults = () => {
                     🛍️
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p
-                      class="truncate text-sm font-semibold text-slate-800"
-                    >
+                    <p class="truncate text-sm font-semibold text-slate-800">
                       {{ product.name ?? "Untitled Product" }}
                     </p>
                     <p
@@ -337,10 +322,7 @@ const hasResults = () => {
                       class="text-xs font-medium text-brand-500"
                     >
                       {{
-                        formatPrice(
-                          product.price,
-                          product.currency ?? "PHP",
-                        )
+                        formatPrice(product.price, product.currency ?? "PHP")
                       }}
                     </p>
                   </div>
@@ -384,9 +366,7 @@ const hasResults = () => {
                     🏠
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p
-                      class="truncate text-sm font-semibold text-slate-800"
-                    >
+                    <p class="truncate text-sm font-semibold text-slate-800">
                       {{ property.title }}
                     </p>
                     <p class="truncate text-xs text-slate-400">

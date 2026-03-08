@@ -20,12 +20,6 @@ const sector = ref(route.query.sector ?? "");
 const collectionId = ref(route.query.collection_id ?? "");
 const searchInputRef = ref(null);
 
-const sectorLabels = {
-  ecommerce: "E-Commerce",
-  real_estate: "Real Estate",
-  services: "Services",
-};
-
 const sectors = [
   { label: "All", value: "" },
   { label: "E-Commerce", value: "ecommerce" },
@@ -255,13 +249,13 @@ watch(
               v-else
               class="flex h-full items-center justify-center"
               :class="
-                store.sector === 'real_estate'
+                store.sector_template === 'real_estate'
                   ? 'bg-gradient-to-br from-slate-100 to-slate-200'
                   : 'bg-gradient-to-br from-brand-50 to-brand-100'
               "
             >
               <span class="text-3xl">{{
-                store.sector === "real_estate" ? "🏠" : "🛍️"
+                store.sector_template === "real_estate" ? "🏠" : "🛍️"
               }}</span>
             </div>
             <!-- Sector badge overlay -->
@@ -269,7 +263,7 @@ watch(
               v-if="store.sector"
               class="absolute bottom-2 right-2 rounded-full bg-black/50 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm"
             >
-              {{ sectorLabels[store.sector] ?? store.sector }}
+              {{ store.sector_label ?? store.sector }}
             </span>
           </div>
           <!-- Info -->
