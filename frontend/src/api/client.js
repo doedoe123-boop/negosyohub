@@ -13,7 +13,7 @@ const client = axios.create({
 
 // ─── Request: inject bearer token if present (mobile / non-cookie flows) ──
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem("api_token");
+  const token = sessionStorage.getItem("api_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -26,7 +26,7 @@ client.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Let the router redirect to login via the auth store
-      localStorage.removeItem("api_token");
+      sessionStorage.removeItem("api_token");
       window.dispatchEvent(new Event("auth:unauthenticated"));
     }
     return Promise.reject(error);

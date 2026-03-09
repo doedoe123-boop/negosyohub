@@ -45,7 +45,7 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function adminPath(): string
 {
-    // ..
+    return '/moon/portal/itsec_tk_'.config('app.admin_path_token');
 }

@@ -198,7 +198,7 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore();
 
   if (!auth.initialized) {
-    const hasToken = !!localStorage.getItem("api_token");
+    const hasToken = !!sessionStorage.getItem("api_token");
     if (hasToken) {
       await auth.fetchUser();
     } else {

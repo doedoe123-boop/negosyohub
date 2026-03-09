@@ -30,14 +30,6 @@ function lunarPath(): string
     return '/store/dashboard/tk_'.config('app.store_path_token');
 }
 
-/**
- * Build the dynamic Admin panel path.
- */
-function adminPath(): string
-{
-    return '/moon/portal/itsec_tk_'.config('app.admin_path_token');
-}
-
 // =========================================================
 // Lunar Panel — Store Owners Only
 // =========================================================

@@ -24,7 +24,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function register(payload) {
     const { data } = await authApi.register(payload);
     if (data.token) {
-      localStorage.setItem("api_token", data.token);
+      sessionStorage.setItem("api_token", data.token);
     }
     user.value = data.user;
     return data;
@@ -33,7 +33,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(credentials) {
     const { data } = await authApi.login(credentials);
     if (data.token) {
-      localStorage.setItem("api_token", data.token);
+      sessionStorage.setItem("api_token", data.token);
     }
     user.value = data.user;
     return data;
@@ -41,7 +41,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function logout() {
     await authApi.logout();
-    localStorage.removeItem("api_token");
+    sessionStorage.removeItem("api_token");
     user.value = null;
     useCartStore().reset();
   }
@@ -54,7 +54,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function resetPassword(payload) {
     const { data } = await authApi.resetPassword(payload);
     if (data.token) {
-      localStorage.setItem("api_token", data.token);
+      sessionStorage.setItem("api_token", data.token);
     }
     if (data.user) {
       user.value = data.user;
