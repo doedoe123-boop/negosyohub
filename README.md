@@ -148,19 +148,6 @@ make npm-build        # Build for production
 make db-shell         # Open psql shell
 ```
 
----
-
-## Admin Panels
-
-| Panel      | Path                       | Users                   |
-| ---------- | -------------------------- | ----------------------- |
-| Admin      | `/moon/portal/…`           | Platform administrators |
-| Store      | `/store/dashboard/…`       | Store owners & staff    |
-| Realty     | `/realty/dashboard/…`      | Real estate agents      |
-| LipatBahay | `/lipat-bahay/dashboard/…` | Moving companies        |
-
----
-
 ## Containers
 
 | Container        | Service    | Port |

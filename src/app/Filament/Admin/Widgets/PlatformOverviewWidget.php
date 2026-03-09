@@ -2,14 +2,14 @@
 
 namespace App\Filament\Admin\Widgets;
 
+use App\Models\Order;
 use App\Models\Store;
-use App\Models\SupportTicket;
 use App\Models\User;
 use App\StoreStatus;
-use App\TicketStatus;
 use App\UserRole;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Number;
 
 class PlatformOverviewWidget extends StatsOverviewWidget
 {
@@ -17,38 +17,43 @@ class PlatformOverviewWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        $totalStores = Store::query()->count();
+        $activeStores = Store::query()->where('status', StoreStatus::Approved)->count();
+        $pendingStores = Store::query()->where('status', StoreStatus::Pending)->count();
+
+        $totalCustomers = User::query()->where('role', UserRole::Customer)->count();
+        $newCustomersThisMonth = User::query()
+            ->where('role', UserRole::Customer)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->count();
+
+        $totalOrders = Order::query()->count();
+        $deliveredOrders = Order::query()->delivered()->count();
+
+        $totalRevenue = Order::query()
+            ->delivered()
+            ->sum('platform_earning') / 100;
+
         return [
-            Stat::make('Total Stores', Store::query()->count())
-                ->description($this->pendingStoresDescription())
+            Stat::make('Total Stores', Number::format($totalStores))
+                ->description("{$activeStores} active · {$pendingStores} pending")
                 ->descriptionIcon('heroicon-o-building-storefront')
                 ->color('primary'),
 
-            Stat::make('Total Users', User::query()->where('role', '!=', UserRole::Admin)->count())
-                ->description('Store Owners & Customers')
+            Stat::make('Total Customers', Number::format($totalCustomers))
+                ->description("{$newCustomersThisMonth} new this month")
                 ->descriptionIcon('heroicon-o-users')
                 ->color('success'),
 
-            Stat::make('Open Tickets', SupportTicket::query()->where('status', TicketStatus::Open)->count())
-                ->description($this->urgentTicketsDescription())
-                ->descriptionIcon('heroicon-o-ticket')
-                ->color('warning'),
+            Stat::make('Total Orders', Number::format($totalOrders))
+                ->description("{$deliveredOrders} delivered")
+                ->descriptionIcon('heroicon-o-shopping-bag')
+                ->color('info'),
+
+            Stat::make('Platform Revenue', '₱'.Number::format($totalRevenue, 2))
+                ->description('Commission from delivered orders')
+                ->descriptionIcon('heroicon-o-currency-dollar')
+                ->color('success'),
         ];
-    }
-
-    private function pendingStoresDescription(): string
-    {
-        $pending = Store::query()->where('status', StoreStatus::Pending)->count();
-
-        return $pending > 0 ? "{$pending} pending approval" : 'All stores reviewed';
-    }
-
-    private function urgentTicketsDescription(): string
-    {
-        $urgent = SupportTicket::query()
-            ->where('status', TicketStatus::Open)
-            ->where('priority', 'urgent')
-            ->count();
-
-        return $urgent > 0 ? "{$urgent} urgent" : 'No urgent tickets';
     }
 }

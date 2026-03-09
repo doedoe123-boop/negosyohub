@@ -4,7 +4,8 @@ namespace App\Filament\Admin\Widgets;
 
 use App\Models\Order;
 use App\Models\Payout;
-use App\OrderStatus;
+use App\Models\SupportTicket;
+use App\TicketStatus;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Number;
@@ -15,9 +16,9 @@ class RevenueOverviewWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $totalRevenue = Order::query()
-            ->where('status', OrderStatus::Delivered)
-            ->sum('platform_earning') / 100;
+        $storeEarnings = Order::query()
+            ->delivered()
+            ->sum('store_earning') / 100;
 
         $pendingPayouts = Payout::query()
             ->where('status', Payout::STATUS_PENDING)
@@ -27,15 +28,22 @@ class RevenueOverviewWidget extends StatsOverviewWidget
             ->where('status', Payout::STATUS_PAID)
             ->sum('amount');
 
-        $activeOrders = Order::query()
-            ->active()
+        $activeOrders = Order::query()->active()->count();
+
+        $openTickets = SupportTicket::query()
+            ->where('status', TicketStatus::Open)
+            ->count();
+
+        $urgentTickets = SupportTicket::query()
+            ->where('status', TicketStatus::Open)
+            ->where('priority', 'urgent')
             ->count();
 
         return [
-            Stat::make('Platform Revenue', '₱'.Number::format($totalRevenue, 2))
-                ->description('From delivered orders')
-                ->descriptionIcon('heroicon-o-currency-dollar')
-                ->color('success'),
+            Stat::make('Store Earnings', '₱'.Number::format($storeEarnings, 2))
+                ->description('Total owed to stores')
+                ->descriptionIcon('heroicon-o-banknotes')
+                ->color('primary'),
 
             Stat::make('Pending Payouts', '₱'.Number::format($pendingPayouts, 2))
                 ->description(Payout::pending()->count().' payouts awaiting')
@@ -48,9 +56,18 @@ class RevenueOverviewWidget extends StatsOverviewWidget
                 ->color('info'),
 
             Stat::make('Active Orders', $activeOrders)
-                ->description('Not yet delivered or cancelled')
+                ->description($this->ticketDescription($openTickets, $urgentTickets))
                 ->descriptionIcon('heroicon-o-arrow-path')
-                ->color('primary'),
+                ->color($urgentTickets > 0 ? 'danger' : 'success'),
         ];
+    }
+
+    private function ticketDescription(int $open, int $urgent): string
+    {
+        if ($urgent > 0) {
+            return "{$urgent} urgent ticket".($urgent > 1 ? 's' : '').' open';
+        }
+
+        return $open > 0 ? "{$open} support ticket".($open > 1 ? 's' : '').' open' : 'No open support tickets';
     }
 }

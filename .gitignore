@@ -4,6 +4,9 @@
 !.env.example
 !.env.dusk.local.example
 
+# ─── github ───────────────────────────────────────────────
+.github/copilot-instructions.md
+
 # ─── IDE / Editor ───────────────────────────────────────────────────────
 .idea/
 .vscode/
