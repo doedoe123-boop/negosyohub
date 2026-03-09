@@ -5,6 +5,7 @@ namespace App\Models;
 use App\OrderStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Lunar\Base\Casts\Price;
 use Lunar\Models\Order as LunarOrder;
 use Spatie\Activitylog\LogOptions;
@@ -72,6 +73,14 @@ class Order extends LunarOrder
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    /**
+     * Return the payout line linking this order to a payout.
+     */
+    public function payoutLine(): HasOne
+    {
+        return $this->hasOne(PayoutLine::class);
     }
 
     // ── Scopes ─────────────────────────────────────────────────────────

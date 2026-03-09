@@ -97,10 +97,11 @@ class PayoutResource extends Resource
                             }),
                         Infolists\Components\TextEntry::make('reference')
                             ->label('Reference')
-                            ->default('—'),
+                            ->placeholder('—'),
                         Infolists\Components\TextEntry::make('paid_at')
                             ->label('Paid At')
-                            ->formatStateUsing(fn ($state): string => $state ? $state->format('M d, Y H:i') : '—'),
+                            ->dateTime('M d, Y H:i')
+                            ->placeholder('—'),
                         Infolists\Components\TextEntry::make('created_at')
                             ->dateTime(),
                     ])->columns(2),
@@ -219,7 +220,9 @@ class PayoutResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            PayoutResource\RelationManagers\LinesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

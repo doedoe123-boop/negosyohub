@@ -28,3 +28,6 @@ Schedule::call(function () {
         ->whereBetween('scheduled_at', [$tomorrow->copy()->startOfHour(), $tomorrow->copy()->endOfHour()])
         ->each(fn (MovingBooking $booking) => SendMovingReminderJob::dispatch($booking));
 })->hourly()->name('moving-reminders');
+
+// Generate weekly store payouts every Monday at 02:00
+Schedule::command('payouts:generate')->weeklyOn(1, '02:00')->name('weekly-payouts');

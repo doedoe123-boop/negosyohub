@@ -88,6 +88,7 @@ class StoreEarnings extends Page implements HasTable
         return $table
             ->query(
                 Payout::query()
+                    ->withCount('lines')
                     ->when($store, fn ($q) => $q->forStore($store->id))
                     ->latest('period_end')
             )
@@ -101,6 +102,11 @@ class StoreEarnings extends Page implements HasTable
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Amount')
                     ->money('PHP')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('lines_count')
+                    ->label('Orders')
+                    ->counts('lines')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')

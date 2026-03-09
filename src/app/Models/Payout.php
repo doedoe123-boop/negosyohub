@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -67,6 +68,14 @@ class Payout extends Model
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    /**
+     * Return the payout line items (order → earning breakdown).
+     */
+    public function lines(): HasMany
+    {
+        return $this->hasMany(PayoutLine::class);
     }
 
     // ── Scopes ─────────────────────────────────────────────────────────
