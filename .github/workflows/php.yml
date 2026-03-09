@@ -65,6 +65,14 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: src/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('src/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Copy environment file
         run: cp .env.example .env.testing
 
@@ -97,4 +105,32 @@ jobs:
         run: ./vendor/bin/pint --test
 
       - name: Run test suite
-        run: php artisan test --compact
+        run: php artisan test --parallel --recreate-databases --compact
+
+  security:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov (Dockerfile best practices)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: dockerfile
+          quiet: true
+
+      - name: Build Docker image
+        run: docker build -f docker/php/Dockerfile -t negosyo-hub:${{ github.sha }} .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: "negosyo-hub:${{ github.sha }}"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"

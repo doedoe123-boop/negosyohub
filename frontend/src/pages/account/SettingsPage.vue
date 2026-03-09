@@ -51,7 +51,7 @@ async function deleteAccount() {
   try {
     await authApi.deleteAccount();
     auth.user = null;
-    localStorage.removeItem("api_token");
+    sessionStorage.removeItem("api_token");
     window.location.href = "/";
   } catch {
     deletingAccount.value = false;
