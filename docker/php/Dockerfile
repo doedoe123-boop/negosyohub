@@ -1,5 +1,10 @@
 FROM php:8.4-fpm
 
+# Professional Metadata (Labels)
+LABEL org.opencontainers.image.source=https://github.com/doedoe123-boop/negosyohub
+LABEL org.opencontainers.image.description="container for Negosyohub"
+LABEL org.opencontainers.image.licenses=Apache-2.0
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \

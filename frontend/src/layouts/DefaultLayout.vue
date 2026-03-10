@@ -4,6 +4,7 @@ import { RouterView } from "vue-router";
 import Navbar from "@/components/Navbar.vue";
 import Footer from "@/components/Footer.vue";
 import CartDrawer from "@/components/CartDrawer.vue";
+import AnnouncementBar from "@/components/AnnouncementBar.vue";
 import { useCartStore } from "@/stores/cart";
 import { useAuthStore } from "@/stores/auth";
 
@@ -20,6 +21,7 @@ onMounted(() => {
 
 <template>
   <div class="flex min-h-screen flex-col bg-slate-50">
+    <AnnouncementBar />
     <Navbar />
 
     <main class="flex-1">

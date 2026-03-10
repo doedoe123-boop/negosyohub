@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AddressController;
+use App\Http\Controllers\Api\V1\AdvertisementController;
+use App\Http\Controllers\Api\V1\AnnouncementController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CouponController;
+use App\Http\Controllers\Api\V1\FeaturedListingController;
 use App\Http\Controllers\Api\V1\GlobalSearchController;
 use App\Http\Controllers\Api\V1\HomepageStatsController;
 use App\Http\Controllers\Api\V1\MoverController;
@@ -13,6 +17,7 @@ use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PaymentMethodController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\StoreController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -65,6 +70,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         // Movers (Lipat Bahay / Moving Service)
         Route::get('/movers', [MoverController::class, 'index'])->name('movers.index');
         Route::get('/movers/{store:slug}', [MoverController::class, 'show'])->name('movers.show');
+
+        // Marketing (public, read-only)
+        Route::get('/advertisements', [AdvertisementController::class, 'index'])->name('advertisements.index');
+        Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('/promotions', [PromotionController::class, 'index'])->name('promotions.index');
+        Route::get('/featured-listings', [FeaturedListingController::class, 'index'])->name('featured-listings.index');
     });
 
     // ── Authenticated customer endpoints ──────────────────────────────────────────────
@@ -101,6 +112,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/cart/shipping-options', [CartController::class, 'shippingOptions'])->name('cart.shipping-options');
         Route::post('/cart/shipping-option', [CartController::class, 'setShippingOption'])->name('cart.shipping-option');
         Route::post('/cart/address', [CartController::class, 'setAddress'])->name('cart.address');
+
+        // Coupon validation
+        Route::post('/coupons/validate', [CouponController::class, 'validate'])->name('coupons.validate');
 
         // Orders — read
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');

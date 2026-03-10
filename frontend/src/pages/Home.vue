@@ -19,6 +19,8 @@ import CategoryStrip from "@/components/CategoryStrip.vue";
 import VerifiedProperties from "@/components/homepage/VerifiedProperties.vue";
 import TrendingCarousel from "@/components/homepage/TrendingCarousel.vue";
 import TrustStrip from "@/components/homepage/TrustStrip.vue";
+import AdBanner from "@/components/homepage/AdBanner.vue";
+import PromotionBanner from "@/components/homepage/PromotionBanner.vue";
 
 // Live backend stats composable
 import { useHomepageStats } from "@/composables/useHomepageStats";
@@ -161,6 +163,9 @@ onMounted(async () => {
 
     <!-- ── 3. Category strip ───────────────────────────────────────── -->
     <CategoryStrip />
+
+    <!-- ── 3a. Sponsored Ad Banner ─────────────────────────────────── -->
+    <AdBanner placement="home_banner" />
 
     <!-- ── 4. Sector picker ────────────────────────────────────────── -->
     <section class="border-b border-slate-100 bg-white px-4 py-12 sm:px-6">
@@ -414,6 +419,9 @@ onMounted(async () => {
         </p>
       </div>
     </section>
+
+    <!-- ── 7a. Promotions ──────────────────────────────────────────── -->
+    <PromotionBanner />
 
     <!-- ── 8. Trust Signals Strip ──────────────────────────────────── -->
     <TrustStrip :stats="stats" />
