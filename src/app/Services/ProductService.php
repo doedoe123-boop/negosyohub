@@ -145,6 +145,32 @@ class ProductService
             ] : null;
         }
 
+        $avgRatingQuery = \App\Models\Review::query()
+            ->where('reviewable_type', \Lunar\Models\Product::class)
+            ->where('reviewable_id', $product->id)
+            ->where('is_published', true);
+
+        $avgRating = (clone $avgRatingQuery)->avg('rating');
+
+        $data['average_rating'] = $avgRating ? round((float) $avgRating, 1) : null;
+        $data['review_count'] = (clone $avgRatingQuery)->count();
+
+        if ($detailed) {
+            $data['reviews'] = (clone $avgRatingQuery)
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(fn ($r) => [
+                    'id' => $r->id,
+                    'name' => $r->reviewer_name,
+                    'rating' => $r->rating,
+                    'content' => $r->content,
+                    'verified' => $r->is_verified_purchase,
+                    'date' => $r->created_at ? $r->created_at->diffForHumans() : 'Recently',
+                ])
+                ->toArray();
+        }
+
         return $data;
     }
 }

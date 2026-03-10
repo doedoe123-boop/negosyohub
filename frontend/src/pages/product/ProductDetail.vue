@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import {
@@ -11,6 +11,8 @@ import {
   BuildingStorefrontIcon,
   StarIcon,
   CheckBadgeIcon,
+  MagnifyingGlassPlusIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/vue/24/solid";
 import { productsApi } from "@/api/products";
@@ -27,6 +29,9 @@ const selectedVariantId = ref(null);
 const quantity = ref(1);
 const selectedImage = ref(0);
 const addedToCart = ref(false);
+
+const activeTab = ref('specs');
+
 
 const selectedVariant = computed(
   () =>
@@ -156,40 +161,45 @@ function buyNow() {
         </nav>
 
         <!-- Top section: gallery + info -->
-        <div class="grid gap-8 md:grid-cols-2">
+        <div class="grid gap-8 lg:grid-cols-[60%_40%]">
           <!-- ── Gallery ── -->
           <div>
             <!-- Main image -->
             <div
-              class="relative aspect-square overflow-hidden rounded-2xl bg-slate-100"
+              class="relative aspect-square overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm"
             >
               <img
                 v-if="images[selectedImage]"
                 :src="images[selectedImage]"
                 :alt="product.name"
-                class="h-full w-full object-cover transition-all duration-300"
+                class="h-full w-full object-cover transition-all duration-500 hover:scale-105 cursor-crosshair"
               />
               <div
                 v-else
-                class="flex h-full items-center justify-center text-7xl"
+                class="flex h-full items-center justify-center text-7xl bg-slate-50"
               >
                 🛍️
+              </div>
+              
+              <!-- Zoom icon overlay -->
+              <div v-if="images[selectedImage]" class="absolute bottom-4 right-4 bg-white/90 p-2.5 rounded-full shadow-md text-slate-700 pointer-events-none backdrop-blur-sm">
+                <MagnifyingGlassPlusIcon class="size-5" />
               </div>
             </div>
 
             <!-- Thumbnail strip -->
             <div
               v-if="images.length > 1"
-              class="mt-3 flex gap-2 overflow-x-auto pb-1"
+              class="mt-4 flex gap-3 overflow-x-auto pb-2 snap-x"
             >
               <button
                 v-for="(img, i) in images"
                 :key="i"
-                class="size-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all"
+                class="size-20 shrink-0 snap-start overflow-hidden rounded-xl border-2 transition-all bg-white"
                 :class="
                   selectedImage === i
-                    ? 'border-brand-500 opacity-100'
-                    : 'border-transparent opacity-60 hover:opacity-90'
+                    ? 'border-brand-500 ring-2 ring-brand-500/20'
+                    : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-300'
                 "
                 @click="selectedImage = i"
               >
@@ -209,63 +219,60 @@ function buyNow() {
               </span>
             </div>
 
-            <!-- Title -->
-            <h1
-              class="text-2xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-3xl"
-            >
-              {{ product.name }}
-            </h1>
+            <div class="mb-4">
+              <!-- Title -->
+              <h1
+                class="text-2xl font-extrabold leading-tight tracking-tight text-[#0F2044] sm:text-3xl"
+              >
+                {{ product.name }}
+              </h1>
 
-            <!-- Rating + sold -->
-            <div
-              v-if="product.rating_avg || product.sold_count"
-              class="mt-2 flex items-center gap-3 text-sm text-slate-500"
-            >
-              <div v-if="product.rating_avg" class="flex items-center gap-1">
-                <span class="font-semibold text-amber-500">{{
-                  product.rating_avg.toFixed(1)
-                }}</span>
-                <div class="flex">
-                  <StarSolid
-                    v-for="s in 5"
-                    :key="s"
-                    class="size-3.5"
-                    :class="
-                      s <= Math.round(product.rating_avg)
-                        ? 'text-amber-400'
-                        : 'text-slate-200'
-                    "
-                  />
+              <!-- Rating + sold -->
+              <div class="mt-3 flex items-center gap-3 text-sm text-slate-500">
+                <div class="flex items-center gap-1.5" v-if="product.average_rating">
+                  <div class="flex text-amber-400">
+                    <StarSolid class="size-4" />
+                    <StarSolid class="size-4" />
+                    <StarSolid class="size-4" />
+                    <StarSolid class="size-4" />
+                    <StarSolid class="size-4" v-if="product.average_rating >= 4.5" />
+                    <StarIcon class="size-4" v-else />
+                  </div>
+                  <span class="font-semibold text-slate-700">{{ product.average_rating.toFixed(1) }}</span>
+                  <span class="text-xs hover:underline cursor-pointer" @click="activeTab = 'reviews'">({{ product.review_count }} reviews)</span>
                 </div>
-                <span v-if="product.reviews_count" class="text-xs"
-                  >({{ product.reviews_count.toLocaleString() }})</span
-                >
+                <div class="flex items-center gap-1.5" v-else>
+                  <div class="flex text-slate-300">
+                    <StarIcon class="size-4" v-for="i in 5" :key="i" />
+                  </div>
+                  <span class="text-xs text-slate-400">No reviews</span>
+                </div>
               </div>
-              <span v-if="product.sold_count" class="text-xs">
-                {{ product.sold_count.toLocaleString() }} sold
-              </span>
             </div>
 
             <!-- Price band -->
-            <div class="mt-4 rounded-xl bg-brand-50 px-4 py-3">
-              <p
-                v-if="formattedPrice"
-                class="text-3xl font-bold text-brand-600"
-              >
-                {{ formattedPrice }}
-              </p>
-              <p v-else class="text-lg font-medium text-slate-400">
-                Price unavailable
-              </p>
+            <div class="mt-1">
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-extrabold text-[#F95D2F]" v-if="formattedPrice">{{ formattedPrice }}</span>
+                <span class="text-lg font-medium text-slate-400 line-through" v-if="formattedPrice && selectedVariant?.price">₱{{ (parseFloat(selectedVariant.price) * 1.2).toLocaleString("en-PH", { maximumFractionDigits: 2 }) }}</span>
+                <span v-if="!formattedPrice" class="text-lg font-medium text-slate-400">Price unavailable</span>
+              </div>
+            </div>
 
-              <!-- Stock label -->
-              <p
-                v-if="stockLabel"
-                class="mt-1 text-xs"
-                :class="inStock ? 'text-slate-500' : 'text-red-500 font-medium'"
-              >
-                {{ stockLabel }}
-              </p>
+            <!-- Social Proof Flags -->
+            <div class="mt-5 flex flex-col gap-2.5">
+              <div v-if="product.sold_count && product.sold_count > 0" class="inline-flex w-fit items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2 text-sm text-slate-700 shadow-sm">
+                <span class="text-lg">🔥</span>
+                <span class="font-medium blur-none">{{ product.sold_count }} people bought this</span>
+              </div>
+              
+              <div v-if="selectedVariant?.stock != null && selectedVariant.stock < 10 && selectedVariant.stock > 0" class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#F95D2F]">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>Low Stock: Only {{ selectedVariant.stock }} left!</span>
+              </div>
+              <div v-else-if="selectedVariant?.stock === 0" class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-red-600">
+                Out of Stock
+              </div>
             </div>
 
             <!-- Variant selector -->
@@ -360,9 +367,7 @@ function buyNow() {
               v-if="product.store"
               class="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"
             >
-              <div
-                class="size-10 shrink-0 overflow-hidden rounded-lg bg-slate-100"
-              >
+              <div class="size-11 shrink-0 overflow-hidden rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">
                 <img
                   v-if="product.store.logo"
                   :src="product.store.logo"
@@ -374,128 +379,176 @@ function buyNow() {
                 </div>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold text-slate-800">
+                <p class="truncate text-sm font-bold text-[#0F2044]">
                   {{ product.store.name }}
                 </p>
-                <div class="flex items-center gap-1">
-                  <CheckBadgeIcon class="size-3.5 text-brand-500" />
-                  <span class="text-xs text-slate-500">Official Store</span>
+                <div class="mt-0.5 flex items-center gap-1">
+                  <CheckBadgeIcon class="size-3.5 text-[#059669]" />
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#059669]">Verified Seller</span>
                 </div>
               </div>
               <RouterLink
                 :to="`/stores/${product.store.slug}`"
-                class="shrink-0 rounded-lg border border-brand-500 px-3 py-1.5 text-xs font-semibold text-brand-600 transition-colors hover:bg-brand-50"
+                class="shrink-0 rounded-full border border-[#059669] px-4 py-1.5 text-xs font-bold text-[#059669] transition-colors hover:bg-emerald-50"
               >
-                View Shop
-              </RouterLink>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── Below fold ── -->
-        <div class="mt-10 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
-          <!-- Description -->
-          <div>
-            <div class="rounded-2xl border border-slate-100 bg-white">
-              <div class="border-b border-slate-100 px-6 py-4">
-                <h2 class="font-semibold text-slate-900">
-                  Product Description
-                </h2>
-              </div>
-              <div class="px-6 py-5">
-                <p
-                  v-if="product.description"
-                  class="whitespace-pre-line text-sm leading-relaxed text-slate-600"
-                >
-                  {{ product.description }}
-                </p>
-                <p v-else class="text-sm italic text-slate-400">
-                  No description provided.
-                </p>
-              </div>
-            </div>
-
-            <!-- Specs / attributes -->
-            <div
-              v-if="
-                product.attributes && Object.keys(product.attributes).length
-              "
-              class="mt-6 rounded-2xl border border-slate-100 bg-white"
-            >
-              <div class="border-b border-slate-100 px-6 py-4">
-                <h2 class="font-semibold text-slate-900">Specifications</h2>
-              </div>
-              <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                  <tbody class="divide-y divide-slate-50">
-                    <tr
-                      v-for="(value, key) in product.attributes"
-                      :key="key"
-                      class="odd:bg-white even:bg-slate-50/60"
-                    >
-                      <td
-                        class="w-1/3 px-6 py-3 font-medium capitalize text-slate-500"
-                      >
-                        {{ String(key).replace(/_/g, " ") }}
-                      </td>
-                      <td class="px-6 py-3 font-medium text-slate-800">
-                        {{ value }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right sidebar: you may also like / same store products could go here -->
-          <div class="order-first lg:order-none">
-            <div
-              v-if="product.store"
-              class="rounded-2xl border border-slate-100 bg-white p-5"
-            >
-              <div class="mb-4 flex items-center gap-3">
-                <div
-                  class="size-12 shrink-0 overflow-hidden rounded-xl bg-slate-100"
-                >
-                  <img
-                    v-if="product.store.logo"
-                    :src="product.store.logo"
-                    :alt="product.store.name"
-                    class="h-full w-full object-cover"
-                  />
-                  <div v-else class="flex h-full items-center justify-center">
-                    <BuildingStorefrontIcon class="size-6 text-slate-400" />
-                  </div>
-                </div>
-                <div>
-                  <p class="font-bold text-slate-900">
-                    {{ product.store.name }}
-                  </p>
-                  <p class="text-xs text-slate-500">Online Store</p>
-                </div>
-              </div>
-              <RouterLink
-                :to="`/stores/${product.store.slug}`"
-                class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-2.5 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700"
-              >
-                <BuildingStorefrontIcon class="size-4" />
                 Visit Store
               </RouterLink>
             </div>
           </div>
         </div>
+
+        <!-- ── Main Section Below: Tabs ── -->
+        <div class="mt-8 rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+          <div class="flex border-b border-slate-100 overflow-x-auto">
+            <button 
+              @click="activeTab = 'specs'"
+              class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
+              :class="activeTab === 'specs' ? 'border-b-2 border-brand-500 text-brand-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+            >
+              Detailed Specs
+            </button>
+            <button 
+              @click="activeTab = 'reviews'"
+              class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
+              :class="activeTab === 'reviews' ? 'border-b-2 border-brand-500 text-brand-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+            >
+              Reviews
+            </button>
+            <button 
+              @click="activeTab = 'shipping'"
+              class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
+              :class="activeTab === 'shipping' ? 'border-b-2 border-brand-500 text-brand-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+            >
+              Shipping Info
+            </button>
+          </div>
+          
+          <div class="p-6 md:p-8">
+            <!-- Specs Tab -->
+            <div v-show="activeTab === 'specs'">
+              <p v-if="product.description" class="whitespace-pre-line text-sm leading-relaxed text-slate-600 mb-8 max-w-3xl">
+                {{ product.description }}
+              </p>
+              
+              <div v-if="product.attributes && Object.keys(product.attributes).length" class="max-w-2xl">
+                <h3 class="font-bold text-[#0F2044] mb-4 text-lg">Specifications</h3>
+                <ul class="space-y-3">
+                  <li v-for="(value, key) in product.attributes" :key="key" class="flex justify-between text-sm py-2 border-b border-slate-50 last:border-0">
+                    <span class="text-slate-500 capitalize">{{ String(key).replace(/_/g, " ") }}</span>
+                    <span class="font-medium text-[#0F2044] text-right">{{ value }}</span>
+                  </li>
+                </ul>
+              </div>
+              <div v-else class="text-sm italic text-slate-400">
+                No detailed specifications provided.
+              </div>
+            </div>
+            
+            <!-- Reviews Tab -->
+            <div v-show="activeTab === 'reviews'" class="max-w-4xl">
+              <h3 class="text-xl font-bold text-[#0F2044] mb-6">Customer Reviews</h3>
+              
+              <!-- Review Summary -->
+              <div v-if="product.reviews?.length" class="flex flex-col sm:flex-row items-center gap-8 mb-8 pb-8 border-b border-slate-100">
+                <div class="text-center shrink-0">
+                  <div class="text-5xl font-black text-[#0F2044]">{{ product.average_rating ? product.average_rating.toFixed(1) : '0.0' }}</div>
+                  <div class="flex text-amber-400 justify-center mt-2">
+                    <StarSolid class="size-4" v-for="n in Math.round(product.average_rating || 0)" :key="'s-'+n" />
+                    <StarIcon class="size-4" v-for="n in (5 - Math.round(product.average_rating || 0))" :key="'e-'+n" />
+                  </div>
+                  <p class="text-xs text-slate-400 mt-2">{{ product.review_count }} Reviews</p>
+                </div>
+              </div>
+              
+              <!-- Individual Reviews list -->
+              <div v-if="product.reviews?.length" class="space-y-6">
+                <div v-for="review in product.reviews" :key="review.id" class="border-t border-slate-100 pt-6 first:border-0 first:pt-0">
+                  <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-3">
+                      <div class="flex text-amber-400">
+                        <StarSolid v-for="n in review.rating" :key="n" class="size-3.5" />
+                        <StarIcon v-for="n in (5 - review.rating)" :key="'empty-'+n" class="size-3.5" />
+                      </div>
+                      <span class="text-sm font-bold text-[#0F2044]">{{ review.name }}</span>
+                    </div>
+                    <span class="text-xs text-slate-400">{{ review.date }}</span>
+                  </div>
+                  
+                  <div v-if="review.verified" class="flex items-center gap-1.5 mb-3">
+                    <CheckBadgeIcon class="size-4 text-[#059669]" />
+                    <span class="text-xs text-[#059669] font-bold tracking-wide uppercase">Verified Buyer</span>
+                  </div>
+                  
+                  <p class="text-sm text-slate-600 leading-relaxed">
+                    {{ review.content }}
+                  </p>
+                </div>
+              </div>
+              <div v-else class="text-center py-10 rounded-xl bg-slate-50 border border-slate-100">
+                <p class="text-slate-500 font-medium">No reviews yet.</p>
+                <p class="text-sm text-slate-400 mt-1">Be the first to review this product!</p>
+              </div>
+            </div>
+
+            <!-- Shipping Tab -->
+            <div v-show="activeTab === 'shipping'" class="max-w-2xl">
+               <h3 class="font-bold text-[#0F2044] mb-4 text-lg">Delivery Options</h3>
+               <ul class="space-y-4 text-sm text-slate-600">
+                 <li class="flex gap-3">
+                   <div class="mt-0.5 text-slate-400">
+                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                   </div>
+                   <div>
+                     <p class="font-bold text-slate-800">Standard Delivery</p>
+                     <p>Get it delivered to <span class="font-medium text-slate-700">{{ product.store?.city || 'Nationwide' }}</span> via NegosyoHub Express.</p>
+                     <p class="mt-1 font-semibold text-[#F95D2F]">Calculated at checkout</p>
+                   </div>
+                 </li>
+                 <li class="flex gap-3">
+                   <div class="mt-0.5 text-slate-400">
+                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                   </div>
+                   <div>
+                     <p class="font-bold text-slate-800">Store Pickup</p>
+                     <p>Pick up straight from the {{ product.store?.name || 'Seller' }} storefront.</p>
+                     <p class="mt-1 font-semibold text-emerald-600">Free</p>
+                   </div>
+                 </li>
+               </ul>
+            </div>
+            
+          </div>
+        </div>
       </div>
     </template>
 
-    <!-- Not found -->
-    <div v-else class="py-24 text-center text-slate-400">
-      <p class="text-lg font-medium">Product not found.</p>
-      <RouterLink
-        to="/stores"
-        class="mt-3 inline-block text-sm text-brand-500 hover:underline"
-        >Browse stores</RouterLink
+    <!-- Sticky Bottom Bar (Mobile) -->
+    <div v-if="product" class="fixed bottom-0 left-0 right-0 z-50 flex gap-3 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden">
+      <button class="flex flex-col items-center justify-center px-4 text-slate-500 transition-colors hover:text-brand-600">
+        <ChatBubbleLeftRightIcon class="size-6" />
+        <span class="text-[10px] font-bold mt-1">Chat</span>
+      </button>
+      <button
+        @click="addToCart"
+        :disabled="cart.loading || !selectedVariantId || !inStock"
+        class="flex-1 rounded-xl border-2 border-brand-500 bg-white py-3 text-sm font-bold text-brand-600 transition-colors hover:bg-brand-50 active:bg-brand-100 disabled:opacity-50"
       >
+        {{ addedToCart ? "✓ Added" : "Add to Cart" }}
+      </button>
+      <button
+        @click="buyNow"
+        :disabled="!selectedVariantId || !inStock"
+        class="flex-1 rounded-xl bg-brand-500 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-brand-600 active:bg-brand-700 disabled:opacity-50"
+      >
+        Buy Now
+      </button>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Add safe area support for iOS devices */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+</style>

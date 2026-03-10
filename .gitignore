@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 !.env.dusk.local.example
+dummy-browser.sh
 
 # ─── github ───────────────────────────────────────────────
 .github/copilot-instructions.md

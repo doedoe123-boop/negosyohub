@@ -122,15 +122,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
-const sectors = [
-  { label: "Stores", to: "/stores" },
-  { label: "Properties", to: "/properties" },
-];
-
-const storeSectors = [
-  { label: "E-Commerce", value: "ecommerce", icon: "🛍️" },
-  { label: "Real Estate", value: "real_estate", icon: "🏠" },
-  { label: "Services", value: "services", icon: "🔧" },
+const sectorLinks = [
+  { label: "E-Commerce", to: "/stores", icon: "🛍️" },
+  { label: "Real Estate", to: "/properties", icon: "🏠" },
+  { label: "Lipat Bahay", to: "/movers", icon: "🚚" },
+  { label: "Services", to: "/stores?sector=services", icon: "🔧" },
 ];
 
 function isActive(path) {
@@ -159,22 +155,24 @@ function isActive(path) {
 
       <!-- Desktop nav -->
       <nav class="hidden flex-1 items-center gap-0.5 md:flex">
-        <!-- Stores with flyout -->
+        <!-- Sectors with flyout -->
         <div
           class="relative"
           @mouseenter="storesFlyout = true"
           @mouseleave="storesFlyout = false"
         >
-          <RouterLink
-            to="/stores"
+          <button
+            type="button"
             class="relative flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
             :class="
-              isActive('/stores')
+              isActive('/stores') ||
+              isActive('/properties') ||
+              isActive('/movers')
                 ? 'bg-white/10 text-white'
                 : 'text-white/70 hover:bg-white/10 hover:text-white'
             "
           >
-            Stores
+            Sectors
             <svg
               class="size-3.5 transition-transform"
               :class="storesFlyout ? 'rotate-180' : ''"
@@ -190,10 +188,14 @@ function isActive(path) {
               />
             </svg>
             <span
-              v-if="isActive('/stores')"
+              v-if="
+                isActive('/stores') ||
+                isActive('/properties') ||
+                isActive('/movers')
+              "
               class="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-emerald-400"
             />
-          </RouterLink>
+          </button>
 
           <!-- Flyout -->
           <Transition
@@ -209,45 +211,19 @@ function isActive(path) {
                 class="w-48 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-xl ring-1 ring-black/5"
               >
                 <RouterLink
-                  v-for="s in storeSectors"
-                  :key="s.value"
-                  :to="`/stores?sector=${s.value}`"
+                  v-for="s in sectorLinks"
+                  :key="s.label"
+                  :to="s.to"
                   class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
                   @click="storesFlyout = false"
                 >
                   <span class="text-base">{{ s.icon }}</span>
                   {{ s.label }}
                 </RouterLink>
-                <div class="my-1.5 border-t border-slate-100" />
-                <RouterLink
-                  to="/stores"
-                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
-                  @click="storesFlyout = false"
-                >
-                  <span class="text-base">🔍</span>
-                  Browse all stores
-                </RouterLink>
               </div>
             </div>
           </Transition>
         </div>
-
-        <!-- Properties -->
-        <RouterLink
-          to="/properties"
-          class="relative rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-          :class="
-            isActive('/properties')
-              ? 'bg-white/10 text-white'
-              : 'text-white/70 hover:bg-white/10 hover:text-white'
-          "
-        >
-          Properties
-          <span
-            v-if="isActive('/properties')"
-            class="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-emerald-400"
-          />
-        </RouterLink>
 
         <span class="mx-1 h-4 w-px bg-white/20" />
 
@@ -376,18 +352,19 @@ function isActive(path) {
         class="border-t border-white/10 bg-navy-900 px-4 py-2 md:hidden"
       >
         <RouterLink
-          v-for="sector in sectors"
-          :key="sector.to"
-          :to="sector.to"
-          class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+          v-for="s in sectorLinks"
+          :key="s.label"
+          :to="s.to"
+          class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
           :class="
-            isActive(sector.to)
+            isActive(s.to.split('?')[0])
               ? 'bg-white/10 text-white'
               : 'text-white/70 hover:bg-white/10 hover:text-white'
           "
           @click="mobileOpen = false"
         >
-          {{ sector.label }}
+          <span>{{ s.icon }}</span>
+          {{ s.label }}
         </RouterLink>
 
         <div class="mt-2 border-t border-white/10 pt-2">

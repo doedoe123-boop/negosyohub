@@ -23,7 +23,7 @@ Built with **Laravel 12**, **Lunar PHP**, **Filament v3**, **Vue 3**, and **Post
 | Auth              | Laravel Sanctum v4                |
 | Testing           | Pest v4, Vitest v4, Playwright v1 |
 | Code Style        | Laravel Pint (PSR-12)             |
-| Payments          | PayMongo                          |
+| Payments          | PayMongo, Paypal                  |
 
 ---
 
@@ -134,43 +134,6 @@ make artisan CMD="filament:clear-cached-components"
 make artisan CMD="filament:cache-components"
 ```
 
-### Frontend
-
-```bash
-make npm-install      # Install node packages
-make npm-dev          # Start Vite dev server
-make npm-build        # Build for production
-```
-
-### Database
-
-```bash
-make db-shell         # Open psql shell
-```
-
-## Containers
-
-| Container        | Service    | Port |
-| ---------------- | ---------- | ---- |
-| `laravel_app`    | PHP-FPM    | 9000 |
-| `laravel_nginx`  | Nginx      | 8080 |
-| `marketplace_db` | PostgreSQL | 5433 |
-| `frontend_node`  | Vite       | 5173 |
-
----
-
-## Testing
-
-```bash
-# Backend (from src/)
-cd src && php artisan test --compact     # 387 Pest tests
-cd src && ./vendor/bin/pint --test       # Code style check
-
-# Frontend (from frontend/)
-cd frontend && npm test                  # Vitest unit tests
-cd frontend && npm run test:e2e          # Playwright E2E tests
-```
-
 ---
 
 ## Contributing
@@ -184,57 +147,6 @@ See [SECURITY.md](SECURITY.md) for our security policy and how to report vulnera
 ## License
 
 This project is licensed under the Apache License 2.0 — see [LICENSE](LICENSE) for details.
-| `mailhog` | MailHog | 8025 |
-| `selenium` | Chromium | 4444 |
-
----
-
----
-
-## User Roles
-
-| Role         | Panel  | Access                                        |
-| ------------ | ------ | --------------------------------------------- |
-| Admin        | Admin  | Full platform management, all orders, payouts |
-| Store Owner  | Store  | Own store, products, orders, staff, earnings  |
-| Staff        | Store  | Limited store access via Spatie permissions   |
-| Realty Agent | Realty | Properties, inquiries, open houses            |
-| Customer     | —      | Browse stores, place orders                   |
-
----
-
-## Testing
-
-```bash
-# Pest — unit & feature tests
-make test                               # 224 tests, 503 assertions
-make test-filter FILTER="OrderPlacement" # Specific test
-
-# Dusk — browser E2E tests
-make dusk                               # 37 tests across 3 panels
-make dusk-filter FILTER="admin can log in"
-```
-
-### Frontend Tests (Vitest + Playwright)
-
-```bash
-cd frontend
-
-# Vitest — unit tests
-npm run test:unit            # Run all unit tests
-npm run test:unit -- --watch # Watch mode
-
-# Playwright — E2E tests (account portal)
-npx playwright test                          # All E2E tests (chromium + Mobile Chrome)
-npx playwright test tests/e2e/account.spec.js # Account portal suite only
-npx playwright test --project=chromium       # Chromium only
-npx playwright test --grep "Profile page"    # Filter by test name
-npx playwright test --ui                     # Interactive UI mode
-```
-
-> The Playwright dev server (`npm run dev`) starts automatically. Ensure the backend API is running on port `8080` for full integration, or rely on the built-in route mocks for offline testing.
-
----
 
 ## Resources
 

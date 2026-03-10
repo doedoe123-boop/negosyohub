@@ -60,7 +60,6 @@ const monthlyEstimate = computed(() => {
 
       <!-- Verified overlay badge -->
       <span
-        v-if="property.is_verified || property.agency?.is_verified"
         class="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm backdrop-blur-sm"
       >
         <svg class="size-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -76,13 +75,25 @@ const monthlyEstimate = computed(() => {
         {{ property.title }}
       </p>
 
-      <!-- Location -->
       <p class="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
         <svg class="size-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
         </svg>
         {{ property.city }}
+      </p>
+
+      <!-- Social Proof -->
+      <p v-if="property.average_rating || property.views_count" class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+        <span v-if="property.average_rating">⭐ {{ property.average_rating }}</span>
+        <span v-if="property.average_rating && property.views_count"> · </span>
+        <span v-if="property.views_count" class="flex items-center gap-1">
+          <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          {{ property.views_count }}
+        </span>
       </p>
 
       <div class="mt-auto pt-3">

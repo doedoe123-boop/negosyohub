@@ -61,6 +61,11 @@ class Property extends Model implements HasMedia
     use InteractsWithMedia;
     use SoftDeletes;
 
+    protected $appends = [
+        'average_rating',
+        'review_count',
+    ];
+
     /** @var list<string> */
     protected $fillable = [
         'store_id',
@@ -270,6 +275,16 @@ class Property extends Model implements HasMedia
             ->avg('rating');
 
         return $avg ? round((float) $avg, 1) : null;
+    }
+
+    public function getAverageRatingAttribute(): ?float
+    {
+        return $this->averageRating();
+    }
+
+    public function getReviewCountAttribute(): int
+    {
+        return $this->testimonials()->where('is_published', true)->count();
     }
 
     /**

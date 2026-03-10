@@ -63,7 +63,7 @@ function discount(product) {
 
       <div class="mt-auto pt-2">
         <!-- Current price -->
-        <p class="text-sm font-bold text-slate-900">{{ peso(product.price) }}</p>
+        <p class="text-lg font-bold text-brand-500">{{ peso(product.price) }}</p>
         <!-- Original + savings -->
         <template v-if="discount(product)">
           <p class="text-xs text-slate-400 line-through">{{ peso(discount(product).original) }}</p>

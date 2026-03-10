@@ -179,7 +179,7 @@ onMounted(async () => {
             v-for="sector in sectors"
             :key="sector.label"
             :to="sector.soon ? undefined : sector.to"
-            class="group relative flex items-start gap-4 rounded-2xl border p-5 transition-all"
+            class="group relative flex items-start gap-4 rounded-2xl border p-6 transition-all"
             :class="
               sector.soon
                 ? 'cursor-not-allowed bg-slate-50 opacity-60'

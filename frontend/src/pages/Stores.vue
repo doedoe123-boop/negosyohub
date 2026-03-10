@@ -23,7 +23,6 @@ const searchInputRef = ref(null);
 const sectors = [
   { label: "All", value: "" },
   { label: "E-Commerce", value: "ecommerce" },
-  { label: "Real Estate", value: "real_estate" },
   { label: "Services", value: "services" },
 ];
 
@@ -110,7 +109,7 @@ watch(
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6">
         <RouterLink
           to="/"
-          class="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-colors"
+          class="mb-5 inline-flex items-center gap-1.5 text-sm font-bold text-white/70 hover:text-white transition-colors"
         >
           <svg
             class="size-4"
@@ -127,30 +126,31 @@ watch(
           </svg>
           Home
         </RouterLink>
-        <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Browse Stores
+        <h1 class="text-3xl font-extrabold tracking-tight sm:text-5xl">
+          Browse E-Commerce Stores
         </h1>
-        <p class="mt-2 text-white/70 sm:text-lg">
-          Discover trusted local businesses across the Philippines.
+        <p class="mt-3 text-white/80 sm:text-lg max-w-2xl leading-relaxed">
+          Discover trusted local shops across the Philippines. Curated
+          E-Commerce stores with verified products.
         </p>
 
         <!-- Integrated search bar -->
-        <form class="mt-6 flex max-w-xl gap-2" @submit.prevent="onSearch">
+        <form class="mt-8 flex max-w-xl gap-3" @submit.prevent="onSearch">
           <div class="relative flex-1">
             <MagnifyingGlassIcon
-              class="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-slate-400"
+              class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-slate-400"
             />
             <input
               ref="searchInputRef"
               v-model="search"
               type="search"
-              placeholder="Search stores by name…"
-              class="w-full rounded-xl border-0 bg-white/95 py-3 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 shadow-lg focus:outline-none focus:ring-2 focus:ring-white/70"
+              placeholder="Search stores by name or location…"
+              class="w-full rounded-2xl border-0 bg-white shadow-xl py-3.5 pl-12 pr-4 text-sm text-[#0F2044] font-medium placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
             />
           </div>
           <button
             type="submit"
-            class="shrink-0 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-500 transition-all"
+            class="shrink-0 rounded-2xl bg-brand-500 px-6 py-3.5 text-sm font-bold text-white hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all focus:ring-4 focus:ring-brand-500/30 active:scale-[0.98]"
           >
             Search
           </button>
@@ -228,77 +228,91 @@ watch(
       </div>
 
       <!-- Grid -->
-      <div v-else class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div
+        v-else
+        class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
         <RouterLink
           v-for="store in stores"
           :key="store.id"
           :to="`/stores/${store.slug}`"
-          class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+          class="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-brand-200 transition-all duration-300"
         >
           <!-- Banner -->
-          <div
-            class="relative aspect-[3/2] w-full overflow-hidden bg-slate-100"
-          >
+          <div class="relative h-32 w-full overflow-hidden bg-slate-100">
             <img
               v-if="store.banner_url"
               :src="store.banner_url"
               :alt="store.name"
-              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div
               v-else
-              class="flex h-full items-center justify-center"
-              :class="
-                store.sector_template === 'real_estate'
-                  ? 'bg-gradient-to-br from-slate-100 to-slate-200'
-                  : 'bg-gradient-to-br from-brand-50 to-brand-100'
-              "
-            >
-              <span class="text-3xl">{{
-                store.sector_template === "real_estate" ? "🏠" : "🛍️"
-              }}</span>
-            </div>
+              class="flex h-full w-full bg-gradient-to-br"
+              :class="store.sector_theme ?? 'from-slate-700 to-slate-900'"
+            ></div>
+
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"
+            ></div>
+
             <!-- Sector badge overlay -->
             <span
               v-if="store.sector"
-              class="absolute bottom-2 right-2 rounded-full bg-black/50 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm"
+              class="absolute top-3 right-3 rounded-full bg-white/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold tracking-wide uppercase text-[#0F2044] shadow-sm"
             >
               {{ store.sector_label ?? store.sector }}
             </span>
           </div>
+
           <!-- Info -->
-          <div class="flex items-center justify-between p-3">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <div class="relative shrink-0">
+          <div class="relative flex flex-col p-5 pt-0">
+            <!-- Overlapping Logo -->
+            <div class="relative -mt-10 mb-3 flex justify-start">
+              <div
+                v-if="store.logo_url"
+                class="size-20 overflow-hidden rounded-full border-4 border-white bg-white shadow-md relative z-10 transition-transform group-hover:scale-105"
+              >
                 <img
-                  v-if="store.logo_url"
                   :src="store.logo_url"
                   :alt="store.name"
-                  class="size-10 rounded-xl bg-slate-100 object-cover ring-2 ring-white shadow-sm"
+                  class="h-full w-full object-cover"
                 />
-                <div
-                  v-else
-                  class="flex size-10 items-center justify-center rounded-xl bg-slate-100 text-lg"
-                >
-                  🏪
-                </div>
               </div>
-              <div class="min-w-0">
-                <p
-                  class="truncate text-sm font-semibold text-slate-800 group-hover:text-brand-600 transition-colors"
-                >
-                  {{ store.name }}
-                </p>
-                <p class="flex items-center gap-0.5 text-xs text-slate-400">
-                  <MapPinIcon class="size-3 shrink-0" />
-                  {{ store.address?.city ?? store.city ?? "Philippines" }}
-                </p>
+              <div
+                v-else
+                class="flex size-20 items-center justify-center rounded-full border-4 border-white bg-[#0F2044] text-3xl font-bold text-white shadow-md relative z-10 transition-transform group-hover:scale-105"
+              >
+                {{ store.name?.charAt(0).toUpperCase() }}
               </div>
             </div>
-            <!-- Arrow indicator -->
-            <ChevronRightIcon
-              class="size-4 shrink-0 text-slate-300 group-hover:text-brand-500 transition-colors"
-            />
+
+            <div class="min-w-0">
+              <h3
+                class="truncate text-lg font-bold text-[#0F2044] leading-tight group-hover:text-brand-600 transition-colors"
+              >
+                {{ store.name }}
+              </h3>
+              <p
+                v-if="store.tagline"
+                class="truncate text-sm text-slate-500 font-medium mt-0.5"
+              >
+                {{ store.tagline }}
+              </p>
+
+              <div
+                class="mt-4 flex items-center justify-between text-xs text-slate-500 font-medium pt-4 border-t border-slate-50"
+              >
+                <span class="flex items-center gap-1.5 truncate">
+                  <MapPinIcon class="size-4 shrink-0 text-brand-500" />
+                  {{ store.address?.city ?? store.city ?? "Philippines" }}
+                </span>
+                <!-- Arrow indicator -->
+                <ChevronRightIcon
+                  class="size-5 shrink-0 text-slate-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all"
+                />
+              </div>
+            </div>
           </div>
         </RouterLink>
       </div>
