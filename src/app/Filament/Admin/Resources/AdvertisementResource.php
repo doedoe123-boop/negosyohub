@@ -72,6 +72,7 @@ class AdvertisementResource extends Resource
                         Forms\Components\TextInput::make('cost_cents')
                             ->label('Cost (cents)')
                             ->numeric()
+                            ->default(0)
                             ->minValue(0),
                         Forms\Components\Select::make('campaign_id')
                             ->label('Campaign')

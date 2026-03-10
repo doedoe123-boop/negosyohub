@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 import { cartApi } from "@/api/cart";
 import { paypalApi } from "@/api/paypal";
 import { addressesApi } from "@/api/addresses";
+import CouponInput from "@/components/CouponInput.vue";
 
 const router = useRouter();
 const cart = useCartStore();
@@ -32,6 +33,15 @@ const step = ref("address"); // address | shipping | payment
 const loading = ref(false);
 const error = ref(null);
 const showLeaveModal = ref(false);
+const appliedCoupon = ref(null);
+
+function onCouponApplied(coupon) {
+  appliedCoupon.value = coupon;
+}
+
+function onCouponRemoved() {
+  appliedCoupon.value = null;
+}
 
 function goBack() {
   if (step.value === "shipping") {
@@ -417,6 +427,9 @@ async function placeOrder() {
             }}</span>
           </li>
         </ul>
+        <div class="mt-4 border-t pt-4">
+          <CouponInput @applied="onCouponApplied" @removed="onCouponRemoved" />
+        </div>
         <div
           class="mt-4 border-t pt-3 flex justify-between font-bold text-slate-900"
         >
