@@ -1,4 +1,4 @@
-# Makefile — Multi-Restaurant Marketplace
+# Makefile — NegosyoHub Marketplace
 # Usage: make <target>
 # Run `make help` to see all available commands.
 
@@ -53,12 +53,21 @@ logs:
 .PHONY: setup install
 
 ## Full first-time project setup (build, start, install deps, migrate, seed)
-setup: build up install key migrate seed npm-install npm-build laravel-npm-install laravel-npm-build
+setup: build up install key migrate seed npm-install npm-build fix-src-perms laravel-npm-install laravel-npm-build restart-nginx
 	@echo ""
-	@echo "✅  Setup complete!"
-	@echo "    App  → http://localhost:8080"
-	@echo "    Mail → http://localhost:8025  (MailHog)"
-	@echo "    Vite → http://localhost:5173  (npm run dev)"
+	@echo "\033[0;36m  ███╗   ██╗███████╗ ██████╗  ██████╗ ███████╗██╗   ██╗ ██████╗ ██╗  ██╗██╗   ██╗██████╗ \033[0m"
+	@echo "\033[0;36m  ████╗  ██║██╔════╝██╔════╝ ██╔═══██╗██╔════╝╚██╗ ██╔╝██╔═══██╗██║  ██║██║   ██║██╔══██╗\033[0m"
+	@echo "\033[0;36m  ██╔██╗ ██║█████╗  ██║  ███╗██║   ██║███████╗ ╚████╔╝ ██║   ██║███████║██║   ██║██████╔╝\033[0m"
+	@echo "\033[0;36m  ██║╚██╗██║██╔══╝  ██║   ██║██║   ██║╚════██║  ╚██╔╝  ██║   ██║██╔══██║██║   ██║██╔══██╗\033[0m"
+	@echo "\033[0;36m  ██║ ╚████║███████╗╚██████╔╝╚██████╔╝███████║   ██║   ╚██████╔╝██║  ██║╚██████╔╝██████╔╝\033[0m"
+	@echo "\033[0;36m  ╚═╝  ╚═══╝╚══════╝ ╚═════╝  ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ \033[0m"
+	@echo ""
+	@echo "\033[1;32m  ✨ NEGOSYOHUB SETUP COMPLETE! ✨\033[0m"
+	@echo "  \033[0;90m--------------------------------------------------\033[0m"
+	@echo "  🌍 \033[1;37mMarketplace:\033[0m    \033[4;34mhttp://localhost:8080\033[0m"
+	@echo "  👤 \033[1;37mAdmin:\033[0m       \033[4;34mhttp://localhost:8080/admin\033[0m"
+	@echo "  📧 \033[1;37mMailHog:\033[0m     \033[4;34mhttp://localhost:8025\033[0m"
+	@echo "  ⚡ \033[1;37mStore front:\033[0m    \033[4;34mhttp://localhost:5173\033[0m"
 	@echo ""
 
 ## Install PHP dependencies inside the app container
@@ -113,13 +122,22 @@ npm-dev:
 npm-build:
 	$(NODE) npm run build
 
-## Install Node deps for the Laravel app (Filament/Blade assets) — runs on host
+## Install Node deps for the Laravel app (Filament/Blade assets)
 laravel-npm-install:
-	cd src && npm install
+	$(NODE) npm --prefix /src install
 
-## Build Laravel Vite assets (generates public/build/manifest.json) — runs on host
+## Build Laravel Vite assets (generates public/build/manifest.json)
 laravel-npm-build:
-	cd src && npm run build
+	$(NODE) npm --prefix /src run build
+
+## Fix src/ ownership so the node container (uid 1000) can write build output
+fix-src-perms:
+	$(DC) exec -u root app chown -R 1000:1000 /var/www/public/build 2>/dev/null || true
+	$(DC) exec -u root app chown -R 1000:1000 /var/www/node_modules 2>/dev/null || true
+
+## Restart nginx to pick up fresh upstream DNS (needed after app container rebuild)
+restart-nginx:
+	$(DC) restart nginx
 
 # --------------------------------------------------------------------------
 # Artisan Helpers

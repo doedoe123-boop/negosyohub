@@ -10,7 +10,7 @@ import { RouterView } from "vue-router";
       <span class="ml-2 text-sm text-slate-500">Checkout</span>
     </header>
 
-    <main class="mx-auto max-w-4xl px-4 py-10">
+    <main class="mx-auto max-w-6xl px-4 py-10">
       <RouterView />
     </main>
   </div>
