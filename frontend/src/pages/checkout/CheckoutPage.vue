@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ExclamationTriangleIcon } from "@heroicons/vue/24/solid";
+import { LockClosedIcon, ShieldCheckIcon } from "@heroicons/vue/24/outline";
 import { useCartStore } from "@/stores/cart";
 import { useAuthStore } from "@/stores/auth";
 import { cartApi } from "@/api/cart";
@@ -177,9 +178,9 @@ async function placeOrder() {
       </template>
     </nav>
 
-    <div class="grid gap-8 lg:grid-cols-3">
+    <div class="flex flex-col gap-8 lg:grid lg:grid-cols-12 lg:items-start">
       <!-- Form area -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="space-y-6 lg:col-span-8 xl:col-span-8">
         <p
           v-if="error"
           class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
@@ -196,114 +197,130 @@ async function placeOrder() {
             Delivery Address
           </h2>
           <form
-            class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            class="grid grid-cols-1 gap-5 sm:grid-cols-2 mt-2"
             @submit.prevent="saveAddress"
           >
-            <div>
-              <label
-                for="addr-first-name"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >First Name</label
-              >
+            <div class="relative">
               <input
                 id="addr-first-name"
                 v-model="address.first_name"
                 required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div>
               <label
-                for="addr-last-name"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >Last Name</label
+                for="addr-first-name"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                First Name
+              </label>
+            </div>
+            <div class="relative">
               <input
                 id="addr-last-name"
                 v-model="address.last_name"
                 required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div class="col-span-full">
               <label
-                for="addr-line-one"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >Address Line</label
+                for="addr-last-name"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                Last Name
+              </label>
+            </div>
+            <div class="relative col-span-full">
               <input
                 id="addr-line-one"
                 v-model="address.line_one"
                 required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div>
               <label
-                for="addr-city"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >City</label
+                for="addr-line-one"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                Address Line
+              </label>
+            </div>
+            <div class="relative">
               <input
                 id="addr-city"
                 v-model="address.city"
                 required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div>
               <label
-                for="addr-state"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >Province</label
+                for="addr-city"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                City
+              </label>
+            </div>
+            <div class="relative">
               <input
                 id="addr-state"
                 v-model="address.state"
                 required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div>
               <label
-                for="addr-postcode"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >ZIP Code</label
+                for="addr-state"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                Province
+              </label>
+            </div>
+            <div class="relative">
               <input
                 id="addr-postcode"
                 v-model="address.postcode"
                 required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div>
               <label
-                for="addr-phone"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >Phone</label
+                for="addr-postcode"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                ZIP Code
+              </label>
+            </div>
+            <div class="relative">
               <input
                 id="addr-phone"
                 v-model="address.contact_phone"
                 type="tel"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-            <div>
               <label
-                for="addr-email"
-                class="mb-1 block text-xs font-medium text-slate-600"
-                >Email</label
+                for="addr-phone"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
+                Phone
+              </label>
+            </div>
+            <div class="relative">
               <input
                 id="addr-email"
                 v-model="address.contact_email"
                 type="email"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                placeholder=" "
+                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
+              <label
+                for="addr-email"
+                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+              >
+                Email
+              </label>
             </div>
-            <div class="col-span-full flex gap-3">
+            <div class="col-span-full mt-2 flex gap-3">
               <button
                 type="button"
                 class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
@@ -388,7 +405,7 @@ async function placeOrder() {
           <p class="mb-6 text-sm text-slate-500">
             You will be redirected to PayPal to complete your payment securely.
           </p>
-          <div class="flex gap-3">
+          <div class="flex gap-3 mb-6">
             <button
               type="button"
               class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
@@ -399,42 +416,58 @@ async function placeOrder() {
             <button
               type="button"
               :disabled="loading"
-              class="flex-1 rounded-xl bg-yellow-400 py-3 text-sm font-bold text-slate-900 transition-colors hover:bg-yellow-300 disabled:opacity-50"
+              class="flex-1 rounded-xl bg-[#0551b5] py-3 text-sm font-bold text-white transition-all hover:bg-[#1161CA] active:scale-[0.98] disabled:opacity-50 shadow-md cursor-pointer"
               @click="placeOrder"
             >
               {{ loading ? "Redirecting…" : "Pay with PayPal" }}
             </button>
           </div>
+
+          <div
+            class="flex items-center justify-center gap-6 border-t border-slate-100 pt-5 text-sm font-medium text-slate-600"
+          >
+            <div class="flex items-center gap-1.5">
+              <LockClosedIcon class="h-4 w-4 text-emerald-600" />
+              <span>Secure SSL</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <ShieldCheckIcon class="h-4 w-4 text-emerald-600" />
+              <span>Money Back Guarantee</span>
+            </div>
+          </div>
         </section>
       </div>
 
       <!-- Order summary -->
-      <aside class="rounded-2xl border border-slate-200 bg-white p-5 h-fit">
-        <h2 class="mb-4 text-base font-semibold text-slate-900">
-          Order Summary
-        </h2>
+      <aside
+        class="sticky top-6 h-fit w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-4 xl:col-span-4"
+      >
+        <h2 class="mb-4 text-lg font-bold text-slate-900">Order Summary</h2>
         <ul class="divide-y text-sm">
           <li
             v-for="line in cart.cart?.lines"
             :key="line.id"
-            class="flex justify-between py-2"
+            class="flex justify-between py-3"
           >
-            <span class="text-slate-600 line-clamp-1 flex-1 mr-3"
+            <span
+              class="text-slate-600 line-clamp-2 flex-1 mr-4 leading-relaxed"
               >{{ line.purchasable?.name }} × {{ line.quantity }}</span
             >
-            <span class="font-medium text-slate-900">{{
+            <span class="font-semibold text-slate-900">{{
               line.sub_total?.formatted
             }}</span>
           </li>
         </ul>
-        <div class="mt-4 border-t pt-4">
+        <div class="mt-4 border-t border-slate-100 pt-5">
           <CouponInput @applied="onCouponApplied" @removed="onCouponRemoved" />
         </div>
         <div
-          class="mt-4 border-t pt-3 flex justify-between font-bold text-slate-900"
+          class="mt-6 flex items-center justify-between border-t border-slate-200 pt-5"
         >
-          <span>Total</span>
-          <span>{{ cart.total }}</span>
+          <span class="text-base font-semibold text-slate-900">Total</span>
+          <span class="text-2xl font-black tracking-tight text-slate-900">{{
+            cart.total
+          }}</span>
         </div>
       </aside>
     </div>

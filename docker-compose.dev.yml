@@ -50,6 +50,7 @@ services:
       BACKEND_URL: "http://laravel_nginx:80"
     volumes:
       - ./frontend:/frontend
+      - ./src:/src
     command: ["sh", "-c", "npm install && npm run dev -- --host"]
     ports:
       - "5173:5173"

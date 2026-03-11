@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
           />
           <div
             v-else
-            class="flex h-48 items-center justify-center bg-gradient-to-r from-brand-600 to-emerald-500 sm:h-64 lg:h-72"
+            class="flex min-h-[12rem] items-center justify-center bg-gradient-to-r from-brand-600 to-emerald-500 py-8 sm:min-h-[16rem] lg:min-h-[18rem]"
           >
             <div class="text-center text-white px-6">
               <div class="text-2xl font-bold" v-html="ad.title"></div>

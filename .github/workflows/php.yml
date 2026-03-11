@@ -18,8 +18,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: kain_hub_test
-          POSTGRES_USER: kain_hub
+          POSTGRES_DB: negosyohub_test
+          POSTGRES_USER: negosyohub
           POSTGRES_PASSWORD: secret
         ports:
           - 5432:5432
@@ -83,8 +83,8 @@ jobs:
           echo "DB_CONNECTION=pgsql" >> .env.testing
           echo "DB_HOST=127.0.0.1" >> .env.testing
           echo "DB_PORT=5432" >> .env.testing
-          echo "DB_DATABASE=kain_hub_test" >> .env.testing
-          echo "DB_USERNAME=kain_hub" >> .env.testing
+          echo "DB_DATABASE=negosyohub_test" >> .env.testing
+          echo "DB_USERNAME=negosyohub" >> .env.testing
           echo "DB_PASSWORD=secret" >> .env.testing
           echo "CACHE_DRIVER=redis" >> .env.testing
           echo "REDIS_HOST=127.0.0.1" >> .env.testing
