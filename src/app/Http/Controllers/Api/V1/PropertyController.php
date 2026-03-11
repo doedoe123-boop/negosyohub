@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\SubmitInquiryRequest;
+use App\Http\Resources\Api\V1\PropertyDetailResource;
+use App\Http\Resources\Api\V1\PropertyResource;
 use App\Models\Property;
 use App\Services\PropertyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * Read-only property browsing endpoints for the customer storefront.
@@ -27,9 +30,9 @@ class PropertyController extends Controller
      * Supported query params:
      *   search, type, listing_type, min_price, max_price, bedrooms, city, featured, per_page
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
-        return response()->json(
+        return PropertyResource::collection(
             $this->propertyService->browse(
                 $request->only([
                     'search',
@@ -49,9 +52,9 @@ class PropertyController extends Controller
     /**
      * Show a single active property by slug, incrementing its view counter.
      */
-    public function show(string $slug): JsonResponse
+    public function show(string $slug): PropertyDetailResource
     {
-        return response()->json(
+        return new PropertyDetailResource(
             $this->propertyService->findBySlugOrFail($slug)
         );
     }

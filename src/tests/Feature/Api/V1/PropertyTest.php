@@ -15,7 +15,7 @@ it('returns a paginated list of active properties', function () {
 
     $this->getJson(route('api.v1.properties.index'))
         ->assertOk()
-        ->assertJsonStructure(['data', 'current_page', 'total'])
+        ->assertJsonStructure(['data', 'meta' => ['current_page', 'total']])
         ->assertJsonCount(3, 'data');
 });
 
@@ -139,9 +139,9 @@ it('returns a single active property by slug', function () {
 
     $this->getJson(route('api.v1.properties.show', $property->slug))
         ->assertOk()
-        ->assertJsonPath('id', $property->id)
-        ->assertJsonPath('title', 'Luxury Penthouse BGC')
-        ->assertJsonStructure(['id', 'title', 'slug', 'description', 'property_type', 'listing_type', 'price', 'city', 'province', 'images', 'features']);
+        ->assertJsonPath('data.id', $property->id)
+        ->assertJsonPath('data.title', 'Luxury Penthouse BGC')
+        ->assertJsonStructure(['data' => ['id', 'title', 'slug', 'description', 'property_type', 'listing_type', 'price', 'city', 'province', 'images', 'features']]);
 });
 
 it('increments the view count when a property is shown', function () {

@@ -98,14 +98,18 @@ class PropertyService
     public function findBySlugOrFail(string $slug): Property
     {
         $property = Property::query()
-            ->with('store:id,name,slug,logo,agent_bio,agent_photo,phone')
+            ->with([
+                'store:id,user_id,name,slug,logo,agent_bio,agent_photo,phone',
+                'store.owner:id,name',
+                'development:id,name,slug,developer_name',
+            ])
             ->where('slug', $slug)
             ->where('status', PropertyStatus::Active)
             ->firstOrFail();
 
         $property->increment('views_count');
 
-        return $property->fresh(['store', 'media']);
+        return $property->fresh(['store', 'store.owner', 'development', 'media']);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Realty\Resources\DevelopmentResource\RelationManagers;
 
+use App\ListingType;
+use App\PropertyStatus;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -36,22 +38,13 @@ class PropertiesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('listing_type')
                     ->label('Listing')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'for_sale' => 'success',
-                        'for_rent' => 'info',
-                        'pre_selling' => 'warning',
-                        default => 'gray',
-                    }),
+                    ->formatStateUsing(fn (ListingType $state): string => $state->label())
+                    ->color(fn (ListingType $state): string => $state->color()),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'active' => 'success',
-                        'sold' => 'danger',
-                        'rented' => 'info',
-                        'draft' => 'gray',
-                        default => 'warning',
-                    }),
+                    ->formatStateUsing(fn (PropertyStatus $state): string => $state->label())
+                    ->color(fn (PropertyStatus $state): string => $state->color()),
 
                 Tables\Columns\TextColumn::make('price')
                     ->money('PHP')
@@ -76,20 +69,14 @@ class PropertiesRelationManager extends RelationManager
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'active' => 'Active',
-                        'sold' => 'Sold',
-                        'rented' => 'Rented',
-                        'reserved' => 'Reserved',
-                    ]),
+                    ->options(collect(PropertyStatus::cases())->mapWithKeys(
+                        fn (PropertyStatus $s) => [$s->value => $s->label()]
+                    )),
 
                 Tables\Filters\SelectFilter::make('listing_type')
-                    ->options([
-                        'for_sale' => 'For Sale',
-                        'for_rent' => 'For Rent',
-                        'pre_selling' => 'Pre-Selling',
-                    ]),
+                    ->options(collect(ListingType::cases())->mapWithKeys(
+                        fn (ListingType $t) => [$t->value => $t->label()]
+                    )),
             ])
             ->actions([
                 Tables\Actions\Action::make('view')
