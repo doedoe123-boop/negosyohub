@@ -458,7 +458,7 @@ async function placeOrder() {
             }}</span>
           </li>
         </ul>
-        <div class="mt-4 border-t border-slate-100 pt-5">
+        <div class="mt-4 border-t pt-4">
           <CouponInput @applied="onCouponApplied" @removed="onCouponRemoved" />
         </div>
         <div
