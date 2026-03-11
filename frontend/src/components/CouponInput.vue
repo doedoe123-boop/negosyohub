@@ -46,21 +46,16 @@ function removeCoupon() {
     <!-- Applied state -->
     <div
       v-if="applied"
-      class="flex items-start justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5"
+      class="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5"
     >
-      <div
-        v-if="applied && applied.code"
-        class="flex items-start gap-2 text-sm min-w-0 mt-2"
-      >
-        <CheckCircleIcon class="size-4 shrink-0 text-emerald-500 mt-0.5" />
-        <p class="text-emerald-600 leading-snug">
-          <span class="font-semibold text-emerald-700">{{ applied.code }}</span><br />
-          <span> — Coupon applied</span>
-        </p>
+      <div class="flex items-center gap-2 text-sm">
+        <CheckCircleIcon class="size-4 text-emerald-500" />
+        <span class="font-semibold text-emerald-700">{{ applied.code }}</span>
+        <span class="text-emerald-600">— {{ applied.description }}</span>
       </div>
       <button
         type="button"
-        class="shrink-0 text-xs font-medium text-emerald-600 hover:text-emerald-800 transition-colors mt-0.5"
+        class="text-xs font-medium text-emerald-600 hover:text-emerald-800 transition-colors"
         @click="removeCoupon"
       >
         Remove
@@ -73,7 +68,7 @@ function removeCoupon() {
         v-model="code"
         type="text"
         placeholder="Enter coupon code"
-        class="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        class="flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
         @keyup.enter="applyCoupon"
       />
       <button
