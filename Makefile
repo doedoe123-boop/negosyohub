@@ -53,7 +53,7 @@ logs:
 .PHONY: setup install
 
 ## Full first-time project setup (build, start, install deps, migrate, seed)
-setup: build up install key migrate seed npm-install npm-build fix-src-perms laravel-npm-install laravel-npm-build restart-nginx
+setup: build up env install key migrate seed npm-install npm-build fix-src-perms laravel-npm-install laravel-npm-build restart-nginx
 	@echo ""
 	@echo "\033[0;36m  ███╗   ██╗███████╗ ██████╗  ██████╗ ███████╗██╗   ██╗ ██████╗ ██╗  ██╗██╗   ██╗██████╗ \033[0m"
 	@echo "\033[0;36m  ████╗  ██║██╔════╝██╔════╝ ██╔═══██╗██╔════╝╚██╗ ██╔╝██╔═══██╗██║  ██║██║   ██║██╔══██╗\033[0m"
@@ -74,8 +74,10 @@ setup: build up install key migrate seed npm-install npm-build fix-src-perms lar
 install:
 	$(APP) composer install
 
-## Copy .env.example → .env if .env does not exist
+## Copy .env.example → .env for root, src/, and frontend/ (skips if already exists)
 env:
+	cp -n .env.example .env || true
+	cp -n frontend/.env.example frontend/.env || true
 	$(APP) cp -n .env.example .env || true
 
 ## Generate Laravel application key
