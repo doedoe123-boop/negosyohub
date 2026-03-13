@@ -105,7 +105,7 @@ class PropertyService
                 'development:id,name,slug,developer_name',
             ])
             ->where('slug', $slug)
-            ->where('status', PropertyStatus::Active)
+            ->whereIn('status', [PropertyStatus::Active, PropertyStatus::UnderOffer, PropertyStatus::Rented])
             ->firstOrFail();
 
         $property->increment('views_count');

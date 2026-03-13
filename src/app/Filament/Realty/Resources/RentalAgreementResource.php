@@ -92,6 +92,34 @@ class RentalAgreementResource extends Resource
                             ->rows(3)
                             ->columnSpanFull(),
                     ])->columns(2),
+
+                Forms\Components\Section::make('Status & Tenant Responses')
+                    ->schema([
+                        Forms\Components\Select::make('status')
+                            ->options([
+                                'pending' => 'Pending Review',
+                                'negotiating' => 'Negotiating',
+                                'signed' => 'Signed',
+                            ])
+                            ->required(),
+
+                        Forms\Components\DateTimePicker::make('signed_at')
+                            ->label('Signed At')
+                            ->disabled(),
+
+                        Forms\Components\Textarea::make('tenant_questions')
+                            ->label('Questions from Tenant')
+                            ->helperText('If the tenant has questions during review, they will appear here.')
+                            ->rows(2)
+                            ->disabled()
+                            ->columnSpanFull(),
+
+                        Forms\Components\Textarea::make('landlord_response')
+                            ->label('Your Response')
+                            ->helperText('Answer the tenant\'s questions or provide clarifications.')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])->columns(2),
             ]);
     }
 
@@ -111,6 +139,16 @@ class RentalAgreementResource extends Resource
                     ->label('Property')
                     ->searchable()
                     ->limit(30),
+
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'gray',
+                        'negotiating' => 'warning',
+                        'signed' => 'success',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
                 Tables\Columns\TextColumn::make('monthly_rent')
                     ->label('Monthly Rent')

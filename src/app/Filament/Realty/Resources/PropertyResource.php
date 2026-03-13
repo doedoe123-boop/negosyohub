@@ -741,9 +741,12 @@ class PropertyResource extends Resource
                             ->rows(2),
                     ])
                     ->action(function (Model $record, array $data): void {
+                        $tenantUser = \App\Models\User::where('email', $data['tenant_email'])->first();
+
                         RentalAgreement::create([
                             'property_id' => $record->id,
                             'store_id' => $record->store_id,
+                            'tenant_user_id' => $tenantUser?->id,
                             'tenant_name' => $data['tenant_name'],
                             'tenant_email' => $data['tenant_email'],
                             'tenant_phone' => $data['tenant_phone'] ?? null,
@@ -756,10 +759,15 @@ class PropertyResource extends Resource
                             'notes' => $data['notes'] ?? null,
                         ]);
 
+                        $record->update(['status' => \App\PropertyStatus::UnderOffer]);
+                        // Only update inquiries that belong to this tenant, or actually close them all and let the RentalAgreement drive it?
+                        // It's cleaner to keep them as "negotiating" if we want them to stick around, or just set to Closed.
+                        $record->inquiries()->update(['status' => \App\InquiryStatus::Closed]);
+
                         \Filament\Notifications\Notification::make()
                             ->success()
-                            ->title('Property marked as rented')
-                            ->body('A rental agreement has been created and the tenant has been notified.')
+                            ->title('Property is now Under Offer')
+                            ->body('A rental agreement has been sent to the tenant for review and signature.')
                             ->send();
                     })
                     ->visible(fn (Model $record): bool => in_array($record->status, [

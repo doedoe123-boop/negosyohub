@@ -22,6 +22,7 @@ import {
   MapIcon,
   HeartIcon,
   ChatBubbleLeftIcon,
+  PhotoIcon,
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/vue/24/solid";
 import { propertiesApi } from "@/api/properties";
@@ -43,6 +44,19 @@ const lightboxIndex = ref(0);
 function openLightbox(index = 0) {
   lightboxIndex.value = index;
   lightboxOpen.value = true;
+}
+
+// Direction photos state
+const visibleDirectionPhotos = ref(new Set());
+
+function toggleDirectionPhoto(index) {
+  const newSet = new Set(visibleDirectionPhotos.value);
+  if (newSet.has(index)) {
+    newSet.delete(index);
+  } else {
+    newSet.add(index);
+  }
+  visibleDirectionPhotos.value = newSet;
 }
 
 // Inquiry form state
@@ -930,17 +944,28 @@ async function submitPropertyReview(payload) {
                       {{ step.instruction }}
                     </p>
 
-                    <!-- Direction photo -->
-                    <img
+                    <!-- Direction photo toggle -->
+                    <button
                       v-if="step.photo"
-                      :src="
-                        step.photo.startsWith('http')
-                          ? step.photo
-                          : `/storage/${step.photo}`
-                      "
-                      :alt="`Direction step ${i + 1}`"
-                      class="mt-3 h-40 w-full rounded-lg object-cover"
-                    />
+                      type="button"
+                      class="mt-3 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700"
+                      @click="toggleDirectionPhoto(i)"
+                    >
+                      <PhotoIcon class="size-4 shrink-0" />
+                      {{ visibleDirectionPhotos.has(i) ? 'Hide photo' : 'Show photo' }}
+                    </button>
+
+                    <!-- Direction photo -->
+                    <div
+                      v-if="step.photo && visibleDirectionPhotos.has(i)"
+                      class="mt-2 overflow-hidden rounded-lg border border-slate-100 shadow-sm"
+                    >
+                      <img
+                        :src="step.photo"
+                        :alt="`Direction step ${i + 1}`"
+                        class="h-40 w-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

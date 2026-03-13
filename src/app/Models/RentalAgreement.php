@@ -46,6 +46,10 @@ class RentalAgreement extends Model
         'move_in_date',
         'lease_term_months',
         'notes',
+        'status',
+        'tenant_questions',
+        'landlord_response',
+        'signed_at',
     ];
 
     protected function casts(): array
@@ -55,6 +59,7 @@ class RentalAgreement extends Model
             'monthly_rent' => 'integer',
             'security_deposit' => 'integer',
             'lease_term_months' => 'integer',
+            'signed_at' => 'datetime',
         ];
     }
 

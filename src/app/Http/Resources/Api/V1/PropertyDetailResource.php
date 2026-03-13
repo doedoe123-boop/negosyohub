@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\PropertyInquiry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Full property representation for the detail / show view.
@@ -59,15 +60,25 @@ class PropertyDetailResource extends JsonResource
 
             // Media & links
             'images' => $this->images,
-            'floor_plans' => $this->floor_plans,
-            'documents' => $this->documents,
-            'video_url' => $this->video_url,
-            'virtual_tour_url' => $this->virtual_tour_url,
-
             // Rich data
             'features' => $this->features,
             'nearby_places' => $this->nearby_places,
-            'direction_steps' => $this->direction_steps,
+            'direction_steps' => collect($this->direction_steps)->map(fn ($step) => [
+                'instruction' => $step['instruction'] ?? null,
+                'landmark' => $step['landmark'] ?? null,
+                'transport_mode' => $step['transport_mode'] ?? null,
+                'photo' => ! empty($step['photo']) ? Storage::disk('public')->url($step['photo']) : null,
+            ]),
+            'floor_plans' => collect($this->floor_plans)->map(fn ($p) => [
+                'label' => $p['label'] ?? null,
+                'floor_number' => $p['floor_number'] ?? null,
+                'url' => ! empty($p['url']) ? Storage::disk('public')->url($p['url']) : null,
+            ]),
+            'documents' => collect($this->documents)->map(fn ($d) => [
+                'name' => $d['name'] ?? null,
+                'type' => $d['type'] ?? null,
+                'url' => ! empty($d['url']) ? Storage::disk('public')->url($d['url']) : null,
+            ]),
             'house_rules' => $this->house_rules,
             'utility_inclusions' => $this->utility_inclusions,
             'safety_features' => $this->safety_features,

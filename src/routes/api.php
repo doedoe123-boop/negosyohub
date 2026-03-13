@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\StoreController;
+use App\Http\Controllers\Api\V1\SupportTicketController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Webhooks\PayMongoController;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +98,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         // User inquiries (cross-sector dashboard)
         Route::get('/user/inquiries', [UserController::class, 'inquiries'])->name('user.inquiries');
+        Route::get('/user/rental-agreements', [UserController::class, 'rentalAgreements'])->name('user.rentalAgreements');
+        Route::patch('/user/rental-agreements/{id}', [UserController::class, 'updateRentalAgreement'])->name('user.rentalAgreements.update');
 
         // User notifications
         Route::get('/user/notifications', [UserController::class, 'notifications'])->name('user.notifications');
@@ -171,6 +174,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('throttle:30,1')->group(function () {
             Route::patch('/moving-bookings/{movingBooking}/status', [MovingBookingController::class, 'updateStatus'])->name('moving-bookings.status');
         });
+
+        // Support Tickets
+        Route::get('/user/support-tickets', [SupportTicketController::class, 'index'])->name('support-tickets.index');
+        Route::post('/user/support-tickets', [SupportTicketController::class, 'store'])->name('support-tickets.store');
+        Route::get('/user/support-tickets/{id}', [SupportTicketController::class, 'show'])->name('support-tickets.show');
 
         // Orders — store-owner progression (store owner / admin only, enforced by policy)
         Route::middleware('throttle:30,1')->group(function () {

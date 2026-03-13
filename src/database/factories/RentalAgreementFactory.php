@@ -29,6 +29,10 @@ class RentalAgreementFactory extends Factory
             'move_in_date' => fake()->dateTimeBetween('now', '+3 months')->format('Y-m-d'),
             'lease_term_months' => fake()->optional(0.7)->randomElement([6, 12, 24]),
             'notes' => fake()->optional(0.4)->paragraph(),
+            'status' => 'pending',
+            'tenant_questions' => null,
+            'landlord_response' => null,
+            'signed_at' => null,
         ];
     }
 

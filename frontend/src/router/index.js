@@ -142,6 +142,11 @@ const routes = [
             component: () => import("@/pages/account/InquiriesPage.vue"),
           },
           {
+            path: "agreements",
+            name: "account.agreements",
+            component: () => import("@/pages/account/RentalAgreementsPage.vue"),
+          },
+          {
             path: "addresses",
             name: "account.addresses",
             component: () => import("@/pages/account/AddressesPage.vue"),
@@ -165,6 +170,11 @@ const routes = [
             path: "settings",
             name: "account.settings",
             component: () => import("@/pages/account/SettingsPage.vue"),
+          },
+          {
+            path: "help",
+            name: "account.help",
+            component: () => import("@/pages/account/HelpPage.vue"),
           },
           // ─── Moving bookings ────────────────────────────────────────
           {

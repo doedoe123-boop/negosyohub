@@ -12,6 +12,7 @@ import {
   HomeModernIcon,
   TruckIcon,
   HeartIcon,
+  DocumentTextIcon,
   BellIcon,
   BellAlertIcon,
   XMarkIcon,
@@ -123,6 +124,13 @@ const quickLinks = [
     description: "Property interest & viewings",
     icon: HeartIcon,
     color: "bg-rose-50 text-rose-600 group-hover:bg-rose-100",
+  },
+  {
+    to: "/account/agreements",
+    label: "Rental Agreements",
+    description: "Your signed contracts",
+    icon: DocumentTextIcon,
+    color: "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100",
   },
   {
     to: "/account/moving",

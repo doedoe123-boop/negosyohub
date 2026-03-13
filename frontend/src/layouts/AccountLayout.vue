@@ -10,6 +10,8 @@ import {
   KeyIcon,
   Cog6ToothIcon,
   TruckIcon,
+  DocumentTextIcon,
+  LifebuoyIcon,
 } from "@heroicons/vue/24/outline";
 import { useAuthStore } from "@/stores/auth";
 
@@ -20,6 +22,7 @@ const navItems = [
   { label: "Overview", to: "/account", icon: HomeIcon, exact: true },
   { label: "My Orders", to: "/account/orders", icon: ShoppingBagIcon },
   { label: "My Inquiries", to: "/account/inquiries", icon: HeartIcon },
+  { label: "Agreements", to: "/account/agreements", icon: DocumentTextIcon },
   { label: "Moving", to: "/account/moving", icon: TruckIcon },
   { label: "Addresses", to: "/account/addresses", icon: MapPinIcon },
   {
@@ -29,6 +32,7 @@ const navItems = [
   },
   { label: "Profile", to: "/account/profile", icon: UserCircleIcon },
   { label: "Password", to: "/account/password", icon: KeyIcon },
+  { label: "Help & Support", to: "/account/help", icon: LifebuoyIcon },
   { label: "Settings", to: "/account/settings", icon: Cog6ToothIcon },
 ];
 

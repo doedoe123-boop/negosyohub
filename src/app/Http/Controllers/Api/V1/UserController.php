@@ -7,6 +7,7 @@ use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\Api\V1\UserInquiryResource;
 use App\Models\PropertyInquiry;
+use App\Models\RentalAgreement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -80,6 +81,66 @@ class UserController extends Controller
             ->paginate(10);
 
         return UserInquiryResource::collection($inquiries);
+    }
+
+    /**
+     * List the authenticated user's rental agreements.
+     */
+    public function rentalAgreements(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Pagination\LengthAwarePaginator
+    {
+        $agreements = RentalAgreement::query()
+            ->where('tenant_user_id', $request->user()->id)
+            ->with(['property', 'store'])
+            ->latest()
+            ->paginate(10);
+
+        return $agreements->through(fn ($a) => [
+            'id' => $a->id,
+            'move_in_date' => $a->move_in_date?->toDateString(),
+            'monthly_rent' => $a->monthly_rent,
+            'security_deposit' => $a->security_deposit,
+            'lease_term_months' => $a->lease_term_months,
+            'created_at' => $a->created_at?->toIso8601String(),
+            'status' => $a->status,
+            'tenant_questions' => $a->tenant_questions,
+            'landlord_response' => $a->landlord_response,
+            'signed_at' => $a->signed_at?->toIso8601String(),
+            'notes' => $a->notes,
+            'property' => [
+                'id' => $a->property?->id,
+                'title' => $a->property?->title,
+                'slug' => $a->property?->slug,
+                'city' => $a->property?->city,
+                'featured_image' => $a->property?->images[0] ?? null,
+            ],
+            'store' => [
+                'name' => $a->store?->name,
+                'slug' => $a->store?->slug,
+            ],
+        ]);
+    }
+
+    /**
+     * Update a rental agreement (sign or submit questions).
+     */
+    public function updateRentalAgreement(Request $request, int $id): JsonResponse
+    {
+        $agreement = RentalAgreement::query()
+            ->where('tenant_user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => ['sometimes', 'string', 'in:signed,negotiating'],
+            'tenant_questions' => ['sometimes', 'nullable', 'string'],
+        ]);
+
+        if (isset($validated['status']) && $validated['status'] === 'signed') {
+            $validated['signed_at'] = now();
+        }
+
+        $agreement->update($validated);
+
+        return response()->json(['message' => 'Rental agreement updated successfully.', 'agreement' => $agreement]);
     }
 
     /**
