@@ -123,6 +123,10 @@ const publishedAgo = computed(() => {
   return months === 1 ? "1 month ago" : `${months} months ago`;
 });
 
+const isRental = computed(
+  () => property.value?.store?.sector_template === "rental",
+);
+
 async function submitInquiry() {
   inquiryError.value = null;
   inquirySubmitting.value = true;
@@ -390,7 +394,7 @@ function copyLink() {
 
               <!-- Development badge -->
               <p
-                v-if="property.development"
+                v-if="!isRental && property.development"
                 class="flex items-center gap-1.5 text-sm text-slate-500"
               >
                 <BuildingOffice2Icon class="size-4 shrink-0 text-indigo-400" />
@@ -430,7 +434,7 @@ function copyLink() {
 
             <!-- Pag-IBIG monthly estimate -->
             <div
-              v-if="monthlyEstimate"
+              v-if="!isRental && monthlyEstimate"
               class="flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm shadow-sm"
             >
               <span class="text-base">🏦</span>
@@ -827,11 +831,11 @@ function copyLink() {
 
           <!-- RIGHT: Sticky sidebar ──────────────────────────────────── -->
           <div class="space-y-4 lg:sticky lg:top-24 self-start">
-            <!-- Agent / Inquiry Card -->
+            <!-- Agent / Landlord Inquiry Card -->
             <div
               class="rounded-3xl border border-slate-100 bg-white p-7 shadow-2xl shadow-slate-200/50"
             >
-              <!-- Agent Header -->
+              <!-- Agent / Landlord Header -->
               <div
                 v-if="property.store"
                 class="mb-6 border-b border-slate-100 pb-6"
@@ -918,7 +922,11 @@ function copyLink() {
                     Inquiry sent successfully!
                   </p>
                   <p class="text-xs text-slate-500">
-                    The agent will be in touch with you shortly.
+                    {{
+                      isRental
+                        ? "The landlord will be in touch with you shortly."
+                        : "The agent will be in touch with you shortly."
+                    }}
                   </p>
                   <button
                     class="mt-2 text-xs font-semibold text-[#059669] hover:underline"

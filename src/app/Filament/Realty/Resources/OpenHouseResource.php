@@ -6,6 +6,7 @@ use App\Filament\Realty\Resources\OpenHouseResource\Pages;
 use App\Filament\Realty\Resources\OpenHouseResource\RelationManagers;
 use App\Models\OpenHouse;
 use App\Models\Property;
+use App\SectorTemplate;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,6 +17,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class OpenHouseResource extends Resource
 {
+    /**
+     * Rental stores do not manage open houses.
+     */
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->getStoreForPanel()?->template() !== SectorTemplate::Rental;
+    }
+
     protected static ?string $model = OpenHouse::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';

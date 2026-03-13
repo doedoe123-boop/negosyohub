@@ -108,6 +108,7 @@ class PropertyResource extends Resource
                                     ->description('Link this property to a development project (optional).')
                                     ->collapsible()
                                     ->collapsed()
+                                    ->visible(fn (): bool => auth()->user()?->getStoreForPanel()?->template() !== SectorTemplate::Rental)
                                     ->schema([
                                         Forms\Components\Select::make('development_id')
                                             ->label('Development')

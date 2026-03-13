@@ -2,6 +2,7 @@
 
 namespace App\Filament\Realty\Pages;
 
+use App\SectorTemplate;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -19,12 +20,25 @@ class AgentProfile extends Page implements HasForms
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $title = 'Agent Profile';
-
     protected static string $view = 'filament.realty.pages.agent-profile';
 
     /** @var array<string, mixed> */
     public ?array $data = [];
+
+    public static function getNavigationLabel(): string
+    {
+        return self::isRentalStore() ? 'Landlord Profile' : 'Agent Profile';
+    }
+
+    public function getTitle(): string
+    {
+        return self::isRentalStore() ? 'Landlord Profile' : 'Agent Profile';
+    }
+
+    private static function isRentalStore(): bool
+    {
+        return auth()->user()?->getStoreForPanel()?->template() === SectorTemplate::Rental;
+    }
 
     public function mount(): void
     {
@@ -42,16 +56,20 @@ class AgentProfile extends Page implements HasForms
 
     public function form(Form $form): Form
     {
+        $isRental = self::isRentalStore();
+
         return $form
             ->schema([
                 Forms\Components\Section::make('Personal Information')
-                    ->description('Your public-facing agent profile.')
+                    ->description($isRental ? 'Your public-facing landlord profile.' : 'Your public-facing agent profile.')
                     ->schema([
                         Forms\Components\Textarea::make('agent_bio')
                             ->label('Bio / About Me')
                             ->rows(4)
                             ->maxLength(2000)
-                            ->placeholder('Tell potential clients about yourself, your experience, and what makes you different...')
+                            ->placeholder($isRental
+                                ? 'Tell potential tenants about yourself and your rental properties...'
+                                : 'Tell potential clients about yourself, your experience, and what makes you different...')
                             ->columnSpanFull(),
 
                         Forms\Components\FileUpload::make('agent_photo')
@@ -67,42 +85,64 @@ class AgentProfile extends Page implements HasForms
                         Forms\Components\TextInput::make('prc_license_number')
                             ->label('PRC License Number')
                             ->maxLength(50)
-                            ->placeholder('e.g. 0012345'),
+                            ->placeholder('e.g. 0012345')
+                            ->visible(! $isRental),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Expertise')
                     ->schema([
                         Forms\Components\TagsInput::make('agent_certifications')
-                            ->label('Certifications & Licenses')
-                            ->placeholder('Add certification...')
-                            ->suggestions([
-                                'Licensed Real Estate Broker',
-                                'Licensed Real Estate Appraiser',
-                                'Licensed Real Estate Consultant',
-                                'Certified International Property Specialist (CIPS)',
-                                'Accredited Buyer Representative (ABR)',
-                                'Seller Representative Specialist (SRS)',
-                                'Real Estate Negotiation Expert (RENE)',
-                                'DHSUD Accredited Broker',
-                            ]),
+                            ->label($isRental ? 'Credentials' : 'Certifications & Licenses')
+                            ->placeholder($isRental ? 'Add credential...' : 'Add certification...')
+                            ->suggestions($isRental
+                                ? [
+                                    'Verified Property Owner',
+                                    'DHSUD Registered Landlord',
+                                    'Barangay Business Permit Holder',
+                                    'BIR Registered Lessor',
+                                    'Accredited Boarding House Operator',
+                                ]
+                                : [
+                                    'Licensed Real Estate Broker',
+                                    'Licensed Real Estate Appraiser',
+                                    'Licensed Real Estate Consultant',
+                                    'Certified International Property Specialist (CIPS)',
+                                    'Accredited Buyer Representative (ABR)',
+                                    'Seller Representative Specialist (SRS)',
+                                    'Real Estate Negotiation Expert (RENE)',
+                                    'DHSUD Accredited Broker',
+                                ]),
 
                         Forms\Components\TagsInput::make('agent_specializations')
                             ->label('Specializations')
                             ->placeholder('Add specialization...')
-                            ->suggestions([
-                                'Residential Sales',
-                                'Commercial Leasing',
-                                'Luxury Properties',
-                                'Condominiums',
-                                'Land & Lots',
-                                'Industrial Properties',
-                                'Pre-Selling Projects',
-                                'Foreclosed Properties',
-                                'Vacation Homes',
-                                'Property Management',
-                                'Investment Consulting',
-                                'Relocation Services',
-                            ]),
+                            ->suggestions($isRental
+                                ? [
+                                    'Apartment Rentals',
+                                    'Room Rentals / Bedspacer',
+                                    'Condo Leasing',
+                                    'Boarding Houses',
+                                    'Commercial Space Leasing',
+                                    'Dormitory / Student Housing',
+                                    'Short-Term Rentals',
+                                    'Long-Term Leasing',
+                                    'Furnished Rentals',
+                                    'Pet-Friendly Rentals',
+                                ]
+                                : [
+                                    'Residential Sales',
+                                    'Commercial Leasing',
+                                    'Luxury Properties',
+                                    'Condominiums',
+                                    'Land & Lots',
+                                    'Industrial Properties',
+                                    'Pre-Selling Projects',
+                                    'Foreclosed Properties',
+                                    'Vacation Homes',
+                                    'Property Management',
+                                    'Investment Consulting',
+                                    'Relocation Services',
+                                ]),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Social Media Links')

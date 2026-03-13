@@ -92,6 +92,7 @@ class PropertyDetailResource extends JsonResource
                 'agent_photo_url' => $this->store->agent_photo_url,
                 'agent_bio' => $this->store->agent_bio,
                 'phone' => $this->store->phone,
+                'sector_template' => $this->store->sector_template,
             ]),
         ];
     }

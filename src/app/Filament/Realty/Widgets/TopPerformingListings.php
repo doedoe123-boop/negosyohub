@@ -3,6 +3,7 @@
 namespace App\Filament\Realty\Widgets;
 
 use App\Models\PropertyAnalytic;
+use App\SectorTemplate;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -10,6 +11,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TopPerformingListings extends BaseWidget
 {
+    /**
+     * Property analytics are not available for rental stores.
+     */
+    public static function canView(): bool
+    {
+        return auth()->user()?->getStoreForPanel()?->template() !== SectorTemplate::Rental;
+    }
+
     protected static ?string $heading = 'Top Performing Listings (30 Days)';
 
     protected static ?int $sort = 7;

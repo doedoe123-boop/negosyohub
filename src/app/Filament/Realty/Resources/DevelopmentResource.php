@@ -5,6 +5,7 @@ namespace App\Filament\Realty\Resources;
 use App\Filament\Realty\Resources\DevelopmentResource\Pages;
 use App\Filament\Realty\Resources\DevelopmentResource\RelationManagers;
 use App\Models\Development;
+use App\SectorTemplate;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
@@ -17,6 +18,14 @@ use Illuminate\Support\Str;
 
 class DevelopmentResource extends Resource
 {
+    /**
+     * Rental stores do not manage developments.
+     */
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->getStoreForPanel()?->template() !== SectorTemplate::Rental;
+    }
+
     protected static ?string $model = Development::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';

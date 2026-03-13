@@ -2,6 +2,7 @@
 
 namespace App\Filament\Realty\Pages;
 
+use App\SectorTemplate;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -11,6 +12,14 @@ use Filament\Pages\Page;
 
 class MortgageSettings extends Page implements HasForms
 {
+    /**
+     * Rental stores do not use the mortgage calculator.
+     */
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->getStoreForPanel()?->template() !== SectorTemplate::Rental;
+    }
+
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
