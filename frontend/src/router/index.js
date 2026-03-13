@@ -171,6 +171,11 @@ const routes = [
             name: "account.settings",
             component: () => import("@/pages/account/SettingsPage.vue"),
           },
+          {
+            path: "help",
+            name: "account.help",
+            component: () => import("@/pages/account/HelpPage.vue"),
+          },
           // ─── Moving bookings ────────────────────────────────────────
           {
             path: "moving",

@@ -11,6 +11,7 @@ import {
   Cog6ToothIcon,
   TruckIcon,
   DocumentTextIcon,
+  LifebuoyIcon,
 } from "@heroicons/vue/24/outline";
 import { useAuthStore } from "@/stores/auth";
 
@@ -31,6 +32,7 @@ const navItems = [
   },
   { label: "Profile", to: "/account/profile", icon: UserCircleIcon },
   { label: "Password", to: "/account/password", icon: KeyIcon },
+  { label: "Help & Support", to: "/account/help", icon: LifebuoyIcon },
   { label: "Settings", to: "/account/settings", icon: Cog6ToothIcon },
 ];
 

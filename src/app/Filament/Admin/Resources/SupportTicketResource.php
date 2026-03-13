@@ -59,6 +59,15 @@ class SupportTicketResource extends Resource
                             ->preload()
                             ->required()
                             ->disabled(fn (?SupportTicket $record): bool => $record !== null),
+                        Forms\Components\Select::make('sector')
+                            ->options([
+                                'ecommerce' => 'E-Commerce',
+                                'real_estate' => 'Real Estate',
+                                'paupahan' => 'Paupahan (Rentals)',
+                                'lipat_bahay' => 'Lipat Bahay (Movers)',
+                            ])
+                            ->live()
+                            ->placeholder('Global / General'),
                         Forms\Components\Select::make('store_id')
                             ->label('Related Store')
                             ->relationship('store', 'name')
@@ -78,7 +87,7 @@ class SupportTicketResource extends Resource
                 Forms\Components\Section::make('Classification')
                     ->schema([
                         Forms\Components\Select::make('category')
-                            ->options(collect(TicketCategory::cases())->mapWithKeys(
+                            ->options(fn (Forms\Get $get) => collect(TicketCategory::forSector($get('sector')))->mapWithKeys(
                                 fn (TicketCategory $cat) => [$cat->value => $cat->label()]
                             ))
                             ->required(),
@@ -166,7 +175,18 @@ class SupportTicketResource extends Resource
                         Infolists\Components\TextEntry::make('store.name')
                             ->label('Related Store')
                             ->default('—'),
-                    ])->columns(3),
+                        Infolists\Components\TextEntry::make('sector')
+                            ->label('Sector')
+                            ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                'ecommerce' => 'E-Commerce',
+                                'real_estate' => 'Real Estate',
+                                'paupahan' => 'Paupahan (Rentals)',
+                                'lipat_bahay' => 'Lipat Bahay (Movers)',
+                                default => 'Global / General',
+                            })
+                            ->badge()
+                            ->color('info'),
+                    ])->columns(4),
                 Infolists\Components\Section::make('Admin Notes')
                     ->schema([
                         Infolists\Components\TextEntry::make('admin_notes')
@@ -204,6 +224,18 @@ class SupportTicketResource extends Resource
                     ->label('Submitted By')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('sector')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'ecommerce' => 'E-Commerce',
+                        'real_estate' => 'Real Estate',
+                        'paupahan' => 'Paupahan (Rentals)',
+                        'lipat_bahay' => 'Lipat Bahay (Movers)',
+                        default => '—',
+                    })
+                    ->color('info')
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('category')
                     ->badge()
                     ->formatStateUsing(fn (TicketCategory $state): string => $state->label())
@@ -251,6 +283,13 @@ class SupportTicketResource extends Resource
                     ->options(collect(TicketCategory::cases())->mapWithKeys(
                         fn (TicketCategory $c) => [$c->value => $c->label()]
                     )),
+                Tables\Filters\SelectFilter::make('sector')
+                    ->options([
+                        'ecommerce' => 'E-Commerce',
+                        'real_estate' => 'Real Estate',
+                        'paupahan' => 'Paupahan (Rentals)',
+                        'lipat_bahay' => 'Lipat Bahay (Movers)',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
