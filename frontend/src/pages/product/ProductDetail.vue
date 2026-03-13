@@ -98,9 +98,11 @@ async function addToCart() {
   setTimeout(() => (addedToCart.value = false), 2500);
 }
 
-function buyNow() {
+async function buyNow() {
   if (!requireAuth()) return;
   if (!selectedVariantId.value || !inStock.value) return;
+  await cart.addItem("product-variant", selectedVariantId.value, quantity.value);
+  cart.closeDrawer();
   router.push({ name: "checkout.index" });
 }
 </script>
