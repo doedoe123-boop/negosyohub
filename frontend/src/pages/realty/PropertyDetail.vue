@@ -20,14 +20,18 @@ import {
   BuildingOffice2Icon,
   StarIcon,
   MapIcon,
+  HeartIcon,
+  ChatBubbleLeftIcon,
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/vue/24/solid";
 import { propertiesApi } from "@/api/properties";
 import { reviewsApi } from "@/api/reviews";
+import { useAuthStore } from "@/stores/auth";
 import PhotoLightbox from "@/components/PhotoLightbox.vue";
 import ReviewForm from "@/components/ReviewForm.vue";
 
 const route = useRoute();
+const auth = useAuthStore();
 const property = ref(null);
 const loading = ref(true);
 const error = ref(null);
@@ -46,6 +50,18 @@ const inquiry = ref({ name: "", email: "", phone: "", message: "" });
 const inquirySubmitting = ref(false);
 const inquirySuccess = ref(false);
 const inquiryError = ref(null);
+const quickMessage = ref("");
+const showQuickMessage = ref(false);
+const inquirySuccessMessage = ref("");
+const hasInquired = ref(false);
+
+const defaultMessage = computed(() => {
+  if (!property.value || !auth.user) return "";
+  const name = auth.user.name;
+  const contactName =
+    property.value.store?.agent_name || (isRental.value ? "landlord" : "agent");
+  return `Hi ${contactName}, I'm ${name} and I'm interested in your listing "${property.value.title}". I'd love to schedule a viewing or learn more about this property. Looking forward to hearing from you!`;
+});
 
 const listingBadgeClass = {
   for_sale: "bg-emerald-100 text-emerald-700 ring-emerald-200",
@@ -59,6 +75,9 @@ onMounted(async () => {
     const { data } = await propertiesApi.show(route.params.slug);
     // JsonResource wraps in { data: { ... } }
     property.value = data.data ?? data;
+    if (property.value.has_inquired) {
+      hasInquired.value = true;
+    }
   } catch (e) {
     error.value =
       e.response?.status === 404
@@ -144,9 +163,32 @@ async function submitInquiry() {
   try {
     await propertiesApi.submitInquiry(route.params.slug, inquiry.value);
     inquirySuccess.value = true;
+    inquirySuccessMessage.value = isRental.value
+      ? "The landlord will be in touch with you shortly."
+      : "The agent will be in touch with you shortly.";
     inquiry.value = { name: "", email: "", phone: "", message: "" };
   } catch {
     inquiryError.value = "Failed to send inquiry. Please try again.";
+  } finally {
+    inquirySubmitting.value = false;
+  }
+}
+
+async function submitQuickInquiry() {
+  inquiryError.value = null;
+  inquirySubmitting.value = true;
+  try {
+    const { data } = await propertiesApi.quickInquiry(route.params.slug, {
+      message: quickMessage.value || null,
+    });
+    inquirySuccess.value = true;
+    inquirySuccessMessage.value =
+      data.message ?? "Your interest has been sent!";
+    quickMessage.value = "";
+    showQuickMessage.value = false;
+    hasInquired.value = true;
+  } catch {
+    inquiryError.value = "Failed to send your interest. Please try again.";
   } finally {
     inquirySubmitting.value = false;
   }
@@ -1108,11 +1150,9 @@ async function submitPropertyReview(payload) {
                 </a>
               </div>
 
-              <!-- Inquiry Form -->
+              <!-- Inquiry Section -->
               <div class="flex flex-col gap-4">
-                <h3 class="font-bold text-[#0F2044]">Send an Inquiry</h3>
-
-                <!-- Success -->
+                <!-- Success (shared by both flows) -->
                 <div
                   v-if="inquirySuccess"
                   class="flex flex-col items-center gap-2 rounded-2xl bg-[#059669]/10 p-6 text-center ring-1 ring-[#059669]/20"
@@ -1122,50 +1162,79 @@ async function submitPropertyReview(payload) {
                     Inquiry sent successfully!
                   </p>
                   <p class="text-xs text-slate-500">
-                    {{
-                      isRental
-                        ? "The landlord will be in touch with you shortly."
-                        : "The agent will be in touch with you shortly."
-                    }}
+                    {{ inquirySuccessMessage }}
                   </p>
                   <button
                     class="mt-2 text-xs font-semibold text-[#059669] hover:underline"
                     @click="inquirySuccess = false"
                   >
-                    Send another message
+                    Send another inquiry
                   </button>
                 </div>
 
-                <!-- Form -->
-                <form
-                  v-else
-                  class="flex flex-col gap-3"
-                  @submit.prevent="submitInquiry"
-                >
-                  <input
-                    v-model="inquiry.name"
-                    required
-                    type="text"
-                    placeholder="Full Name *"
-                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
-                  />
-                  <input
-                    v-model="inquiry.email"
-                    required
-                    type="email"
-                    placeholder="Email Address *"
-                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
-                  />
-                  <input
-                    v-model="inquiry.phone"
-                    type="tel"
-                    placeholder="Phone Number"
-                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
-                  />
+                <!-- Quick Inquiry (logged-in users) -->
+                <template v-else-if="auth.isLoggedIn">
+                  <h3 class="font-bold text-[#0F2044]">Interested?</h3>
+
+                  <!-- Already-inquired label -->
+                  <div
+                    v-if="hasInquired"
+                    class="flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-xs font-medium text-amber-700 ring-1 ring-amber-200"
+                  >
+                    <CheckCircleIcon class="size-4 shrink-0" />
+                    You've already sent an inquiry for this listing.
+                  </div>
+
+                  <p class="text-xs text-slate-500">
+                    Express your interest instantly — your contact details will
+                    be shared with the
+                    {{ isRental ? "landlord" : "agent" }} automatically.
+                  </p>
+
+                  <div
+                    class="flex items-center gap-3 rounded-xl bg-slate-50 p-3"
+                  >
+                    <div
+                      class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700"
+                    >
+                      {{ auth.user?.name?.charAt(0)?.toUpperCase() }}
+                    </div>
+                    <div class="min-w-0 text-sm">
+                      <p class="truncate font-medium text-slate-800">
+                        {{ auth.user?.name }}
+                      </p>
+                      <p class="truncate text-xs text-slate-500">
+                        {{ auth.user?.email }}
+                        <span v-if="auth.user?.phone">
+                          · {{ auth.user?.phone }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Auto-generated message preview -->
+                  <div
+                    v-if="!showQuickMessage"
+                    class="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500 italic"
+                  >
+                    "{{ defaultMessage }}"
+                  </div>
+
+                  <!-- Custom message toggle -->
+                  <button
+                    v-if="!showQuickMessage"
+                    type="button"
+                    class="flex items-center gap-1.5 self-start text-xs font-medium text-slate-500 transition-colors hover:text-slate-700"
+                    @click="showQuickMessage = true"
+                  >
+                    <ChatBubbleLeftIcon class="size-3.5" />
+                    Write your own message instead
+                  </button>
                   <textarea
-                    v-model="inquiry.message"
-                    rows="3"
-                    placeholder="I'm interested in this property. Please contact me for a viewing."
+                    v-if="showQuickMessage"
+                    v-model="quickMessage"
+                    rows="2"
+                    placeholder="I'd like to schedule a viewing…"
                     class="w-full resize-none rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
                   />
 
@@ -1178,9 +1247,10 @@ async function submitPropertyReview(payload) {
                   </div>
 
                   <button
-                    type="submit"
+                    type="button"
                     :disabled="inquirySubmitting"
-                    class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#059669] py-4 text-sm font-bold text-white shadow-lg shadow-[#059669]/25 transition-all hover:bg-[#047857] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#059669] py-4 text-sm font-bold text-white shadow-lg shadow-[#059669]/25 transition-all hover:bg-[#047857] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                    @click="submitQuickInquiry"
                   >
                     <span
                       v-if="inquirySubmitting"
@@ -1207,16 +1277,114 @@ async function submitPropertyReview(payload) {
                       </svg>
                       Sending…
                     </span>
-                    <span v-else>Submit Inquiry</span>
+                    <template v-else>
+                      <HeartIcon class="size-4.5" />
+                      I'm Interested
+                    </template>
                   </button>
 
                   <p
-                    class="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium"
+                    class="flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400"
                   >
                     <LockClosedIcon class="size-3.5 shrink-0" />
                     Your data is protected and never shared.
                   </p>
-                </form>
+                </template>
+
+                <!-- Manual Inquiry Form (guests) -->
+                <template v-else>
+                  <h3 class="font-bold text-[#0F2044]">Send an Inquiry</h3>
+
+                  <form
+                    class="flex flex-col gap-3"
+                    @submit.prevent="submitInquiry"
+                  >
+                    <input
+                      v-model="inquiry.name"
+                      required
+                      type="text"
+                      placeholder="Full Name *"
+                      class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
+                    />
+                    <input
+                      v-model="inquiry.email"
+                      required
+                      type="email"
+                      placeholder="Email Address *"
+                      class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
+                    />
+                    <input
+                      v-model="inquiry.phone"
+                      type="tel"
+                      placeholder="Phone Number"
+                      class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
+                    />
+                    <textarea
+                      v-model="inquiry.message"
+                      rows="3"
+                      placeholder="I'm interested in this property. Please contact me for a viewing."
+                      class="w-full resize-none rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20"
+                    />
+
+                    <div
+                      v-if="inquiryError"
+                      class="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-600 ring-1 ring-red-100"
+                    >
+                      <ExclamationCircleIcon class="size-4 shrink-0" />
+                      {{ inquiryError }}
+                    </div>
+
+                    <button
+                      type="submit"
+                      :disabled="inquirySubmitting"
+                      class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#059669] py-4 text-sm font-bold text-white shadow-lg shadow-[#059669]/25 transition-all hover:bg-[#047857] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                    >
+                      <span
+                        v-if="inquirySubmitting"
+                        class="flex items-center gap-2"
+                      >
+                        <svg
+                          class="size-5 animate-spin text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                          ></circle>
+                          <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Sending…
+                      </span>
+                      <span v-else>Submit Inquiry</span>
+                    </button>
+
+                    <p
+                      class="mt-2 flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400"
+                    >
+                      <LockClosedIcon class="size-3.5 shrink-0" />
+                      Your data is protected and never shared.
+                    </p>
+                  </form>
+
+                  <p class="text-center text-xs text-slate-400">
+                    <RouterLink
+                      to="/login"
+                      class="font-semibold text-brand-600 hover:underline"
+                    >
+                      Log in
+                    </RouterLink>
+                    to inquire instantly with one click.
+                  </p>
+                </template>
               </div>
             </div>
 

@@ -3,11 +3,13 @@ import { RouterView, RouterLink, useRoute } from "vue-router";
 import {
   HomeIcon,
   ShoppingBagIcon,
+  HeartIcon,
   MapPinIcon,
   CreditCardIcon,
   UserCircleIcon,
   KeyIcon,
   Cog6ToothIcon,
+  TruckIcon,
 } from "@heroicons/vue/24/outline";
 import { useAuthStore } from "@/stores/auth";
 
@@ -17,6 +19,8 @@ const route = useRoute();
 const navItems = [
   { label: "Overview", to: "/account", icon: HomeIcon, exact: true },
   { label: "My Orders", to: "/account/orders", icon: ShoppingBagIcon },
+  { label: "My Inquiries", to: "/account/inquiries", icon: HeartIcon },
+  { label: "Moving", to: "/account/moving", icon: TruckIcon },
   { label: "Addresses", to: "/account/addresses", icon: MapPinIcon },
   {
     label: "Payment Methods",

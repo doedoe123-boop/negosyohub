@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Api\V1;
 
 use App\Models\Property;
+use App\Models\PropertyInquiry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -113,6 +114,15 @@ class PropertyDetailResource extends JsonResource
                 'phone' => $this->store->phone,
                 'sector_template' => $this->store->sector_template,
             ]),
+
+            // Inquiry awareness (authenticated users only)
+            'has_inquired' => $this->when(
+                $request->user() !== null,
+                fn () => PropertyInquiry::query()
+                    ->where('property_id', $this->id)
+                    ->where('user_id', $request->user()->id)
+                    ->exists(),
+            ),
         ];
     }
 }

@@ -29,6 +29,16 @@ export const propertiesApi = {
   },
 
   /**
+   * Submit a quick inquiry using the authenticated user's details.
+   *
+   * @param {string} slug
+   * @param {{ message?: string }} payload
+   */
+  quickInquiry(slug, payload = {}) {
+    return client.post(`/api/v1/properties/${slug}/quick-inquiry`, payload);
+  },
+
+  /**
    * List upcoming open house events for a property.
    *
    * @param {string} slug

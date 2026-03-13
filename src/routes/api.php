@@ -84,7 +84,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     });
 
     // ── Authenticated customer endpoints ──────────────────────────────────────────────
-    Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    Route::middleware(['auth:sanctum', 'throttle:180,1'])->group(function () {
         // Auth
         Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
         Route::get('/user', [AuthController::class, 'user'])->name('auth.user');
@@ -94,6 +94,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::patch('/user/password', [UserController::class, 'changePassword'])->name('user.password');
         Route::patch('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings');
         Route::delete('/user', [UserController::class, 'destroy'])->name('user.destroy');
+
+        // User inquiries (cross-sector dashboard)
+        Route::get('/user/inquiries', [UserController::class, 'inquiries'])->name('user.inquiries');
+
+        // User notifications
+        Route::get('/user/notifications', [UserController::class, 'notifications'])->name('user.notifications');
+        Route::patch('/user/notifications/{id}/read', [UserController::class, 'markNotificationRead'])->name('user.notifications.read');
+        Route::post('/user/notifications/read-all', [UserController::class, 'markAllNotificationsRead'])->name('user.notifications.readAll');
 
         // Delivery addresses
         Route::get('/user/addresses', [AddressController::class, 'index'])->name('addresses.index');
@@ -154,6 +162,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             // Product & property reviews
             Route::post('/products/{product}/reviews', [ReviewController::class, 'productStore'])->name('products.reviews.store');
             Route::post('/properties/{property:slug}/reviews', [ReviewController::class, 'propertyStore'])->name('properties.reviews.store');
+        });
+
+        // Quick inquiry — own bucket so dashboard page-loads don't eat the limit
+        Route::middleware('throttle:5,1,quick-inquiry')->group(function () {
+            Route::post('/properties/{property:slug}/quick-inquiry', [PropertyController::class, 'quickInquiry'])->name('properties.quick-inquiry');
         });
         Route::middleware('throttle:30,1')->group(function () {
             Route::patch('/moving-bookings/{movingBooking}/status', [MovingBookingController::class, 'updateStatus'])->name('moving-bookings.status');

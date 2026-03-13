@@ -7,6 +7,7 @@ use App\Models\OpenHouse;
 use App\Models\Property;
 use App\Models\PropertyInquiry;
 use App\Models\Store;
+use App\Models\User;
 use App\PropertyStatus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -180,6 +181,42 @@ class PropertyService
             'source' => $data['source'] ?? 'website',
             'status' => InquiryStatus::New,
         ]);
+    }
+
+    /**
+     * Submit a quick inquiry from an authenticated user.
+     *
+     * Pulls the user's name, email, and phone automatically.
+     * Generates a friendly default message when none is provided.
+     */
+    public function submitQuickInquiry(Property $property, User $user, ?string $message = null): PropertyInquiry
+    {
+        abort_if($property->status !== PropertyStatus::Active, 404);
+
+        $message ??= $this->generateDefaultMessage($property, $user);
+
+        return PropertyInquiry::create([
+            'property_id' => $property->id,
+            'store_id' => $property->store_id,
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'message' => $message,
+            'source' => 'website',
+            'status' => InquiryStatus::New,
+        ]);
+    }
+
+    /**
+     * Build a friendly default inquiry message.
+     */
+    private function generateDefaultMessage(Property $property, User $user): string
+    {
+        $recipientLabel = $property->store?->isPaupahan() ? 'landlord' : 'agent';
+        $contactName = $property->store?->agent_name ?? $recipientLabel;
+
+        return "Hi {$contactName}, I'm {$user->name} and I'm interested in your listing \"{$property->title}\". I'd love to schedule a viewing or learn more about this property. Looking forward to hearing from you!";
     }
 
     /**

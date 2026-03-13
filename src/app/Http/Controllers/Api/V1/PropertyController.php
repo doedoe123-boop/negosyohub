@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\QuickInquiryRequest;
 use App\Http\Requests\Api\V1\SubmitInquiryRequest;
 use App\Http\Resources\Api\V1\PropertyDetailResource;
 use App\Http\Resources\Api\V1\PropertyResource;
@@ -70,6 +71,23 @@ class PropertyController extends Controller
 
         return response()->json([
             'message' => 'Your inquiry has been submitted. We will get back to you shortly.',
+            'id' => $inquiry->id,
+        ], 201);
+    }
+
+    /**
+     * Submit a quick inquiry using the authenticated user's details.
+     */
+    public function quickInquiry(QuickInquiryRequest $request, Property $property): JsonResponse
+    {
+        $inquiry = $this->propertyService->submitQuickInquiry(
+            $property,
+            $request->user(),
+            $request->validated('message'),
+        );
+
+        return response()->json([
+            'message' => 'Your interest has been sent to the '.($property->store?->isPaupahan() ? 'landlord' : 'agent').'.',
             'id' => $inquiry->id,
         ], 201);
     }
