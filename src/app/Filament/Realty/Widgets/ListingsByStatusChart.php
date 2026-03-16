@@ -10,7 +10,7 @@ class ListingsByStatusChart extends ChartWidget
 {
     protected static ?string $heading = 'Listings by Status';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 4;
 
     protected static ?string $maxHeight = '280px';
 

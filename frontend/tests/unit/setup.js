@@ -48,6 +48,16 @@ vi.mock("@heroicons/vue/24/outline", () => {
     UserCircleIcon: s,
     XMarkIcon: s,
     ExclamationTriangleIcon: s,
+    // Added for dashboard / inquiry / notification features
+    BellIcon: s,
+    BellAlertIcon: s,
+    DocumentTextIcon: s,
+    HeartIcon: s,
+    PhotoIcon: s,
+    LockClosedIcon: s,
+    InformationCircleIcon: s,
+    CheckBadgeIcon: s,
+    LifebuoyIcon: s,
   };
 });
 

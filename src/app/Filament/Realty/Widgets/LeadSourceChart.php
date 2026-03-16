@@ -10,7 +10,7 @@ class LeadSourceChart extends ChartWidget
 {
     protected static ?string $heading = 'Inquiries by Lead Source';
 
-    protected static ?int $sort = 8;
+    protected static ?int $sort = 5;
 
     protected static ?string $maxHeight = '280px';
 

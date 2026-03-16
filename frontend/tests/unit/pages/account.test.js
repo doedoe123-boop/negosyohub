@@ -56,9 +56,25 @@ vi.mock("@/api/paymentMethods", () => ({
   },
 }));
 
+vi.mock("@/api/inquiries", () => ({
+  inquiriesApi: { list: vi.fn() },
+}));
+
+vi.mock("@/api/movingBookings", () => ({
+  movingBookingsApi: { list: vi.fn(), show: vi.fn(), cancel: vi.fn() },
+}));
+
+vi.mock("@/api/notifications", () => ({
+  notificationsApi: { list: vi.fn(), markRead: vi.fn(), markAllRead: vi.fn() },
+}));
+
 vi.mock("@/api/cart", () => ({
   cartApi: {
-    get: vi.fn().mockResolvedValue({ data: { lines: [], total: { formatted: "₱0.00", value: 0 }, meta: {} } }),
+    get: vi
+      .fn()
+      .mockResolvedValue({
+        data: { lines: [], total: { formatted: "₱0.00", value: 0 }, meta: {} },
+      }),
     addItem: vi.fn(),
     updateItem: vi.fn(),
     removeItem: vi.fn(),
@@ -100,6 +116,56 @@ const mockOrders = [
   },
 ];
 
+const mockInquiries = [
+  {
+    id: 10,
+    status: "new",
+    status_label: "New",
+    property: {
+      title: "Sunset Villa",
+      slug: "sunset-villa",
+      city: "Makati",
+      featured_image: null,
+    },
+    store: { name: "Golden Gate Realty" },
+  },
+  {
+    id: 11,
+    status: "contacted",
+    status_label: "Contacted",
+    property: {
+      title: "Blue Ridge Condo",
+      slug: "blue-ridge-condo",
+      city: "BGC",
+      featured_image: "https://cdn.example.com/condo.jpg",
+    },
+    store: { name: "Metro Properties" },
+  },
+];
+
+const mockNotifications = [
+  {
+    id: "notif-uuid-1",
+    type: "InquiryStatusUpdatedNotification",
+    data: {
+      title: "Inquiry Update",
+      body: "Agent contacted you about Sunset Villa.",
+    },
+    read_at: null,
+    created_at: "2026-03-10T10:00:00.000Z",
+  },
+];
+
+const mockBookings = [
+  {
+    id: 42,
+    status: "confirmed",
+    moving_date: "2026-04-01",
+    mover_name: "FastMove Logistics",
+    store: null,
+  },
+];
+
 const mockAddresses = [
   {
     id: 1,
@@ -126,8 +192,22 @@ const mockAddresses = [
 ];
 
 const mockPaymentMethods = [
-  { id: 1, brand: "visa", last4: "4242", exp_month: 12, exp_year: 2027, is_default: true },
-  { id: 2, brand: "mastercard", last4: "5555", exp_month: 6, exp_year: 2026, is_default: false },
+  {
+    id: 1,
+    brand: "visa",
+    last4: "4242",
+    exp_month: 12,
+    exp_year: 2027,
+    is_default: true,
+  },
+  {
+    id: 2,
+    brand: "mastercard",
+    last4: "5555",
+    exp_month: 6,
+    exp_year: 2026,
+    is_default: false,
+  },
 ];
 
 const mockOrderPending = {
@@ -155,16 +235,20 @@ function buildRouter(path = "/account") {
     history: createMemoryHistory(),
     routes: [
       { path: "/", component: { template: "<div />" } },
-      { path: "/account", component: AccountLayout, children: [
-        { path: "", component: AccountDashboard },
-        { path: "orders", component: OrdersPage },
-        { path: "orders/:id", component: OrderDetail },
-        { path: "profile", component: ProfilePage },
-        { path: "password", component: ChangePasswordPage },
-        { path: "addresses", component: AddressesPage },
-        { path: "payment-methods", component: PaymentMethodsPage },
-        { path: "settings", component: SettingsPage },
-      ]},
+      {
+        path: "/account",
+        component: AccountLayout,
+        children: [
+          { path: "", component: AccountDashboard },
+          { path: "orders", component: OrdersPage },
+          { path: "orders/:id", component: OrderDetail },
+          { path: "profile", component: ProfilePage },
+          { path: "password", component: ChangePasswordPage },
+          { path: "addresses", component: AddressesPage },
+          { path: "payment-methods", component: PaymentMethodsPage },
+          { path: "settings", component: SettingsPage },
+        ],
+      },
       { path: "/cart", component: { template: "<div />" } },
       { path: "/login", component: { template: "<div />" } },
     ],
@@ -194,11 +278,18 @@ function mountPage(Component, pinia, routePath = "/account", extraRoutes = []) {
       { path: "/account/addresses", component: { template: "<div />" } },
       { path: "/account/payment-methods", component: { template: "<div />" } },
       { path: "/account/settings", component: { template: "<div />" } },
+      { path: "/account/inquiries", component: { template: "<div />" } },
+      { path: "/account/agreements", component: { template: "<div />" } },
+      { path: "/account/moving", component: { template: "<div />" } },
+      { path: "/account/moving/:id", component: { template: "<div />" } },
       { path: "/cart", component: { template: "<div />" } },
       ...extraRoutes,
     ],
   });
-  return { wrapper: mount(Component, { global: { plugins: [pinia, router] } }), router };
+  return {
+    wrapper: mount(Component, { global: { plugins: [pinia, router] } }),
+    router,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -221,7 +312,9 @@ describe("AccountLayout sidebar", () => {
     const router = buildRouter("/account");
     await router.push("/account");
 
-    const wrapper = mount(AccountLayout, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(AccountLayout, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("Juan dela Cruz");
@@ -235,7 +328,9 @@ describe("AccountLayout sidebar", () => {
     const router = buildRouter();
     await router.push("/account");
 
-    const wrapper = mount(AccountLayout, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(AccountLayout, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("juan@example.com");
@@ -249,7 +344,9 @@ describe("AccountLayout sidebar", () => {
     const router = buildRouter();
     await router.push("/account");
 
-    const wrapper = mount(AccountLayout, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(AccountLayout, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("09171234567");
@@ -263,13 +360,21 @@ describe("AccountLayout sidebar", () => {
     const router = buildRouter();
     await router.push("/account");
 
-    const wrapper = mount(AccountLayout, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(AccountLayout, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     const text = wrapper.text();
-    ["Overview", "My Orders", "Addresses", "Payment Methods", "Profile", "Password", "Settings"].forEach(
-      (label) => expect(text).toContain(label),
-    );
+    [
+      "Overview",
+      "My Orders",
+      "Addresses",
+      "Payment Methods",
+      "Profile",
+      "Password",
+      "Settings",
+    ].forEach((label) => expect(text).toContain(label));
   });
 });
 
@@ -489,7 +594,9 @@ describe("Change Password page", () => {
     authApi.changePassword.mockRejectedValue({
       response: {
         status: 422,
-        data: { errors: { current_password: ["The current password is incorrect."] } },
+        data: {
+          errors: { current_password: ["The current password is incorrect."] },
+        },
       },
     });
 
@@ -683,7 +790,9 @@ describe("Payment Methods page", () => {
     const { wrapper } = mountPage(PaymentMethodsPage, pinia);
     await flushPromises();
 
-    const btn = wrapper.findAll("button").find((b) => b.text().includes("Set default"));
+    const btn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Set default"));
     expect(btn).toBeDefined();
   });
 
@@ -791,7 +900,9 @@ describe("Settings page", () => {
     activeWrapper = wrapper;
     await flushPromises();
 
-    const saveBtn = wrapper.findAll("button").find((b) => b.text().includes("Save Preferences"));
+    const saveBtn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Save Preferences"));
     await saveBtn.trigger("click");
     await flushPromises();
 
@@ -804,7 +915,9 @@ describe("Settings page", () => {
     activeWrapper = wrapper;
     await flushPromises();
 
-    const link = wrapper.findAll("a").find((a) => a.text().includes("Change Password"));
+    const link = wrapper
+      .findAll("a")
+      .find((a) => a.text().includes("Change Password"));
     expect(link).toBeDefined();
   });
 
@@ -814,7 +927,9 @@ describe("Settings page", () => {
     activeWrapper = wrapper;
     await flushPromises();
 
-    const btn = wrapper.findAll("button").find((b) => b.text().includes("Delete My Account"));
+    const btn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Delete My Account"));
     expect(btn).toBeDefined();
   });
 
@@ -824,7 +939,9 @@ describe("Settings page", () => {
     activeWrapper = wrapper;
     await flushPromises();
 
-    const btn = wrapper.findAll("button").find((b) => b.text().includes("Delete My Account"));
+    const btn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Delete My Account"));
     await btn.trigger("click");
     await flushPromises();
 
@@ -837,12 +954,14 @@ describe("Settings page", () => {
     activeWrapper = wrapper;
     await flushPromises();
 
-    const btn = wrapper.findAll("button").find((b) => b.text().includes("Delete My Account"));
+    const btn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Delete My Account"));
     await btn.trigger("click");
     await flushPromises();
 
-    const deleteBtn = Array.from(document.body.querySelectorAll("button")).find((b) =>
-      b.textContent.includes("Permanently Delete"),
+    const deleteBtn = Array.from(document.body.querySelectorAll("button")).find(
+      (b) => b.textContent.includes("Permanently Delete"),
     );
     expect(deleteBtn.disabled).toBe(true);
 
@@ -864,14 +983,16 @@ describe("Settings page", () => {
     activeWrapper = wrapper;
     await flushPromises();
 
-    const openBtn = wrapper.findAll("button").find((b) => b.text().includes("Delete My Account"));
+    const openBtn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Delete My Account"));
     await openBtn.trigger("click");
     await flushPromises();
 
     expect(document.body.textContent).toContain("Delete your account?");
 
-    const cancelBtn = Array.from(document.body.querySelectorAll("button")).find((b) =>
-      b.textContent.includes("Cancel"),
+    const cancelBtn = Array.from(document.body.querySelectorAll("button")).find(
+      (b) => b.textContent.includes("Cancel"),
     );
     await new DOMWrapper(cancelBtn).trigger("click");
     await flushPromises();
@@ -973,7 +1094,9 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-002");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("ORD-002");
@@ -993,7 +1116,9 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-002");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("Sinigang");
@@ -1014,7 +1139,9 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-002");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("pending");
@@ -1034,7 +1161,9 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-002");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("Order Placed");
@@ -1056,16 +1185,22 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-002");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
-    const cancelBtn = wrapper.findAll("button").find((b) => b.text().includes("Cancel Order"));
+    const cancelBtn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Cancel Order"));
     expect(cancelBtn).toBeDefined();
   });
 
   it("Cancel Order button is NOT visible for delivered orders", async () => {
     const { ordersApi } = await import("@/api/orders");
-    ordersApi.show.mockResolvedValue({ data: { ...mockOrderPending, status: "delivered" } });
+    ordersApi.show.mockResolvedValue({
+      data: { ...mockOrderPending, status: "delivered" },
+    });
 
     const router = createRouter({
       history: createMemoryHistory(),
@@ -1077,16 +1212,22 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-001");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
-    const cancelBtn = wrapper.findAll("button").find((b) => b.text().includes("Cancel Order"));
+    const cancelBtn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Cancel Order"));
     expect(cancelBtn).toBeUndefined();
   });
 
   it("shows cancelled banner for cancelled orders", async () => {
     const { ordersApi } = await import("@/api/orders");
-    ordersApi.show.mockResolvedValue({ data: { ...mockOrderPending, status: "cancelled" } });
+    ordersApi.show.mockResolvedValue({
+      data: { ...mockOrderPending, status: "cancelled" },
+    });
 
     const router = createRouter({
       history: createMemoryHistory(),
@@ -1098,7 +1239,9 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-003");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).toContain("This order was cancelled");
@@ -1106,7 +1249,9 @@ describe("Order Detail page", () => {
 
   it("hides timeline for cancelled orders", async () => {
     const { ordersApi } = await import("@/api/orders");
-    ordersApi.show.mockResolvedValue({ data: { ...mockOrderPending, status: "cancelled" } });
+    ordersApi.show.mockResolvedValue({
+      data: { ...mockOrderPending, status: "cancelled" },
+    });
 
     const router = createRouter({
       history: createMemoryHistory(),
@@ -1118,7 +1263,9 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-003");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
     expect(wrapper.text()).not.toContain("Order Placed");
@@ -1138,10 +1285,249 @@ describe("Order Detail page", () => {
     });
     await router.push("/account/orders/ORD-002");
 
-    const wrapper = mount(OrderDetail, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(OrderDetail, {
+      global: { plugins: [pinia, router] },
+    });
     await flushPromises();
 
-    const reorderBtn = wrapper.findAll("button").find((b) => b.text().includes("Reorder"));
+    const reorderBtn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Reorder"));
     expect(reorderBtn).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Helper: seed all 4 AccountDashboard API mocks
+// ---------------------------------------------------------------------------
+
+async function seedDashboardApis({
+  orders = [],
+  inquiries = [],
+  bookings = [],
+  notifications = [],
+  unreadCount = 0,
+} = {}) {
+  const { ordersApi } = await import("@/api/orders");
+  const { inquiriesApi } = await import("@/api/inquiries");
+  const { movingBookingsApi } = await import("@/api/movingBookings");
+  const { notificationsApi } = await import("@/api/notifications");
+
+  ordersApi.list.mockResolvedValue({ data: { data: orders } });
+  inquiriesApi.list.mockResolvedValue({ data: { data: inquiries } });
+  movingBookingsApi.list.mockResolvedValue({ data: { data: bookings } });
+  notificationsApi.list.mockResolvedValue({
+    data: { notifications, unread_count: unreadCount },
+  });
+
+  return { ordersApi, inquiriesApi, movingBookingsApi, notificationsApi };
+}
+
+// ---------------------------------------------------------------------------
+// Account Dashboard — notification banner
+// ---------------------------------------------------------------------------
+
+describe("Account Dashboard — notification banner", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    vi.clearAllMocks();
+  });
+
+  it("shows notification banner when notifications exist", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({
+      notifications: mockNotifications,
+      unreadCount: 1,
+    });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Notifications");
+    expect(wrapper.text()).toContain("Inquiry Update");
+    expect(wrapper.text()).toContain("Agent contacted you about Sunset Villa.");
+  });
+
+  it("shows unread count badge", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({
+      notifications: mockNotifications,
+      unreadCount: 1,
+    });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("1");
+  });
+
+  it("hides notification banner when no notifications", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({ notifications: [], unreadCount: 0 });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain("Dismiss all");
+  });
+
+  it("dismisses single notification and calls markRead", async () => {
+    seedAuth(pinia);
+    const { notificationsApi } = await seedDashboardApis({
+      notifications: mockNotifications,
+      unreadCount: 1,
+    });
+    notificationsApi.markRead.mockResolvedValue({});
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    const dismissBtn = wrapper
+      .findAll("button")
+      .find(
+        (b) =>
+          b.attributes("aria-label") === "Dismiss notification" ||
+          b.find("svg").exists(),
+      );
+    // Click the XMarkIcon button on the notification
+    const xButtons = wrapper.findAll("li button");
+    if (xButtons.length > 0) {
+      await xButtons[0].trigger("click");
+      await flushPromises();
+      expect(notificationsApi.markRead).toHaveBeenCalledWith("notif-uuid-1");
+    }
+  });
+
+  it("dismisses all notifications and calls markAllRead", async () => {
+    seedAuth(pinia);
+    const { notificationsApi } = await seedDashboardApis({
+      notifications: mockNotifications,
+      unreadCount: 1,
+    });
+    notificationsApi.markAllRead.mockResolvedValue({});
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    const dismissAllBtn = wrapper
+      .findAll("button")
+      .find((b) => b.text().includes("Dismiss all"));
+    expect(dismissAllBtn).toBeDefined();
+    await dismissAllBtn.trigger("click");
+    await flushPromises();
+
+    expect(notificationsApi.markAllRead).toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain("Inquiry Update");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Account Dashboard — inquiries section
+// ---------------------------------------------------------------------------
+
+describe("Account Dashboard — inquiries section", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    vi.clearAllMocks();
+  });
+
+  it("shows My Property Inquiries section heading", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({ inquiries: mockInquiries });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("My Property Inquiries");
+  });
+
+  it("shows inquiry property title", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({ inquiries: mockInquiries });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Sunset Villa");
+    expect(wrapper.text()).toContain("Blue Ridge Condo");
+  });
+
+  it("shows inquiry status badge", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({ inquiries: mockInquiries });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("New");
+    expect(wrapper.text()).toContain("Contacted");
+  });
+
+  it("shows empty state when no inquiries", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({ inquiries: [] });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("No inquiries yet");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Account Dashboard — quick links
+// ---------------------------------------------------------------------------
+
+describe("Account Dashboard — quick links", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    vi.clearAllMocks();
+  });
+
+  it("renders My Inquiries quick-link card", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis();
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("My Inquiries");
+  });
+
+  it("renders Rental Agreements quick-link card", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis();
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Rental Agreements");
+  });
+
+  it("renders Moving Bookings quick-link card", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis();
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Moving Bookings");
+  });
+
+  it("shows moving bookings section when bookings exist", async () => {
+    seedAuth(pinia);
+    await seedDashboardApis({ bookings: mockBookings });
+
+    const { wrapper } = mountPage(AccountDashboard, pinia);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Moving Bookings");
+    expect(wrapper.text()).toContain("Booking #42");
   });
 });

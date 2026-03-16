@@ -73,3 +73,92 @@ describe("ordersApi", () => {
     });
   });
 });
+
+describe("inquiriesApi", () => {
+  it("list calls GET /api/v1/user/inquiries", async () => {
+    const { inquiriesApi } = await import("@/api/inquiries");
+    const { default: client } = await import("@/api/client");
+    client.get = vi.fn().mockResolvedValue({ data: { data: [] } });
+
+    await inquiriesApi.list();
+    expect(client.get).toHaveBeenCalledWith("/api/v1/user/inquiries", {
+      params: {},
+    });
+  });
+
+  it("list passes query params", async () => {
+    const { inquiriesApi } = await import("@/api/inquiries");
+    const { default: client } = await import("@/api/client");
+    client.get = vi.fn().mockResolvedValue({ data: { data: [] } });
+
+    await inquiriesApi.list({ page: 2 });
+    expect(client.get).toHaveBeenCalledWith("/api/v1/user/inquiries", {
+      params: { page: 2 },
+    });
+  });
+});
+
+describe("notificationsApi", () => {
+  it("list calls GET /api/v1/user/notifications", async () => {
+    const { notificationsApi } = await import("@/api/notifications");
+    const { default: client } = await import("@/api/client");
+    client.get = vi
+      .fn()
+      .mockResolvedValue({ data: { notifications: [], unread_count: 0 } });
+
+    await notificationsApi.list();
+    expect(client.get).toHaveBeenCalledWith("/api/v1/user/notifications");
+  });
+
+  it("markRead calls PATCH /api/v1/user/notifications/:id/read", async () => {
+    const { notificationsApi } = await import("@/api/notifications");
+    const { default: client } = await import("@/api/client");
+    client.patch = vi.fn().mockResolvedValue({});
+
+    await notificationsApi.markRead("uuid-123");
+    expect(client.patch).toHaveBeenCalledWith(
+      "/api/v1/user/notifications/uuid-123/read",
+    );
+  });
+
+  it("markAllRead calls POST /api/v1/user/notifications/read-all", async () => {
+    const { notificationsApi } = await import("@/api/notifications");
+    const { default: client } = await import("@/api/client");
+    client.post = vi.fn().mockResolvedValue({});
+
+    await notificationsApi.markAllRead();
+    expect(client.post).toHaveBeenCalledWith(
+      "/api/v1/user/notifications/read-all",
+    );
+  });
+});
+
+describe("propertiesApi", () => {
+  it("quickInquiry calls POST /api/v1/properties/:slug/quick-inquiry", async () => {
+    const { propertiesApi } = await import("@/api/properties");
+    const { default: client } = await import("@/api/client");
+    client.post = vi
+      .fn()
+      .mockResolvedValue({ data: { message: "Inquiry sent." } });
+
+    await propertiesApi.quickInquiry("sunset-villa", {
+      message: "I am interested.",
+    });
+    expect(client.post).toHaveBeenCalledWith(
+      "/api/v1/properties/sunset-villa/quick-inquiry",
+      { message: "I am interested." },
+    );
+  });
+
+  it("quickInquiry uses empty payload by default", async () => {
+    const { propertiesApi } = await import("@/api/properties");
+    const { default: client } = await import("@/api/client");
+    client.post = vi.fn().mockResolvedValue({ data: {} });
+
+    await propertiesApi.quickInquiry("sunset-villa");
+    expect(client.post).toHaveBeenCalledWith(
+      "/api/v1/properties/sunset-villa/quick-inquiry",
+      {},
+    );
+  });
+});

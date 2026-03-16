@@ -269,6 +269,7 @@ class PropertyResource extends Resource
                         // ── Features Tab ───────────────────────────────
                         Forms\Components\Tabs\Tab::make('Features')
                             ->icon('heroicon-o-sparkles')
+                            ->visible(fn (): bool => auth()->user()?->getStoreForPanel()?->template() !== SectorTemplate::Rental)
                             ->schema([
                                 Forms\Components\TagsInput::make('features')
                                     ->placeholder('Add feature...')

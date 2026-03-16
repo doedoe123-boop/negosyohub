@@ -68,6 +68,7 @@ const quickMessage = ref("");
 const showQuickMessage = ref(false);
 const inquirySuccessMessage = ref("");
 const hasInquired = ref(false);
+const hasRented = ref(false);
 
 const defaultMessage = computed(() => {
   if (!property.value || !auth.user) return "";
@@ -91,6 +92,9 @@ onMounted(async () => {
     property.value = data.data ?? data;
     if (property.value.has_inquired) {
       hasInquired.value = true;
+    }
+    if (property.value.has_rented) {
+      hasRented.value = true;
     }
   } catch (e) {
     error.value =
@@ -618,7 +622,7 @@ async function submitPropertyReview(payload) {
               </div>
               <!-- Small: Lot Area -->
               <div
-                v-if="property.lot_area"
+                v-if="property.lot_area && !isRental"
                 class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm"
               >
                 <p
@@ -633,7 +637,7 @@ async function submitPropertyReview(payload) {
               </div>
               <!-- Small: Year Built -->
               <div
-                v-if="property.year_built"
+                v-if="property.year_built && !isRental"
                 class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm"
               >
                 <p
@@ -647,7 +651,7 @@ async function submitPropertyReview(payload) {
               </div>
               <!-- Small: Floors -->
               <div
-                v-if="property.floors"
+                v-if="property.floors && !isRental"
                 class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm"
               >
                 <p
@@ -673,7 +677,7 @@ async function submitPropertyReview(payload) {
             </section>
 
             <!-- ═══ Features & Amenities (dense grid) ═════════════════ -->
-            <section v-if="property.features?.length">
+            <section v-if="property.features?.length && !isRental">
               <h2 class="mb-4 text-lg font-bold text-slate-900">
                 Features & Amenities
               </h2>
@@ -890,7 +894,9 @@ async function submitPropertyReview(payload) {
               </ul>
             </section>
 
-            <!-- ═══ PAANO PUMUNTA (How to Get There) ══════════════════ -->
+<!-- ═══ RENTAL INFO SECTIONS (Moved Up) ══════════════════════════════ -->
+
+            <!-- Paano Pumunta (How to Get There) -->
             <section v-if="property.direction_steps?.length">
               <h2
                 class="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900"
@@ -970,9 +976,7 @@ async function submitPropertyReview(payload) {
                 </div>
               </div>
             </section>
-
-            <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
-
+          <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
             <!-- Utility Inclusions -->
             <section v-if="property.utility_inclusions?.length">
               <h2 class="mb-3 text-lg font-bold text-slate-900">
@@ -1195,6 +1199,44 @@ async function submitPropertyReview(payload) {
                   >
                     Send another inquiry
                   </button>
+                </div>
+
+                <!-- Already Rented State -->
+                <div
+                  v-if="hasRented"
+                  class="flex flex-col items-center gap-3 rounded-2xl bg-emerald-50 p-6 text-center ring-1 ring-emerald-200"
+                >
+                  <HomeModernIcon class="size-8 text-emerald-600" />
+                  <div>
+                    <p class="font-bold text-[#0F2044]">
+                      You rent this property!
+                    </p>
+                    <p class="mt-1 text-xs text-slate-500">
+                      You have an active or pending rental agreement for this listing.
+                    </p>
+                  </div>
+                  <RouterLink
+                    to="/account/rental-agreements"
+                    class="mt-2 w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+                  >
+                    View Agreement
+                  </RouterLink>
+                </div>
+
+                <!-- Unavailable State -->
+                <div
+                  v-else-if="!property.is_active"
+                  class="flex flex-col items-center gap-3 rounded-2xl bg-slate-50 p-6 text-center ring-1 ring-slate-200"
+                >
+                  <LockClosedIcon class="size-8 text-slate-400" />
+                  <div>
+                    <p class="font-bold text-[#0F2044]">
+                      No longer available
+                    </p>
+                    <p class="mt-1 text-xs text-slate-500">
+                      This property has already been rented or is currently off the market.
+                    </p>
+                  </div>
                 </div>
 
                 <!-- Quick Inquiry (logged-in users) -->

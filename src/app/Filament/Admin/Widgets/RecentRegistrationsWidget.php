@@ -40,12 +40,12 @@ class RecentRegistrationsWidget extends TableWidget
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => StoreStatus::tryFrom($state)?->name ?? ucfirst($state))
-                    ->color(fn (string $state): string => match ($state) {
-                        StoreStatus::Approved->value => 'success',
-                        StoreStatus::Pending->value => 'warning',
-                        StoreStatus::Rejected->value => 'danger',
-                        StoreStatus::Suspended->value => 'danger',
+                    ->formatStateUsing(fn (StoreStatus $state): string => $state->name)
+                    ->color(fn (StoreStatus $state): string => match ($state) {
+                        StoreStatus::Approved => 'success',
+                        StoreStatus::Pending => 'warning',
+                        StoreStatus::Rejected => 'danger',
+                        StoreStatus::Suspended => 'danger',
                         default => 'gray',
                     }),
 

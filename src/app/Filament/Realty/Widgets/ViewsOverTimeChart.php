@@ -9,7 +9,7 @@ class ViewsOverTimeChart extends ChartWidget
 {
     protected static ?string $heading = 'Views (Last 30 Days)';
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 2;
 
     protected static ?string $maxHeight = '280px';
 

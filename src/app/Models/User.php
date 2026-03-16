@@ -153,6 +153,14 @@ class User extends Authenticatable implements FilamentUser, LunarUserInterface
     }
 
     /**
+     * Return the most recent login record.
+     */
+    public function latestLogin(): HasOne
+    {
+        return $this->hasOne(LoginHistory::class)->latestOfMany('created_at');
+    }
+
+    /**
      * Return support tickets filed by this user.
      */
     public function supportTickets(): HasMany
