@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useSeoMeta } from "@/composables/useSeoMeta";
+import { useSeoStore } from "@/stores/seo";
 import { RouterLink } from "vue-router";
 import {
   BuildingStorefrontIcon,
@@ -25,6 +27,9 @@ import PromotionBanner from "@/components/homepage/PromotionBanner.vue";
 // Live backend stats composable
 import { useHomepageStats } from "@/composables/useHomepageStats";
 const { stats, loaded: statsLoaded, formatCount } = useHomepageStats();
+const seo = useSeoStore();
+
+useSeoMeta({ title: null, description: seo.defaultDescription });
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 

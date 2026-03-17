@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\ReviewController;
+use App\Http\Controllers\Api\V1\SeoController;
 use App\Http\Controllers\Api\V1\StoreController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -53,6 +54,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/search', GlobalSearchController::class)->name('search');
         Route::get('/homepage-stats', HomepageStatsController::class)->name('homepage.stats');
+        Route::get('/seo/global', [SeoController::class, 'global'])->name('seo.global');
         Route::get('/stores', [StoreController::class, 'index'])->name('stores.index');
         Route::get('/stores/{store:slug}', [StoreController::class, 'show'])->name('stores.show');
         Route::get('/stores/{store:slug}/products', [ProductController::class, 'storeProducts'])->name('products.store');

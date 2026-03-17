@@ -113,6 +113,9 @@ class Property extends Model implements HasMedia
         'is_featured',
         'published_at',
         'views_count',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
     ];
 
     /**

@@ -132,6 +132,7 @@ Run after adding any new Filament plugin, resource, or page:
 ```bash
 make artisan CMD="filament:clear-cached-components"
 make artisan CMD="filament:cache-components"
+make cache-clear
 ```
 
 ---

@@ -16,6 +16,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/vue/24/solid";
 import { productsApi } from "@/api/products";
+import { useSeoMeta } from "@/composables/useSeoMeta";
 import { reviewsApi } from "@/api/reviews";
 import { useCartStore } from "@/stores/cart";
 import PhotoLightbox from "@/components/PhotoLightbox.vue";
@@ -40,8 +41,7 @@ function openLightbox(index = 0) {
   lightboxOpen.value = true;
 }
 
-const activeTab = ref('specs');
-
+const activeTab = ref("specs");
 
 const selectedVariant = computed(
   () =>
@@ -83,6 +83,13 @@ onMounted(async () => {
     const { data } = await productsApi.show(route.params.id);
     product.value = data;
     selectedVariantId.value = data.variants?.[0]?.id ?? null;
+
+    useSeoMeta({
+      title: data.name,
+      description: data.description || null,
+      ogImage: data.thumbnail || data.images?.[0] || null,
+      ogType: "product",
+    });
   } finally {
     loading.value = false;
   }
@@ -111,7 +118,11 @@ async function addToCart() {
 async function buyNow() {
   if (!requireAuth()) return;
   if (!selectedVariantId.value || !inStock.value) return;
-  await cart.addItem("product-variant", selectedVariantId.value, quantity.value);
+  await cart.addItem(
+    "product-variant",
+    selectedVariantId.value,
+    quantity.value,
+  );
   cart.closeDrawer();
   router.push({ name: "checkout.index" });
 }
@@ -124,7 +135,7 @@ async function submitProductReview(payload) {
     reviewFormRef.value?.onSuccess();
   } catch (e) {
     reviewFormRef.value?.onError(
-      e.response?.data?.message ?? "Failed to submit review. Please try again."
+      e.response?.data?.message ?? "Failed to submit review. Please try again.",
     );
   }
 }
@@ -208,8 +219,13 @@ async function submitProductReview(payload) {
               </div>
 
               <!-- Zoom hint overlay -->
-              <div v-if="images[selectedImage]" class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
-                <div class="rounded-full bg-white/90 p-3 shadow-lg text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+              <div
+                v-if="images[selectedImage]"
+                class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors"
+              >
+                <div
+                  class="rounded-full bg-white/90 p-3 shadow-lg text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                >
                   <MagnifyingGlassPlusIcon class="size-6" />
                 </div>
               </div>
@@ -229,7 +245,10 @@ async function submitProductReview(payload) {
                     ? 'border-brand-500 ring-2 ring-brand-500/20'
                     : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-300'
                 "
-                @click="selectedImage = i; openLightbox(i)"
+                @click="
+                  selectedImage = i;
+                  openLightbox(i);
+                "
               >
                 <img :src="img" class="h-full w-full object-cover" />
               </button>
@@ -257,17 +276,29 @@ async function submitProductReview(payload) {
 
               <!-- Rating + sold -->
               <div class="mt-3 flex items-center gap-3 text-sm text-slate-500">
-                <div class="flex items-center gap-1.5" v-if="product.average_rating">
+                <div
+                  class="flex items-center gap-1.5"
+                  v-if="product.average_rating"
+                >
                   <div class="flex text-amber-400">
                     <StarSolid class="size-4" />
                     <StarSolid class="size-4" />
                     <StarSolid class="size-4" />
                     <StarSolid class="size-4" />
-                    <StarSolid class="size-4" v-if="product.average_rating >= 4.5" />
+                    <StarSolid
+                      class="size-4"
+                      v-if="product.average_rating >= 4.5"
+                    />
                     <StarIcon class="size-4" v-else />
                   </div>
-                  <span class="font-semibold text-slate-700">{{ product.average_rating.toFixed(1) }}</span>
-                  <span class="text-xs hover:underline cursor-pointer" @click="activeTab = 'reviews'">({{ product.review_count }} reviews)</span>
+                  <span class="font-semibold text-slate-700">{{
+                    product.average_rating.toFixed(1)
+                  }}</span>
+                  <span
+                    class="text-xs hover:underline cursor-pointer"
+                    @click="activeTab = 'reviews'"
+                    >({{ product.review_count }} reviews)</span
+                  >
                 </div>
                 <div class="flex items-center gap-1.5" v-else>
                   <div class="flex text-slate-300">
@@ -281,24 +312,68 @@ async function submitProductReview(payload) {
             <!-- Price band -->
             <div class="mt-1">
               <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-extrabold text-[#F95D2F]" v-if="formattedPrice">{{ formattedPrice }}</span>
-                <span class="text-lg font-medium text-slate-400 line-through" v-if="formattedPrice && selectedVariant?.price">₱{{ (parseFloat(selectedVariant.price) * 1.2).toLocaleString("en-PH", { maximumFractionDigits: 2 }) }}</span>
-                <span v-if="!formattedPrice" class="text-lg font-medium text-slate-400">Price unavailable</span>
+                <span
+                  class="text-3xl font-extrabold text-[#F95D2F]"
+                  v-if="formattedPrice"
+                  >{{ formattedPrice }}</span
+                >
+                <span
+                  class="text-lg font-medium text-slate-400 line-through"
+                  v-if="formattedPrice && selectedVariant?.price"
+                  >₱{{
+                    (parseFloat(selectedVariant.price) * 1.2).toLocaleString(
+                      "en-PH",
+                      { maximumFractionDigits: 2 },
+                    )
+                  }}</span
+                >
+                <span
+                  v-if="!formattedPrice"
+                  class="text-lg font-medium text-slate-400"
+                  >Price unavailable</span
+                >
               </div>
             </div>
 
             <!-- Social Proof Flags -->
             <div class="mt-5 flex flex-col gap-2.5">
-              <div v-if="product.sold_count && product.sold_count > 0" class="inline-flex w-fit items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2 text-sm text-slate-700 shadow-sm">
+              <div
+                v-if="product.sold_count && product.sold_count > 0"
+                class="inline-flex w-fit items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2 text-sm text-slate-700 shadow-sm"
+              >
                 <span class="text-lg">🔥</span>
-                <span class="font-medium blur-none">{{ product.sold_count }} people bought this</span>
+                <span class="font-medium blur-none"
+                  >{{ product.sold_count }} people bought this</span
+                >
               </div>
-              
-              <div v-if="selectedVariant?.stock != null && selectedVariant.stock < 10 && selectedVariant.stock > 0" class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#F95D2F]">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+
+              <div
+                v-if="
+                  selectedVariant?.stock != null &&
+                  selectedVariant.stock < 10 &&
+                  selectedVariant.stock > 0
+                "
+                class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#F95D2F]"
+              >
+                <svg
+                  class="size-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
                 <span>Low Stock: Only {{ selectedVariant.stock }} left!</span>
               </div>
-              <div v-else-if="selectedVariant?.stock === 0" class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-red-600">
+              <div
+                v-else-if="selectedVariant?.stock === 0"
+                class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-red-600"
+              >
                 Out of Stock
               </div>
             </div>
@@ -395,7 +470,9 @@ async function submitProductReview(payload) {
               v-if="product.store"
               class="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"
             >
-              <div class="size-11 shrink-0 overflow-hidden rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm">
+              <div
+                class="size-11 shrink-0 overflow-hidden rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm"
+              >
                 <img
                   v-if="product.store.logo"
                   :src="product.store.logo"
@@ -412,7 +489,10 @@ async function submitProductReview(payload) {
                 </p>
                 <div class="mt-0.5 flex items-center gap-1">
                   <CheckBadgeIcon class="size-3.5 text-[#059669]" />
-                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#059669]">Verified Seller</span>
+                  <span
+                    class="text-[10px] font-bold uppercase tracking-wider text-[#059669]"
+                    >Verified Seller</span
+                  >
                 </div>
               </div>
               <RouterLink
@@ -426,44 +506,76 @@ async function submitProductReview(payload) {
         </div>
 
         <!-- ── Main Section Below: Tabs ── -->
-        <div class="mt-8 rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <div
+          class="mt-8 rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden"
+        >
           <div class="flex border-b border-slate-100 overflow-x-auto">
-            <button 
+            <button
               @click="activeTab = 'specs'"
               class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
-              :class="activeTab === 'specs' ? 'border-b-2 border-brand-500 text-brand-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+              :class="
+                activeTab === 'specs'
+                  ? 'border-b-2 border-brand-500 text-brand-600'
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+              "
             >
               Detailed Specs
             </button>
-            <button 
+            <button
               @click="activeTab = 'reviews'"
               class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
-              :class="activeTab === 'reviews' ? 'border-b-2 border-brand-500 text-brand-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+              :class="
+                activeTab === 'reviews'
+                  ? 'border-b-2 border-brand-500 text-brand-600'
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+              "
             >
               Reviews
             </button>
-            <button 
+            <button
               @click="activeTab = 'shipping'"
               class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
-              :class="activeTab === 'shipping' ? 'border-b-2 border-brand-500 text-brand-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+              :class="
+                activeTab === 'shipping'
+                  ? 'border-b-2 border-brand-500 text-brand-600'
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+              "
             >
               Shipping Info
             </button>
           </div>
-          
+
           <div class="p-6 md:p-8">
             <!-- Specs Tab -->
             <div v-show="activeTab === 'specs'">
-              <p v-if="product.description" class="whitespace-pre-line text-sm leading-relaxed text-slate-600 mb-8 max-w-3xl">
+              <p
+                v-if="product.description"
+                class="whitespace-pre-line text-sm leading-relaxed text-slate-600 mb-8 max-w-3xl"
+              >
                 {{ product.description }}
               </p>
-              
-              <div v-if="product.attributes && Object.keys(product.attributes).length" class="max-w-2xl">
-                <h3 class="font-bold text-[#0F2044] mb-4 text-lg">Specifications</h3>
+
+              <div
+                v-if="
+                  product.attributes && Object.keys(product.attributes).length
+                "
+                class="max-w-2xl"
+              >
+                <h3 class="font-bold text-[#0F2044] mb-4 text-lg">
+                  Specifications
+                </h3>
                 <ul class="space-y-3">
-                  <li v-for="(value, key) in product.attributes" :key="key" class="flex justify-between text-sm py-2 border-b border-slate-50 last:border-0">
-                    <span class="text-slate-500 capitalize">{{ String(key).replace(/_/g, " ") }}</span>
-                    <span class="font-medium text-[#0F2044] text-right">{{ value }}</span>
+                  <li
+                    v-for="(value, key) in product.attributes"
+                    :key="key"
+                    class="flex justify-between text-sm py-2 border-b border-slate-50 last:border-0"
+                  >
+                    <span class="text-slate-500 capitalize">{{
+                      String(key).replace(/_/g, " ")
+                    }}</span>
+                    <span class="font-medium text-[#0F2044] text-right">{{
+                      value
+                    }}</span>
                   </li>
                 </ul>
               </div>
@@ -471,7 +583,7 @@ async function submitProductReview(payload) {
                 No detailed specifications provided.
               </div>
             </div>
-            
+
             <!-- Reviews Tab -->
             <div v-show="activeTab === 'reviews'" class="max-w-4xl">
               <ReviewForm
@@ -486,39 +598,80 @@ async function submitProductReview(payload) {
 
             <!-- Shipping Tab -->
             <div v-show="activeTab === 'shipping'" class="max-w-2xl">
-               <h3 class="font-bold text-[#0F2044] mb-4 text-lg">Delivery Options</h3>
-               <ul class="space-y-4 text-sm text-slate-600">
-                 <li class="flex gap-3">
-                   <div class="mt-0.5 text-slate-400">
-                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-                   </div>
-                   <div>
-                     <p class="font-bold text-slate-800">Standard Delivery</p>
-                     <p>Get it delivered to <span class="font-medium text-slate-700">{{ product.store?.city || 'Nationwide' }}</span> via NegosyoHub Express.</p>
-                     <p class="mt-1 font-semibold text-[#F95D2F]">Calculated at checkout</p>
-                   </div>
-                 </li>
-                 <li class="flex gap-3">
-                   <div class="mt-0.5 text-slate-400">
-                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                   </div>
-                   <div>
-                     <p class="font-bold text-slate-800">Store Pickup</p>
-                     <p>Pick up straight from the {{ product.store?.name || 'Seller' }} storefront.</p>
-                     <p class="mt-1 font-semibold text-emerald-600">Free</p>
-                   </div>
-                 </li>
-               </ul>
+              <h3 class="font-bold text-[#0F2044] mb-4 text-lg">
+                Delivery Options
+              </h3>
+              <ul class="space-y-4 text-sm text-slate-600">
+                <li class="flex gap-3">
+                  <div class="mt-0.5 text-slate-400">
+                    <svg
+                      class="size-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-800">Standard Delivery</p>
+                    <p>
+                      Get it delivered to
+                      <span class="font-medium text-slate-700">{{
+                        product.store?.city || "Nationwide"
+                      }}</span>
+                      via NegosyoHub Express.
+                    </p>
+                    <p class="mt-1 font-semibold text-[#F95D2F]">
+                      Calculated at checkout
+                    </p>
+                  </div>
+                </li>
+                <li class="flex gap-3">
+                  <div class="mt-0.5 text-slate-400">
+                    <svg
+                      class="size-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-800">Store Pickup</p>
+                    <p>
+                      Pick up straight from the
+                      {{ product.store?.name || "Seller" }} storefront.
+                    </p>
+                    <p class="mt-1 font-semibold text-emerald-600">Free</p>
+                  </div>
+                </li>
+              </ul>
             </div>
-            
           </div>
         </div>
       </div>
     </template>
 
     <!-- Sticky Bottom Bar (Mobile) -->
-    <div v-if="product" class="fixed bottom-0 left-0 right-0 z-50 flex gap-3 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden">
-      <button class="flex flex-col items-center justify-center px-4 text-slate-500 transition-colors hover:text-brand-600">
+    <div
+      v-if="product"
+      class="fixed bottom-0 left-0 right-0 z-50 flex gap-3 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden"
+    >
+      <button
+        class="flex flex-col items-center justify-center px-4 text-slate-500 transition-colors hover:text-brand-600"
+      >
         <ChatBubbleLeftRightIcon class="size-6" />
         <span class="text-[10px] font-bold mt-1">Chat</span>
       </button>

@@ -9,6 +9,7 @@ import {
   GlobeAltIcon,
 } from "@heroicons/vue/24/outline";
 import { storesApi } from "@/api/stores";
+import { useSeoMeta } from "@/composables/useSeoMeta";
 import { useCartStore } from "@/stores/cart";
 
 const route = useRoute();
@@ -44,6 +45,13 @@ onMounted(async () => {
   try {
     const storeRes = await storesApi.show(route.params.slug);
     store.value = storeRes.data;
+
+    useSeoMeta({
+      title: store.value.seo_title || store.value.name,
+      description: store.value.seo_description || store.value.description,
+      ogImage: store.value.og_image || store.value.banner_url || null,
+      ogType: "business.business",
+    });
 
     if (store.value.sector === "real_estate") {
       const propRes = await storesApi.properties(route.params.slug);
@@ -160,7 +168,9 @@ async function addToCart(product) {
 
           <div class="mb-2 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-              <h1 class="text-3xl font-bold leading-tight text-[#0F2044] break-words">
+              <h1
+                class="text-3xl font-bold leading-tight text-[#0F2044] break-words"
+              >
                 {{ store.name }}
               </h1>
               <span

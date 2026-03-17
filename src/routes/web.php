@@ -5,6 +5,7 @@ use App\Livewire\SectorBrowse;
 use App\Livewire\Store\SectorSelection;
 use App\Livewire\Store\StoreOwnerRegistration;
 use App\Livewire\StoreDirectory;
+use App\Models\GlobalSeoSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,13 @@ require __DIR__.'/store.php';
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+Route::get('/robots.txt', function () {
+    $content = GlobalSeoSetting::current()->robots_txt_content
+        ?? "User-agent: *\nAllow: /";
+
+    return response($content, 200)->header('Content-Type', 'text/plain');
+})->name('robots');
 
 // Browse stores (all verified stores) — Livewire-powered search, filter, sort, pagination
 Route::get('/stores', StoreDirectory::class)->name('stores.index');

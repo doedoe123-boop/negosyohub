@@ -108,6 +108,10 @@ class Store extends Model
         'suspended_at',
         'suspension_reason',
         'setup_completed_at',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
+        'og_image',
     ];
 
     /** @var list<string> */
