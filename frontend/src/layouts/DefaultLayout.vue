@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { RouterView } from "vue-router";
 import { useHead } from "@unhead/vue";
 import Navbar from "@/components/Navbar.vue";
