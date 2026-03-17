@@ -49,16 +49,16 @@ COPY ./src /var/www
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Copy custom Caddyfile — disables auto-HTTPS and sets correct document root.
+# Cloud Run terminates TLS, so the container only needs plain HTTP on $PORT.
+COPY docker/php/Caddyfile /etc/caddy/Caddyfile
+
 # Finalize composer
 RUN composer dump-autoload --optimize --no-dev
 
-# FrankenPHP uses environment variables to configure the port.
-# Cloud Run provides $PORT (usually 8080), FrankenPHP listens to $SERVER_NAME or :8080
-ENV SERVER_NAME=:8080
-
 # Fail the container if the app stops responding (Laravel's built-in /up route).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8080/up || exit 1
+    CMD curl -f http://localhost:${PORT:-8080}/up || exit 1
 
 # Expose the port Cloud Run expects
 EXPOSE 8080

@@ -1,0 +1,19 @@
+{
+    # Cloud Run terminates TLS — disable Caddy's automatic HTTPS entirely.
+    auto_https off
+
+    # Disable the admin API endpoint (not needed in production).
+    admin off
+
+    frankenphp
+}
+
+# Listen on the PORT Cloud Run injects (defaults to :8080).
+:{$PORT:8080} {
+    root * /var/www/public
+
+    encode zstd br gzip
+
+    # Serve PHP via FrankenPHP.
+    php_server
+}
