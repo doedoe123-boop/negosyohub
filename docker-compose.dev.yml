@@ -72,24 +72,50 @@ services:
       - app-network
 
   queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: marketplace
+      DB_USERNAME: laravel
       DB_PASSWORD: secret
     volumes:
       - ./src:/var/www
       - ./skills:/var/www/skills
       - ./agent:/var/www/agent
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_started
 
   scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: marketplace
+      DB_USERNAME: laravel
       DB_PASSWORD: secret
     volumes:
       - ./src:/var/www
       - ./skills:/var/www/skills
       - ./agent:/var/www/agent
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_started
 
   mailhog:
     image: mailhog/mailhog

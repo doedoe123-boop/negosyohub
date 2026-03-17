@@ -96,11 +96,59 @@ class StaffResource extends Resource
                                         'staff',
                                     ])
                             )
-                            ->descriptions([
-                                1 => 'Full system access',
-                            ])
+                            ->descriptions(function (): array {
+                                return \Spatie\Permission\Models\Role::where('guard_name', 'web')
+                                    ->whereIn('name', ['super_admin', 'manager', 'support', 'moderator', 'finance', 'admin', 'staff'])
+                                    ->get()
+                                    ->mapWithKeys(fn ($role) => [$role->id => match ($role->name) {
+                                        'super_admin' => 'Full system access — all resources and settings',
+                                        'manager' => 'Manage stores, orders, payouts, and users',
+                                        'support' => 'Handle support tickets and customer inquiries',
+                                        'moderator' => 'Moderate content, reviews, and listed stores',
+                                        'finance' => 'Access payouts, commissions, and revenue reports',
+                                        'admin' => 'Standard admin panel access with management capabilities',
+                                        'staff' => 'Read-only assistive access to the admin panel',
+                                        default => '',
+                                    }])
+                                    ->toArray();
+                            })
                             ->columns(3)
                             ->columnSpanFull(),
+                    ]),
+
+                Forms\Components\Section::make('Direct Permissions')
+                    ->description('Grant individual permissions beyond what the assigned roles already provide.')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        Forms\Components\CheckboxList::make('permissions')
+                            ->options(fn (): array => \Spatie\Permission\Models\Permission::where('guard_name', 'web')
+                                ->orderBy('name')
+                                ->pluck('name', 'name')
+                                ->toArray())
+                            ->descriptions([
+                                'manage-users' => 'Create, edit, and deactivate user accounts',
+                                'manage-marketing' => 'Manage promotions, banners, and campaigns',
+                                'manage-legal' => 'Update terms, privacy policy, and legal documents',
+                                'manage-platform' => 'Configure platform settings and system options',
+                                'manage-marketplace' => 'Oversee stores, listings, and marketplace rules',
+                                'manage-tickets' => 'Handle support tickets and customer inquiries',
+                                'manage-ecommerce' => 'Manage orders, payouts, and commissions',
+                                'manage-content' => 'Moderate content, FAQs, and announcements',
+                            ])
+                            ->afterStateHydrated(function (Forms\Components\CheckboxList $component, ?Model $record): void {
+                                if ($record) {
+                                    $component->state($record->getDirectPermissions()->pluck('name')->toArray());
+                                }
+                            })
+                            ->saveRelationshipsUsing(function (Model $record, array $state): void {
+                                $record->syncPermissions($state);
+                            })
+                            ->columns(2)
+                            ->columnSpanFull()
+                            ->searchable()
+                            ->noSearchResultsMessage('No permissions found.')
+                            ->helperText('These supplement but do not override role-based permissions.'),
                     ]),
             ]);
     }

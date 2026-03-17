@@ -201,19 +201,19 @@ Close all backend gaps so admin & store panels are production-ready before any s
 
 ### 4E — Nice-to-Have Enhancements
 
-| #   | Feature                                 | Priority | Status | Notes                                                     |
-| --- | --------------------------------------- | -------- | ------ | --------------------------------------------------------- |
-| 24  | Activity Log resource (admin)           | Low      | ✅     | `ActivityLogResource` in admin panel                      |
-| 25  | Login History resource (admin)          | Low      | ✅     | `LoginHistoryResource` + relation manager on UserResource |
-| 26  | Bulk approve stores action              | Low      | ❌     |                                                           |
-| 27  | Announcement auto-expire job            | Low      | ✅     | `ExpireAnnouncementsJob` scheduled                        |
-| 28  | FaqResource & SectorResource View pages | Low      | ✅     | Both have dedicated View pages                            |
-| 29  | Staff role/permission granularity       | Medium   | ❌     |                                                           |
-| 30  | Property clone/duplicate action         | Low      | ❌     |                                                           |
-| 31  | Bulk property status change             | Low      | ❌     |                                                           |
-| 32  | Lead source analytics widget            | Low      | ✅     | `LeadSourceChart` widget on Realty dashboard              |
-| 33  | Inquiry auto-responder email            | Medium   | ❌     |                                                           |
-| 34  | Agent reply to testimonials             | Low      | ❌     |                                                           |
+| #   | Feature                                 | Priority | Status | Notes                                                                                                                                                        |
+| --- | --------------------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 24  | Activity Log resource (admin)           | Low      | ✅     | `ActivityLogResource` in admin panel                                                                                                                         |
+| 25  | Login History resource (admin)          | Low      | ✅     | `LoginHistoryResource` + relation manager on UserResource                                                                                                    |
+| 26  | Bulk approve stores action              | Low      | ✅     | Inline `BulkAction` in `StoreResource` — loops Pending stores, approves, sends `StoreApproved` mail, shows count notification                                |
+| 27  | Announcement auto-expire job            | Low      | ✅     | `ExpireAnnouncementsJob` scheduled                                                                                                                           |
+| 28  | FaqResource & SectorResource View pages | Low      | ✅     | Both have dedicated View pages                                                                                                                               |
+| 29  | Staff role/permission granularity       | Medium   | ✅     | Role `CheckboxList` with dynamic descriptions per role; collapsible Direct Permissions section with `saveRelationshipsUsing` for per-staff permission grants |
+| 30  | Property clone/duplicate action         | Low      | ✅     | `ReplicateAction` in `PropertyResource` — excludes `slug/published_at/views_count`, prepends `[Copy]`, sets Draft status                                     |
+| 31  | Bulk property status change             | Low      | ✅     | `bulk_publish` and `bulk_archive` BulkActions in `PropertyResource`                                                                                          |
+| 32  | Lead source analytics widget            | Low      | ✅     | `LeadSourceChart` widget on Realty dashboard                                                                                                                 |
+| 33  | Inquiry auto-responder email            | Medium   | ✅     | `InquiryAutoResponder` mail queued in `PropertyInquiryObserver::created()`                                                                                   |
+| 34  | Agent reply to testimonials             | Low      | ✅     | Reply and Edit Reply table actions in `TestimonialResource`; `agent_reply`/`replied_at` form section in Edit page                                            |
 
 ### 4F — Bonus (Added beyond original scope)
 

@@ -7,6 +7,7 @@ use App\Models\Property;
 use App\Models\Testimonial;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -109,6 +110,23 @@ class TestimonialResource extends Resource
                         Forms\Components\DateTimePicker::make('published_at')
                             ->label('Publish Date'),
                     ])->columns(3),
+
+                Forms\Components\Section::make('Agent Reply')
+                    ->description('Your public response to this testimonial, visible to prospective clients.')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Textarea::make('agent_reply')
+                            ->label('Reply')
+                            ->nullable()
+                            ->maxLength(1000)
+                            ->rows(3)
+                            ->columnSpanFull(),
+
+                        Forms\Components\DateTimePicker::make('replied_at')
+                            ->label('Replied At')
+                            ->disabled()
+                            ->dehydrated(false),
+                    ])->columns(2),
             ]);
     }
 
@@ -173,6 +191,58 @@ class TestimonialResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('reply')
+                    ->label('Reply')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('info')
+                    ->modalHeading('Reply to Testimonial')
+                    ->modalDescription(fn (Model $record): string => "\"{$record->content}\" — {$record->client_name}")
+                    ->visible(fn (Model $record): bool => blank($record->agent_reply))
+                    ->form([
+                        Forms\Components\Textarea::make('agent_reply')
+                            ->label('Your Reply')
+                            ->required()
+                            ->maxLength(1000)
+                            ->rows(4),
+                    ])
+                    ->action(function (Model $record, array $data): void {
+                        $record->update([
+                            'agent_reply' => $data['agent_reply'],
+                            'replied_at' => now(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Reply posted successfully')
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('edit_reply')
+                    ->label('Edit Reply')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('gray')
+                    ->modalHeading('Edit Your Reply')
+                    ->visible(fn (Model $record): bool => filled($record->agent_reply))
+                    ->fillForm(fn (Model $record): array => [
+                        'agent_reply' => $record->agent_reply,
+                    ])
+                    ->form([
+                        Forms\Components\Textarea::make('agent_reply')
+                            ->label('Your Reply')
+                            ->required()
+                            ->maxLength(1000)
+                            ->rows(4),
+                    ])
+                    ->action(function (Model $record, array $data): void {
+                        $record->update([
+                            'agent_reply' => $data['agent_reply'],
+                            'replied_at' => now(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Reply updated successfully')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('publish')
                     ->icon('heroicon-o-globe-alt')
                     ->color('success')
