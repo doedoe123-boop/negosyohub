@@ -145,6 +145,16 @@ class PropertyDetailResource extends JsonResource
                     ->exists(),
             ),
 
+            // Rental agreement awareness (authenticated users only)
+            'has_rented' => $this->when(
+                $request->user('sanctum') !== null,
+                fn () => \App\Models\RentalAgreement::query()
+                    ->where('property_id', $this->id)
+                    ->where('tenant_user_id', $request->user('sanctum')->id)
+                    ->whereIn('status', ['pending', 'negotiating', 'signed', 'active'])
+                    ->exists(),
+            ),
+
             // SEO
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
