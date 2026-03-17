@@ -1,7 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import { createHead } from "unhead/client";
-import { headSymbol } from "@unhead/vue";
+import { createUnhead, headSymbol } from "@unhead/vue";
 import router from "./router";
 import App from "./App.vue";
 import { useCartStore } from "@/stores/cart";
@@ -9,7 +8,7 @@ import "./style.css";
 
 const app = createApp(App);
 const pinia = createPinia();
-const head = createHead();
+const head = createUnhead();
 
 app.use(pinia);
 app.use(router);
