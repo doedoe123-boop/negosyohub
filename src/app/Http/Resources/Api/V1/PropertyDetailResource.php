@@ -144,6 +144,11 @@ class PropertyDetailResource extends JsonResource
                     ->whereIn('status', ['pending', 'negotiating', 'signed', 'active'])
                     ->exists(),
             ),
+
+            // SEO
+            'seo_title' => $this->seo_title,
+            'seo_description' => $this->seo_description,
+            'seo_keywords' => $this->seo_keywords,
         ];
     }
 }

@@ -571,6 +571,33 @@ class PropertyResource extends Resource
                                     ->label('Publish Date')
                                     ->helperText('Leave blank to publish immediately when status is set to Active.'),
                             ]),
+
+                        Forms\Components\Tabs\Tab::make('SEO')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->schema([
+                                Forms\Components\Section::make('Search Engine Optimisation')
+                                    ->description('Customise how this listing appears in Google. Leave blank to auto-generate from the property title and description.')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('seo_title')
+                                            ->label('Meta Title')
+                                            ->maxLength(70)
+                                            ->helperText('Ideal length: 50–60 characters. Falls back to the property title if blank.')
+                                            ->columnSpanFull(),
+
+                                        Forms\Components\Textarea::make('seo_description')
+                                            ->label('Meta Description')
+                                            ->maxLength(320)
+                                            ->rows(3)
+                                            ->helperText('Ideal length: 140–160 characters. Falls back to the property description if blank.')
+                                            ->columnSpanFull(),
+
+                                        Forms\Components\TextInput::make('seo_keywords')
+                                            ->label('Meta Keywords')
+                                            ->maxLength(255)
+                                            ->helperText('Comma-separated. Optional — most search engines ignore this field.')
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
                     ])
                     ->persistTabInQueryString()
                     ->columnSpanFull(),

@@ -26,6 +26,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/vue/24/solid";
 import { propertiesApi } from "@/api/properties";
+import { useSeoMeta } from "@/composables/useSeoMeta";
 import { reviewsApi } from "@/api/reviews";
 import { useAuthStore } from "@/stores/auth";
 import PhotoLightbox from "@/components/PhotoLightbox.vue";
@@ -90,6 +91,14 @@ onMounted(async () => {
     const { data } = await propertiesApi.show(route.params.slug);
     // JsonResource wraps in { data: { ... } }
     property.value = data.data ?? data;
+
+    useSeoMeta({
+      title: property.value.seo_title || property.value.title,
+      description: property.value.seo_description || property.value.description,
+      ogImage: property.value.images?.[0] || null,
+      ogType: "article",
+    });
+
     if (property.value.has_inquired) {
       hasInquired.value = true;
     }
@@ -894,7 +903,7 @@ async function submitPropertyReview(payload) {
               </ul>
             </section>
 
-<!-- ═══ RENTAL INFO SECTIONS (Moved Up) ══════════════════════════════ -->
+            <!-- ═══ RENTAL INFO SECTIONS (Moved Up) ══════════════════════════════ -->
 
             <!-- Paano Pumunta (How to Get There) -->
             <section v-if="property.direction_steps?.length">
@@ -958,7 +967,11 @@ async function submitPropertyReview(payload) {
                       @click="toggleDirectionPhoto(i)"
                     >
                       <PhotoIcon class="size-4 shrink-0" />
-                      {{ visibleDirectionPhotos.has(i) ? 'Hide photo' : 'Show photo' }}
+                      {{
+                        visibleDirectionPhotos.has(i)
+                          ? "Hide photo"
+                          : "Show photo"
+                      }}
                     </button>
 
                     <!-- Direction photo -->
@@ -976,7 +989,7 @@ async function submitPropertyReview(payload) {
                 </div>
               </div>
             </section>
-          <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
+            <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
             <!-- Utility Inclusions -->
             <section v-if="property.utility_inclusions?.length">
               <h2 class="mb-3 text-lg font-bold text-slate-900">
@@ -1212,7 +1225,8 @@ async function submitPropertyReview(payload) {
                       You rent this property!
                     </p>
                     <p class="mt-1 text-xs text-slate-500">
-                      You have an active or pending rental agreement for this listing.
+                      You have an active or pending rental agreement for this
+                      listing.
                     </p>
                   </div>
                   <RouterLink
@@ -1230,11 +1244,10 @@ async function submitPropertyReview(payload) {
                 >
                   <LockClosedIcon class="size-8 text-slate-400" />
                   <div>
-                    <p class="font-bold text-[#0F2044]">
-                      No longer available
-                    </p>
+                    <p class="font-bold text-[#0F2044]">No longer available</p>
                     <p class="mt-1 text-xs text-slate-500">
-                      This property has already been rented or is currently off the market.
+                      This property has already been rented or is currently off
+                      the market.
                     </p>
                   </div>
                 </div>
