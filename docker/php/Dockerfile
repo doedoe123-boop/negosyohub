@@ -56,6 +56,10 @@ RUN composer dump-autoload --optimize --no-dev
 # Cloud Run provides $PORT (usually 8080), FrankenPHP listens to $SERVER_NAME or :8080
 ENV SERVER_NAME=:8080
 
+# Fail the container if the app stops responding (Laravel's built-in /up route).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8080/up || exit 1
+
 # Expose the port Cloud Run expects
 EXPOSE 8080
 
