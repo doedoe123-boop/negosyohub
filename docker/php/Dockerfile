@@ -1,12 +1,12 @@
-# Using a specific version is better for stability
-FROM php:8.4-fpm-bookworm
+# Use FrankenPHP - it includes the web server and PHP 8.4
+FROM dunglas/frankenphp:1.3-php8.4-bookworm
 
-# Professional Metadata
+# Metadata
 LABEL org.opencontainers.image.source=https://github.com/doedoe123-boop/negosyohub
-LABEL org.opencontainers.image.description="Production container for Negosyohub"
+LABEL org.opencontainers.image.description="Production container for Negosyohub on Cloud Run"
 
-# Install system dependencies and apply all security patches
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+# Install system dependencies (Keeping your specific list)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
     libpq-dev \
@@ -30,43 +30,34 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
         opcache \
         exif \
         pcntl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Optimized PHP settings
-RUN { \
-    echo 'opcache.memory_consumption=128'; \
-    echo 'opcache.interned_strings_buffer=8'; \
-    echo 'opcache.max_accelerated_files=10000'; \
-    echo 'opcache.validate_timestamps=0'; \
-    echo 'opcache.fast_shutdown=1'; \
-} > /usr/local/etc/php/conf.d/opcache-recommended.ini
-
-RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini
-RUN echo "upload_max_filesize=20M\npost_max_size=25M" > /usr/local/etc/php/conf.d/uploads.ini
-
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /var/www
 
-# Handle User Permissions
-RUN usermod -u 1000 www-data && groupmod -g 1000 www-data
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Production Code Injection
+# Copy only composer files first for caching
 COPY src/composer.json src/composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
-COPY --chown=www-data:www-data ./src /var/www
+# Copy the rest of your source code
+COPY ./src /var/www
 
+# Fix permissions for Laravel
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Finalize composer
 RUN composer dump-autoload --optimize --no-dev
 
-USER www-data
+# FrankenPHP uses environment variables to configure the port.
+# Cloud Run provides $PORT (usually 8080), FrankenPHP listens to $SERVER_NAME or :8080
+ENV SERVER_NAME=:8080
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD php-fpm -t || exit 1
+# Expose the port Cloud Run expects
+EXPOSE 8080
 
-EXPOSE 9000
-CMD ["php-fpm"]
+# No need for a separate CMD for php-fpm, FrankenPHP handles it
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
