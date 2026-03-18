@@ -41,17 +41,17 @@ function formatPrice(price, currency = "PHP") {
   });
 }
 
+useSeoMeta(() => ({
+  title: store.value?.seo_title || store.value?.name || null,
+  description: store.value?.seo_description || store.value?.description || null,
+  ogImage: store.value?.og_image || store.value?.banner_url || null,
+  ogType: "business.business",
+}));
+
 onMounted(async () => {
   try {
     const storeRes = await storesApi.show(route.params.slug);
     store.value = storeRes.data;
-
-    useSeoMeta({
-      title: store.value.seo_title || store.value.name,
-      description: store.value.seo_description || store.value.description,
-      ogImage: store.value.og_image || store.value.banner_url || null,
-      ogType: "business.business",
-    });
 
     if (store.value.sector === "real_estate") {
       const propRes = await storesApi.properties(route.params.slug);

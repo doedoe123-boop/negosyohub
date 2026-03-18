@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\ExpireAnnouncementsJob;
+use App\Jobs\NotifySavedSearchesJob;
 use App\Jobs\PurgeExpiredDocumentsJob;
 use App\Jobs\SendMovingReminderJob;
 use App\Models\MovingBooking;
@@ -31,3 +32,6 @@ Schedule::call(function () {
 
 // Generate weekly store payouts every Monday at 02:00
 Schedule::command('payouts:generate')->weeklyOn(1, '02:00')->name('weekly-payouts');
+
+// Notify users of new properties matching their saved searches (daily at 08:00)
+Schedule::job(new NotifySavedSearchesJob)->dailyAt('08:00')->name('saved-search-notifications');

@@ -40,9 +40,24 @@ const routes = [
         component: () => import("@/pages/realty/Properties.vue"),
       },
       {
+        path: "properties/compare",
+        name: "properties.compare",
+        component: () => import("@/pages/realty/CompareProperties.vue"),
+      },
+      {
         path: "properties/:slug",
         name: "properties.show",
         component: () => import("@/pages/realty/PropertyDetail.vue"),
+      },
+      {
+        path: "developments",
+        name: "developments.index",
+        component: () => import("@/pages/realty/Developments.vue"),
+      },
+      {
+        path: "developments/:slug",
+        name: "developments.show",
+        component: () => import("@/pages/realty/DevelopmentDetail.vue"),
       },
       {
         path: "agent/:slug",
@@ -140,6 +155,11 @@ const routes = [
             path: "inquiries",
             name: "account.inquiries",
             component: () => import("@/pages/account/InquiriesPage.vue"),
+          },
+          {
+            path: "saved-searches",
+            name: "account.saved-searches",
+            component: () => import("@/pages/account/SavedSearches.vue"),
           },
           {
             path: "agreements",

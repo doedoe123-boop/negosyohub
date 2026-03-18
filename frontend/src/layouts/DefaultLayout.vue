@@ -14,6 +14,13 @@ const cart = useCartStore();
 const auth = useAuthStore();
 const seo = useSeoStore();
 
+// Set the site-wide title template so every page gets "Title | SiteName".
+// Must be called at the top level of setup(), not inside a lifecycle hook.
+useHead({
+  titleTemplate: (title) =>
+    title ? `${title} | ${seo.siteName}` : seo.siteName,
+});
+
 // Rehydrate cart from the server on every fresh page load.
 // The router's beforeEach guard has already resolved auth by the time
 // this component mounts, so auth.isLoggedIn is reliable here.
@@ -21,12 +28,6 @@ onMounted(async () => {
   if (auth.isLoggedIn) cart.fetch();
 
   await seo.fetchSettings();
-
-  // Set the site-wide title template so every page gets "Title | SiteName".
-  useHead({
-    titleTemplate: (title) =>
-      title ? `${title} | ${seo.siteName}` : seo.siteName,
-  });
 
   // Google Analytics 4
   if (seo.googleAnalyticsId) {

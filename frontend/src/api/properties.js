@@ -46,4 +46,16 @@ export const propertiesApi = {
   openHouses(slug) {
     return client.get(`/api/v1/properties/${slug}/open-houses`);
   },
+
+  /**
+   * Track a user interaction event for analytics.
+   *
+   * @param {string} slug
+   * @param {'phone_click'|'email_click'|'share_click'} event
+   */
+  track(slug, event) {
+    return client
+      .post(`/api/v1/properties/${slug}/track`, { event })
+      .catch(() => {});
+  },
 };

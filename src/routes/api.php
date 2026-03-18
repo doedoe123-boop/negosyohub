@@ -7,12 +7,14 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CouponController;
+use App\Http\Controllers\Api\V1\DevelopmentController;
 use App\Http\Controllers\Api\V1\FeaturedListingController;
 use App\Http\Controllers\Api\V1\GlobalSearchController;
 use App\Http\Controllers\Api\V1\HomepageStatsController;
 use App\Http\Controllers\Api\V1\MoverController;
 use App\Http\Controllers\Api\V1\MovingBookingController;
 use App\Http\Controllers\Api\V1\MovingReviewController;
+use App\Http\Controllers\Api\V1\OpenHouseController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PaymentMethodController;
@@ -20,6 +22,7 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\ReviewController;
+use App\Http\Controllers\Api\V1\SavedSearchController;
 use App\Http\Controllers\Api\V1\SeoController;
 use App\Http\Controllers\Api\V1\StoreController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
@@ -70,6 +73,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/properties/{slug}', [PropertyController::class, 'show'])->name('properties.show');
         Route::post('/properties/{property:slug}/inquiries', [PropertyController::class, 'submitInquiry'])->name('properties.inquiries.store');
         Route::get('/properties/{property:slug}/open-houses', [PropertyController::class, 'openHouses'])->name('properties.open-houses');
+        Route::post('/properties/{property:slug}/track', [PropertyController::class, 'track'])->name('properties.track');
+
+        // Developments (Real Estate projects)
+        Route::get('/developments', [DevelopmentController::class, 'index'])->name('developments.index');
+        Route::get('/developments/{slug}', [DevelopmentController::class, 'show'])->name('developments.show');
+
+        // Open House RSVP
+        Route::post('/open-houses/{openHouse}/rsvp', [OpenHouseController::class, 'rsvp'])->name('open-houses.rsvp');
 
         // Movers (Lipat Bahay / Moving Service)
         Route::get('/movers', [MoverController::class, 'index'])->name('movers.index');
@@ -181,6 +192,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/user/support-tickets', [SupportTicketController::class, 'index'])->name('support-tickets.index');
         Route::post('/user/support-tickets', [SupportTicketController::class, 'store'])->name('support-tickets.store');
         Route::get('/user/support-tickets/{id}', [SupportTicketController::class, 'show'])->name('support-tickets.show');
+
+        // Saved Searches
+        Route::get('/user/saved-searches', [SavedSearchController::class, 'index'])->name('saved-searches.index');
+        Route::post('/user/saved-searches', [SavedSearchController::class, 'store'])->name('saved-searches.store');
+        Route::delete('/user/saved-searches/{savedSearch}', [SavedSearchController::class, 'destroy'])->name('saved-searches.destroy');
+        Route::patch('/user/saved-searches/{savedSearch}/toggle', [SavedSearchController::class, 'toggle'])->name('saved-searches.toggle');
 
         // Orders — store-owner progression (store owner / admin only, enforced by policy)
         Route::middleware('throttle:30,1')->group(function () {

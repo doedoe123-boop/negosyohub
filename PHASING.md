@@ -253,22 +253,22 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 | 13  | Deals & offers page            | ❌     | Not yet implemented                                                              |
 | 14  | Market insights page           | ❌     | Not yet implemented                                                              |
 
-### 5B — Real Estate Storefront 🔶 PARTIAL
+### 5B — Real Estate Storefront ✅ COMPLETE
 
-| #   | Feature                        | Status | Notes                                                                             |
-| --- | ------------------------------ | ------ | --------------------------------------------------------------------------------- |
-| 15  | Property search/browse page    | ✅     | `Properties.vue` — filters: type, listing, price range, bedrooms, city, search    |
-| 16  | Property detail page           | ✅     | `PropertyDetail.vue` — gallery, specs, floor area, pricing, inquiry form          |
-| 17  | Mortgage calculator frontend   | ✅     | Pag-IBIG calculator integrated in PropertyDetail                                  |
-| 18  | Property inquiry form          | ✅     | In PropertyDetail — name, email, phone, message → `propertiesApi.submitInquiry()` |
-| 19  | Open house listing + RSVP form | ❌     | Backend API exists, no frontend UI                                                |
-| 20  | Agent profile public page      | ✅     | `AgentDetail.vue` — profile, verified badge, contact info, property listings      |
-| 21  | Development/project pages      | ❌     | Backend models exist, no frontend pages                                           |
-| 22  | Property comparison tool       | ❌     | Not yet implemented                                                               |
-| 23  | Saved search management        | ❌     | Backend model exists, no frontend UI                                              |
-| 24  | Saved search notifications job | ❌     | Not yet implemented                                                               |
-| 25  | Map/geolocation view           | ❌     | Lat/lng data stored, no map UI                                                    |
-| 26  | Property analytics tracker     | ❌     | Backend model exists, no frontend middleware                                      |
+| #   | Feature                        | Status | Notes                                                                                                                 |
+| --- | ------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| 15  | Property search/browse page    | ✅     | `Properties.vue` — filters: type, listing, price range, bedrooms, city, search                                        |
+| 16  | Property detail page           | ✅     | `PropertyDetail.vue` — gallery, specs, floor area, pricing, inquiry form                                              |
+| 17  | Mortgage calculator frontend   | ✅     | Pag-IBIG calculator integrated in PropertyDetail                                                                      |
+| 18  | Property inquiry form          | ✅     | In PropertyDetail — name, email, phone, message → `propertiesApi.submitInquiry()`                                     |
+| 19  | Open house listing + RSVP form | ✅     | `OpenHouseController::rsvp()`, open houses section + RSVP Teleport modal in `PropertyDetail.vue`                      |
+| 20  | Agent profile public page      | ✅     | `AgentDetail.vue` — profile, verified badge, contact info, property listings                                          |
+| 21  | Development/project pages      | ✅     | `DevelopmentController`, `Developments.vue`, `DevelopmentDetail.vue` with units grid + map                            |
+| 22  | Property comparison tool       | ✅     | `useCompare.js` composable, floating compare bar in `Properties.vue`, `CompareProperties.vue` side-by-side spec table |
+| 23  | Saved search management        | ✅     | `SavedSearchController`, `SavedSearches.vue` account page, save-search modal in `Properties.vue`                      |
+| 24  | Saved search notifications job | ✅     | `NotifySavedSearchesJob` — daily/weekly frequency, `SavedSearchResultsMail`, scheduled at 08:00                       |
+| 25  | Map/geolocation view           | ✅     | OpenStreetMap iframe in `PropertyDetail.vue` + `DevelopmentDetail.vue` using lat/lng data                             |
+| 26  | Property analytics tracker     | ✅     | `PropertyController::track()`, `propertiesApi.track()`, phone/share click events in `PropertyDetail.vue`              |
 
 ### 5C — Shared Storefront 🔶 PARTIAL
 

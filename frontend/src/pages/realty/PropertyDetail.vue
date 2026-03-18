@@ -26,6 +26,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/vue/24/solid";
 import { propertiesApi } from "@/api/properties";
+import { openHousesApi } from "@/api/openHouses";
 import { useSeoMeta } from "@/composables/useSeoMeta";
 import { reviewsApi } from "@/api/reviews";
 import { useAuthStore } from "@/stores/auth";
@@ -71,6 +72,56 @@ const inquirySuccessMessage = ref("");
 const hasInquired = ref(false);
 const hasRented = ref(false);
 
+// Open houses state
+const openHouses = ref([]);
+const rsvpModalOpen = ref(false);
+const selectedOpenHouse = ref(null);
+const rsvpForm = ref({ name: "", email: "", phone: "", notes: "" });
+const rsvpSubmitting = ref(false);
+const rsvpSuccess = ref(false);
+const rsvpError = ref(null);
+
+function openRsvpModal(openHouse) {
+  selectedOpenHouse.value = openHouse;
+  rsvpSuccess.value = false;
+  rsvpError.value = null;
+  if (auth.user) {
+    rsvpForm.value.name = auth.user.name ?? "";
+    rsvpForm.value.email = auth.user.email ?? "";
+    rsvpForm.value.phone = auth.user.phone ?? "";
+  }
+  rsvpModalOpen.value = true;
+}
+
+async function submitRsvp() {
+  if (!selectedOpenHouse.value) return;
+  rsvpSubmitting.value = true;
+  rsvpError.value = null;
+  try {
+    await openHousesApi.rsvp(selectedOpenHouse.value.id, rsvpForm.value);
+    rsvpSuccess.value = true;
+  } catch (e) {
+    const status = e.response?.status;
+    if (status === 409) {
+      rsvpSuccess.value = true; // Already registered
+    } else {
+      rsvpError.value =
+        e.response?.data?.message ?? "Failed to submit RSVP. Please try again.";
+    }
+  } finally {
+    rsvpSubmitting.value = false;
+  }
+}
+
+function closeRsvpModal() {
+  rsvpModalOpen.value = false;
+  rsvpForm.value = { name: "", email: "", phone: "", notes: "" };
+}
+
+function trackEvent(event) {
+  propertiesApi.track(route.params.slug, event);
+}
+
 const defaultMessage = computed(() => {
   if (!property.value || !auth.user) return "";
   const name = auth.user.name;
@@ -86,18 +137,19 @@ const listingBadgeClass = {
   pre_selling: "bg-purple-100 text-purple-700 ring-purple-200",
 };
 
+useSeoMeta(() => ({
+  title: property.value?.seo_title || property.value?.title || null,
+  description:
+    property.value?.seo_description || property.value?.description || null,
+  ogImage: property.value?.images?.[0] || null,
+  ogType: "article",
+}));
+
 onMounted(async () => {
   try {
     const { data } = await propertiesApi.show(route.params.slug);
     // JsonResource wraps in { data: { ... } }
     property.value = data.data ?? data;
-
-    useSeoMeta({
-      title: property.value.seo_title || property.value.title,
-      description: property.value.seo_description || property.value.description,
-      ogImage: property.value.images?.[0] || null,
-      ogType: "article",
-    });
 
     if (property.value.has_inquired) {
       hasInquired.value = true;
@@ -105,6 +157,14 @@ onMounted(async () => {
     if (property.value.has_rented) {
       hasRented.value = true;
     }
+
+    // Load open houses in parallel (non-blocking)
+    propertiesApi
+      .openHouses(route.params.slug)
+      .then((r) => {
+        openHouses.value = r.data?.data ?? r.data ?? [];
+      })
+      .catch(() => {});
   } catch (e) {
     error.value =
       e.response?.status === 404
@@ -873,6 +933,177 @@ async function submitPropertyReview(payload) {
               </div>
             </section>
 
+            <!-- Open Houses -->
+            <section v-if="openHouses.length">
+              <h2 class="mb-4 text-lg font-bold text-slate-900">Open Houses</h2>
+              <ul class="flex flex-col gap-3">
+                <li
+                  v-for="oh in openHouses"
+                  :key="oh.id"
+                  class="flex items-start justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100"
+                >
+                  <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-slate-900 text-sm">{{
+                        oh.title
+                      }}</span>
+                      <span
+                        v-if="oh.is_virtual"
+                        class="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sky-600"
+                        >Virtual</span
+                      >
+                    </div>
+                    <p class="text-xs text-slate-500">
+                      {{
+                        new Date(oh.event_date).toLocaleDateString("en-PH", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      }}
+                      <template v-if="oh.start_time">
+                        &middot; {{ oh.start_time
+                        }}<template v-if="oh.end_time">
+                          – {{ oh.end_time }}</template
+                        >
+                      </template>
+                    </p>
+                    <p
+                      v-if="oh.description"
+                      class="text-xs text-slate-600 mt-0.5"
+                    >
+                      {{ oh.description }}
+                    </p>
+                  </div>
+                  <button
+                    class="shrink-0 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
+                    @click="openRsvpModal(oh)"
+                  >
+                    RSVP
+                  </button>
+                </li>
+              </ul>
+
+              <!-- RSVP Modal -->
+              <Teleport to="body">
+                <div
+                  v-if="rsvpModalOpen"
+                  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                  @click.self="closeRsvpModal"
+                >
+                  <div
+                    class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+                  >
+                    <h3 class="mb-1 text-lg font-bold text-slate-900">
+                      RSVP for Open House
+                    </h3>
+                    <p class="mb-4 text-sm text-slate-500">
+                      {{ selectedOpenHouse?.title }}
+                    </p>
+
+                    <div
+                      v-if="rsvpSuccess"
+                      class="flex flex-col items-center gap-3 py-4 text-center"
+                    >
+                      <CheckCircleIcon class="size-10 text-emerald-500" />
+                      <p class="font-bold text-slate-900">You're registered!</p>
+                      <p class="text-sm text-slate-500">
+                        We'll see you at the open house.
+                      </p>
+                      <button
+                        class="mt-2 rounded-xl bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                        @click="closeRsvpModal"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    <form
+                      v-else
+                      class="flex flex-col gap-3"
+                      @submit.prevent="submitRsvp"
+                    >
+                      <div>
+                        <label
+                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          >Full Name *</label
+                        >
+                        <input
+                          v-model="rsvpForm.name"
+                          required
+                          type="text"
+                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          placeholder="Your full name"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          >Email *</label
+                        >
+                        <input
+                          v-model="rsvpForm.email"
+                          required
+                          type="email"
+                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          placeholder="you@email.com"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          >Phone</label
+                        >
+                        <input
+                          v-model="rsvpForm.phone"
+                          type="tel"
+                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          placeholder="+63 9xx xxx xxxx"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          >Notes</label
+                        >
+                        <textarea
+                          v-model="rsvpForm.notes"
+                          rows="2"
+                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          placeholder="Any questions or notes..."
+                        ></textarea>
+                      </div>
+                      <p
+                        v-if="rsvpError"
+                        class="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600"
+                      >
+                        {{ rsvpError }}
+                      </p>
+                      <div class="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                          @click="closeRsvpModal"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          :disabled="rsvpSubmitting"
+                          class="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+                        >
+                          {{
+                            rsvpSubmitting ? "Registering..." : "Confirm RSVP"
+                          }}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </Teleport>
+            </section>
+
             <!-- Nearby Places -->
             <section v-if="property.nearby_places?.length">
               <h2 class="mb-4 text-lg font-bold text-slate-900">
@@ -903,7 +1134,7 @@ async function submitPropertyReview(payload) {
               </ul>
             </section>
 
-<!-- ═══ RENTAL INFO SECTIONS (Moved Up) ══════════════════════════════ -->
+            <!-- ═══ RENTAL INFO SECTIONS (Moved Up) ══════════════════════════════ -->
 
             <!-- Paano Pumunta (How to Get There) -->
             <section v-if="property.direction_steps?.length">
@@ -989,7 +1220,7 @@ async function submitPropertyReview(payload) {
                 </div>
               </div>
             </section>
-          <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
+            <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
             <!-- Utility Inclusions -->
             <section v-if="property.utility_inclusions?.length">
               <h2 class="mb-3 text-lg font-bold text-slate-900">
@@ -1093,7 +1324,10 @@ async function submitPropertyReview(payload) {
               >
               <button
                 class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
-                @click="copyLink"
+                @click="
+                  copyLink();
+                  trackEvent('share_click');
+                "
               >
                 <ShareIcon class="size-3.5" /> Copy link
               </button>
@@ -1102,6 +1336,7 @@ async function submitPropertyReview(payload) {
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition-colors hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
+                @click="trackEvent('share_click')"
               >
                 <svg class="size-4" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -1186,6 +1421,7 @@ async function submitPropertyReview(payload) {
                   v-if="property.store.phone"
                   :href="`tel:${property.store.phone}`"
                   class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100"
+                  @click="trackEvent('phone_click')"
                 >
                   <PhoneIcon class="size-4" />
                   {{ property.store.phone }}
@@ -1225,7 +1461,8 @@ async function submitPropertyReview(payload) {
                       You rent this property!
                     </p>
                     <p class="mt-1 text-xs text-slate-500">
-                      You have an active or pending rental agreement for this listing.
+                      You have an active or pending rental agreement for this
+                      listing.
                     </p>
                   </div>
                   <RouterLink
@@ -1243,11 +1480,10 @@ async function submitPropertyReview(payload) {
                 >
                   <LockClosedIcon class="size-8 text-slate-400" />
                   <div>
-                    <p class="font-bold text-[#0F2044]">
-                      No longer available
-                    </p>
+                    <p class="font-bold text-[#0F2044]">No longer available</p>
                     <p class="mt-1 text-xs text-slate-500">
-                      This property has already been rented or is currently off the market.
+                      This property has already been rented or is currently off
+                      the market.
                     </p>
                   </div>
                 </div>

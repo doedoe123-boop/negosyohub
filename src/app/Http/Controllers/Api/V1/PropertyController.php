@@ -8,6 +8,7 @@ use App\Http\Requests\Api\V1\SubmitInquiryRequest;
 use App\Http\Resources\Api\V1\PropertyDetailResource;
 use App\Http\Resources\Api\V1\PropertyResource;
 use App\Models\Property;
+use App\Models\PropertyAnalytic;
 use App\Services\PropertyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -90,6 +91,29 @@ class PropertyController extends Controller
             'message' => 'Your interest has been sent to the '.($property->store?->isPaupahan() ? 'landlord' : 'agent').'.',
             'id' => $inquiry->id,
         ], 201);
+    }
+
+    /**
+     * Track a user interaction event for analytics.
+     *
+     * Public — fire-and-forget, always returns 200.
+     */
+    public function track(Request $request, Property $property): JsonResponse
+    {
+        $event = $request->input('event');
+
+        $increments = match ($event) {
+            'phone_click' => ['phone_clicks' => 1],
+            'email_click' => ['email_clicks' => 1],
+            'share_click' => ['share_clicks' => 1],
+            default => [],
+        };
+
+        if (! empty($increments) && $property->store_id) {
+            PropertyAnalytic::record($property->id, $property->store_id, $increments);
+        }
+
+        return response()->json(['ok' => true]);
     }
 
     /**

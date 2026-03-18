@@ -78,18 +78,18 @@ const stockLabel = computed(() => {
   return `${stock} pieces available`;
 });
 
+useSeoMeta(() => ({
+  title: product.value?.name || null,
+  description: product.value?.description || null,
+  ogImage: product.value?.thumbnail || product.value?.images?.[0] || null,
+  ogType: "product",
+}));
+
 onMounted(async () => {
   try {
     const { data } = await productsApi.show(route.params.id);
     product.value = data;
     selectedVariantId.value = data.variants?.[0]?.id ?? null;
-
-    useSeoMeta({
-      title: data.name,
-      description: data.description || null,
-      ogImage: data.thumbnail || data.images?.[0] || null,
-      ogType: "product",
-    });
   } finally {
     loading.value = false;
   }
