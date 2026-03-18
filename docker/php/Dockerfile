@@ -1,5 +1,6 @@
 # Use FrankenPHP - it includes the web server and PHP 8.4
-FROM dunglas/frankenphp:1.3-php8.4-bookworm
+# 1.12.1 is built with Go 1.25+, which patches CVE-2025-68121 (crypto/tls session resumption)
+FROM dunglas/frankenphp:1.12.1-php8.4-bookworm
 
 # Metadata
 LABEL org.opencontainers.image.source=https://github.com/doedoe123-boop/negosyohub
