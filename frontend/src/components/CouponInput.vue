@@ -39,7 +39,7 @@ function removeCoupon() {
 
 <template>
   <div class="space-y-2">
-    <label class="block text-xs font-medium text-slate-600">
+    <label class="theme-text-muted block text-xs font-medium">
       Coupon Code
     </label>
 
@@ -68,13 +68,13 @@ function removeCoupon() {
         v-model="code"
         type="text"
         placeholder="Enter coupon code"
-        class="flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-colors focus:border-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        class="theme-input flex-1 rounded-xl px-3 py-2.5 text-sm"
         @keyup.enter="applyCoupon"
       />
       <button
         type="button"
         :disabled="loading || !code.trim()"
-        class="shrink-0 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+        class="btn-brand shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
         @click="applyCoupon"
       >
         {{ loading ? "Checking…" : "Apply" }}

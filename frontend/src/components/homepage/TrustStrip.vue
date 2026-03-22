@@ -68,7 +68,8 @@ const signals = computed(() => [
 
 <template>
   <section
-    class="border-y border-slate-100 bg-white py-10 dark:bg-slate-900 dark:border-slate-800"
+    class="theme-page-section border-y py-10"
+    style="border-color: var(--color-border)"
   >
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <!-- Heading -->
@@ -78,7 +79,7 @@ const signals = computed(() => [
         >
           Trust & Security
         </p>
-        <h3 class="mt-1 text-lg font-bold text-slate-900">
+        <h3 class="theme-title mt-1 text-lg font-bold">
           Why Filipinos trust NegosyoHub
         </h3>
       </div>
@@ -88,7 +89,7 @@ const signals = computed(() => [
         <div
           v-for="signal in signals"
           :key="signal.label"
-          class="flex flex-col items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 text-center transition-all hover:border-emerald-100 hover:bg-emerald-50/30 dark:bg-slate-800/60 dark:border-slate-700 dark:hover:border-emerald-800"
+          class="theme-card-muted flex flex-col items-center gap-2 rounded-2xl p-4 text-center transition-all hover:border-emerald-100 hover:bg-emerald-50/30"
         >
           <!-- Icon -->
           <div
@@ -164,17 +165,17 @@ const signals = computed(() => [
           </div>
 
           <div>
-            <p class="text-sm font-semibold text-slate-800">
+            <p class="theme-title text-sm font-semibold">
               {{ signal.label }}
             </p>
-            <p class="mt-0.5 text-xs text-slate-400">{{ signal.sublabel }}</p>
+            <p class="theme-copy mt-0.5 text-xs">{{ signal.sublabel }}</p>
           </div>
         </div>
       </div>
 
       <!-- Secure data note -->
       <p
-        class="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-400"
+        class="theme-copy mt-6 flex items-center justify-center gap-1.5 text-xs"
       >
         <svg
           class="size-3.5 text-emerald-500"

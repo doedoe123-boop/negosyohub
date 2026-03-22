@@ -80,7 +80,7 @@ async function addToCart(product) {
 </script>
 
 <template>
-  <div>
+  <div class="theme-page">
     <!-- Skeleton -->
     <div v-if="loading" class="animate-pulse">
       <!-- Banner -->
@@ -151,7 +151,11 @@ async function addToCart(product) {
         <div class="relative -mt-10 mb-6 flex items-end gap-4">
           <div
             v-if="store.logo"
-            class="size-[100px] shrink-0 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg dark:border-slate-700 dark:bg-slate-700"
+            class="size-[100px] shrink-0 overflow-hidden rounded-full shadow-lg"
+            style="
+              border: 4px solid var(--color-surface);
+              background-color: var(--color-surface);
+            "
           >
             <img
               :src="store.logo"
@@ -169,7 +173,7 @@ async function addToCart(product) {
           <div class="mb-2 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2 sm:gap-3">
               <h1
-                class="text-3xl font-bold leading-tight text-[#0F2044] break-words"
+                class="theme-title break-words text-3xl font-bold leading-tight"
               >
                 {{ store.name }}
               </h1>
@@ -180,7 +184,7 @@ async function addToCart(product) {
                 {{ store.sector_label ?? store.sector }}
               </span>
             </div>
-            <p v-if="store.tagline" class="text-slate-500 font-medium mt-1">
+            <p v-if="store.tagline" class="theme-copy mt-1 font-medium">
               {{ store.tagline }}
             </p>
           </div>
@@ -190,19 +194,19 @@ async function addToCart(product) {
           <!-- Left Sidebar (Contact Info) -->
           <div class="space-y-4">
             <div
-              class="flex items-start gap-4 p-4 rounded-2xl bg-white shadow-sm border border-slate-100 dark:bg-slate-800 dark:border-slate-700"
+              class="theme-card flex items-start gap-4 rounded-2xl p-4"
             >
               <PhoneIcon class="size-5 text-brand-600 shrink-0" />
               <div class="flex flex-col min-w-0">
-                <span class="text-sm font-bold text-[#0F2044] truncate">{{
+                <span class="theme-title truncate text-sm font-bold">{{
                   store.phone || "N/A"
                 }}</span>
-                <span class="text-xs text-slate-500">Official Contact</span>
+                <span class="theme-copy text-xs">Official Contact</span>
               </div>
             </div>
 
             <div
-              class="flex items-start gap-4 p-4 rounded-2xl bg-white shadow-sm border border-slate-100 hover:bg-slate-50 transition-colors dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700"
+              class="theme-card flex items-start gap-4 rounded-2xl p-4 transition-colors hover:bg-[var(--color-surface-muted)]"
             >
               <GlobeAltIcon class="size-5 text-brand-600 shrink-0" />
               <div class="flex flex-col min-w-0">
@@ -210,27 +214,27 @@ async function addToCart(product) {
                   v-if="store.website"
                   :href="store.website"
                   target="_blank"
-                  class="text-sm font-bold text-[#0F2044] hover:text-brand-600 transition-colors truncate"
+                  class="theme-title truncate text-sm font-bold transition-colors hover:text-brand-600"
                   >{{ store.website.replace(/^https?:\/\//, "") }}</a
                 >
-                <span v-else class="text-sm font-bold text-[#0F2044]">N/A</span>
-                <span class="text-xs text-slate-500">Website</span>
+                <span v-else class="theme-title text-sm font-bold">N/A</span>
+                <span class="theme-copy text-xs">Website</span>
               </div>
             </div>
 
             <div
-              class="flex items-start gap-4 p-4 rounded-2xl bg-white shadow-sm border border-slate-100 dark:bg-slate-800 dark:border-slate-700"
+              class="theme-card flex items-start gap-4 rounded-2xl p-4"
             >
               <MapPinIcon class="size-5 text-brand-600 shrink-0 mt-0.5" />
               <div class="flex flex-col min-w-0">
-                <span class="text-sm font-bold text-[#0F2044] leading-snug">
+                <span class="theme-title text-sm font-bold leading-snug">
                   {{
                     store.address?.line_one
                       ? store.address.line_one + ", "
                       : ""
                   }}{{ store.address?.city || "Location unavailable" }}
                 </span>
-                <span class="text-xs text-slate-500 mt-0.5"
+                <span class="theme-copy mt-0.5 text-xs"
                   >Store Location</span
                 >
               </div>
@@ -239,12 +243,12 @@ async function addToCart(product) {
             <!-- Description Box -->
             <div
               v-if="store.description"
-              class="p-5 rounded-2xl bg-slate-50 border border-slate-100 mt-6 dark:bg-slate-800/60 dark:border-slate-700"
+              class="theme-card-muted mt-6 rounded-2xl p-5"
             >
-              <h3 class="text-sm font-bold text-[#0F2044] mb-2">
+              <h3 class="theme-title mb-2 text-sm font-bold">
                 {{ isRealEstate ? "About Agency" : "About Store" }}
               </h3>
-              <p class="text-xs leading-relaxed text-slate-600">
+              <p class="theme-copy text-xs leading-relaxed">
                 {{ store.description }}
               </p>
             </div>
@@ -255,24 +259,24 @@ async function addToCart(product) {
             <!-- ═══ Real Estate: Properties ═══ -->
             <template v-if="isRealEstate">
               <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-[#0F2044]">
+                <h2 class="theme-title text-xl font-bold">
                   Listed Properties
                 </h2>
               </div>
 
               <div
                 v-if="properties.length === 0"
-                class="rounded-2xl border border-slate-200 bg-white py-16 text-center shadow-sm dark:bg-slate-900 dark:border-slate-700"
+                class="theme-card rounded-2xl py-16 text-center"
               >
                 <div
                   class="mx-auto flex size-16 items-center justify-center rounded-full bg-slate-100 mb-4"
                 >
                   <span class="text-2xl">🏠</span>
                 </div>
-                <h3 class="text-lg font-bold text-[#0F2044]">
+                <h3 class="theme-title text-lg font-bold">
                   No Properties Listed
                 </h3>
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="theme-copy mt-1 text-sm">
                   This agency hasn't listed any properties yet.
                 </p>
               </div>
@@ -285,11 +289,12 @@ async function addToCart(product) {
                   v-for="property in properties"
                   :key="property.id"
                   :to="`/properties/${property.slug}`"
-                  class="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                  class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl transition-all duration-200"
                 >
                   <!-- Image -->
                   <div
-                    class="relative aspect-[4/3] bg-slate-50 overflow-hidden"
+                    class="relative aspect-[4/3] overflow-hidden"
+                    style="background-color: var(--color-surface-muted)"
                   >
                     <span
                       v-if="property.listing_type"
@@ -316,16 +321,16 @@ async function addToCart(product) {
 
                   <!-- Info -->
                   <div
-                    class="flex flex-1 flex-col p-4 border-t border-slate-50"
+                    class="theme-divider-soft flex flex-1 flex-col border-t p-4"
                   >
                     <p
-                      class="line-clamp-2 text-sm font-medium leading-snug text-[#0F2044] transition-colors group-hover:text-brand-600 min-h-[40px]"
+                      class="theme-title min-h-[40px] line-clamp-2 text-sm font-medium leading-snug transition-colors group-hover:text-brand-600"
                     >
                       {{ property.title }}
                     </p>
                     <p
                       v-if="property.city"
-                      class="mt-1 flex items-center gap-1 text-xs text-slate-500"
+                      class="theme-copy mt-1 flex items-center gap-1 text-xs"
                     >
                       <MapPinIcon class="size-3.5 shrink-0" />
                       {{ property.city }}
@@ -343,7 +348,7 @@ async function addToCart(product) {
                         property.bathrooms ||
                         property.floor_area
                       "
-                      class="mt-3 flex flex-wrap gap-3 text-xs text-slate-500 border-t border-slate-50 pt-3"
+                      class="theme-copy theme-divider-soft mt-3 flex flex-wrap gap-3 border-t pt-3 text-xs"
                     >
                       <span v-if="property.bedrooms"
                         >🛏️ {{ property.bedrooms }} bed</span
@@ -363,24 +368,24 @@ async function addToCart(product) {
             <!-- ═══ E-Commerce / Other: Products ═══ -->
             <template v-else>
               <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-[#0F2044]">
+                <h2 class="theme-title text-xl font-bold">
                   Featured Products
                 </h2>
               </div>
 
               <div
                 v-if="products.length === 0"
-                class="rounded-2xl border border-slate-200 bg-white py-16 text-center shadow-sm dark:bg-slate-900 dark:border-slate-700"
+                class="theme-card rounded-2xl py-16 text-center"
               >
                 <div
                   class="mx-auto flex size-16 items-center justify-center rounded-full bg-slate-100 mb-4"
                 >
                   <span class="text-2xl">🛍️</span>
                 </div>
-                <h3 class="text-lg font-bold text-[#0F2044]">
+                <h3 class="theme-title text-lg font-bold">
                   No Products Found
                 </h3>
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="theme-copy mt-1 text-sm">
                   This store hasn't listed any products yet.
                 </p>
               </div>
@@ -392,12 +397,13 @@ async function addToCart(product) {
                 <div
                   v-for="product in products"
                   :key="product.id"
-                  class="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:bg-slate-800 dark:border-slate-700"
+                  class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl transition-all duration-200"
                 >
                   <!-- Image -->
                   <RouterLink
                     :to="`/products/${product.id}`"
-                    class="block relative aspect-square bg-slate-50 overflow-hidden"
+                    class="block relative aspect-square overflow-hidden"
+                    style="background-color: var(--color-surface-muted)"
                   >
                     <span
                       v-if="
@@ -432,11 +438,11 @@ async function addToCart(product) {
 
                   <!-- Info -->
                   <div
-                    class="flex flex-1 flex-col p-4 border-t border-slate-50"
+                    class="theme-divider-soft flex flex-1 flex-col border-t p-4"
                   >
                     <RouterLink :to="`/products/${product.id}`">
                       <p
-                        class="line-clamp-2 text-sm font-medium leading-snug text-[#0F2044] transition-colors group-hover:text-brand-600 min-h-[40px]"
+                        class="theme-title min-h-[40px] line-clamp-2 text-sm font-medium leading-snug transition-colors group-hover:text-brand-600"
                       >
                         {{ product.name }}
                       </p>

@@ -123,11 +123,11 @@ async function setDefault(id) {
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8 sm:px-0">
     <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+      <h1 class="theme-title text-2xl font-extrabold tracking-tight">
         Addresses
       </h1>
       <button
-        class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-2 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700"
+        class="btn-primary flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all"
         @click="openAdd"
       >
         <PlusIcon class="size-4" />
@@ -137,21 +137,17 @@ async function setDefault(id) {
 
     <!-- Skeleton -->
     <div v-if="loading" class="space-y-3">
-      <div
-        v-for="i in 2"
-        :key="i"
-        class="h-24 animate-pulse rounded-2xl bg-slate-100"
-      />
+      <div v-for="i in 2" :key="i" class="theme-skeleton h-24 animate-pulse rounded-2xl" />
     </div>
 
     <!-- Empty -->
     <div
       v-else-if="addresses.length === 0"
-      class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center"
+      class="theme-empty-state rounded-2xl py-14 text-center"
     >
-      <MapPinIcon class="mx-auto mb-3 size-10 text-slate-300" />
-      <p class="font-medium text-slate-500">No saved addresses</p>
-      <p class="mt-1 text-sm text-slate-400">
+      <MapPinIcon class="theme-copy mx-auto mb-3 size-10" />
+      <p class="theme-copy font-medium">No saved addresses</p>
+      <p class="theme-copy mt-1 text-sm">
         Add an address to speed up checkout.
       </p>
     </div>
@@ -161,13 +157,13 @@ async function setDefault(id) {
       <li
         v-for="addr in addresses"
         :key="addr.id"
-        class="rounded-2xl border bg-white p-5 shadow-sm transition-colors"
-        :class="addr.is_default ? 'border-brand-300' : 'border-slate-200'"
+        class="theme-card rounded-2xl p-5 transition-colors"
+        :class="addr.is_default ? 'border-brand-300' : ''"
       >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 flex-1">
             <div class="mb-1 flex flex-wrap items-center gap-2">
-              <span class="text-sm font-semibold text-slate-900">{{
+              <span class="theme-title text-sm font-semibold">{{
                 addr.label || "Address"
               }}</span>
               <span
@@ -176,7 +172,7 @@ async function setDefault(id) {
                 >Default</span
               >
             </div>
-            <p class="text-sm text-slate-600 leading-relaxed">
+            <p class="theme-copy text-sm leading-relaxed">
               {{ addr.line1
               }}<template v-if="addr.line2">, {{ addr.line2 }}</template>
               <br />
@@ -189,19 +185,19 @@ async function setDefault(id) {
           <div class="flex shrink-0 items-center gap-1">
             <button
               v-if="!addr.is_default"
-              class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              class="theme-copy rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
               @click="setDefault(addr.id)"
             >
               Set default
             </button>
             <button
-              class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              class="theme-copy rounded-lg p-1.5 transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
               @click="openEdit(addr)"
             >
               <PencilIcon class="size-4" />
             </button>
             <button
-              class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+              class="theme-copy rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500"
               :disabled="deletingId === addr.id"
               @click="remove(addr.id)"
             >
@@ -216,14 +212,11 @@ async function setDefault(id) {
     <Teleport to="body">
       <div
         v-if="showModal"
-        class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+        class="theme-overlay fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
         @click.self="showModal = false"
       >
-        <div
-          class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
-          @click.stop
-        >
-          <h2 class="mb-5 text-lg font-bold text-slate-900">
+        <div class="theme-modal w-full max-w-lg rounded-2xl p-6 shadow-xl" @click.stop>
+          <h2 class="theme-title mb-5 text-lg font-bold">
             {{ editingId ? "Edit Address" : "New Address" }}
           </h2>
 
@@ -232,7 +225,7 @@ async function setDefault(id) {
             <div>
               <label
                 for="addr-label"
-                class="mb-1 block text-xs font-medium text-slate-600"
+                class="theme-copy mb-1 block text-xs font-medium"
                 >Label (e.g. Home, Office)</label
               >
               <input
@@ -240,7 +233,7 @@ async function setDefault(id) {
                 v-model="form.label"
                 type="text"
                 placeholder="Home"
-                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+                class="theme-input w-full rounded-xl px-3 py-2 text-sm"
               />
             </div>
 
@@ -248,7 +241,7 @@ async function setDefault(id) {
             <div>
               <label
                 for="addr-line1"
-                class="mb-1 block text-xs font-medium text-slate-600"
+                class="theme-copy mb-1 block text-xs font-medium"
                 >Address Line 1 <span class="text-red-500">*</span></label
               >
               <input
@@ -257,8 +250,8 @@ async function setDefault(id) {
                 type="text"
                 required
                 placeholder="House no., Street"
-                class="w-full rounded-xl border px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
-                :class="errors.line1 ? 'border-red-300' : 'border-slate-200'"
+                class="theme-input w-full rounded-xl px-3 py-2 text-sm"
+                :class="errors.line1 ? 'border-red-300' : ''"
               />
               <p v-if="errors.line1" class="mt-0.5 text-xs text-red-600">
                 {{ errors.line1[0] }}
@@ -269,7 +262,7 @@ async function setDefault(id) {
             <div>
               <label
                 for="addr-line2"
-                class="mb-1 block text-xs font-medium text-slate-600"
+                class="theme-copy mb-1 block text-xs font-medium"
                 >Address Line 2 (optional)</label
               >
               <input
@@ -277,26 +270,26 @@ async function setDefault(id) {
                 v-model="form.line2"
                 type="text"
                 placeholder="Building, Floor, Unit"
-                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+                class="theme-input w-full rounded-xl px-3 py-2 text-sm"
               />
             </div>
 
             <!-- Barangay / City / Province / Postal -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="mb-1 block text-xs font-medium text-slate-600"
+                <label class="theme-copy mb-1 block text-xs font-medium"
                   >Barangay</label
                 >
                 <input
                   v-model="form.barangay"
                   type="text"
-                  class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+                  class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                 />
               </div>
               <div>
                 <label
                   for="addr-city"
-                  class="mb-1 block text-xs font-medium text-slate-600"
+                  class="theme-copy mb-1 block text-xs font-medium"
                   >City / Municipality
                   <span class="text-red-500">*</span></label
                 >
@@ -305,14 +298,14 @@ async function setDefault(id) {
                   v-model="form.city"
                   type="text"
                   required
-                  class="w-full rounded-xl border px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
-                  :class="errors.city ? 'border-red-300' : 'border-slate-200'"
+                  class="theme-input w-full rounded-xl px-3 py-2 text-sm"
+                  :class="errors.city ? 'border-red-300' : ''"
                 />
               </div>
               <div>
                 <label
                   for="addr-province"
-                  class="mb-1 block text-xs font-medium text-slate-600"
+                  class="theme-copy mb-1 block text-xs font-medium"
                   >Province <span class="text-red-500">*</span></label
                 >
                 <input
@@ -320,16 +313,16 @@ async function setDefault(id) {
                   v-model="form.province"
                   type="text"
                   required
-                  class="w-full rounded-xl border px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+                  class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                   :class="
-                    errors.province ? 'border-red-300' : 'border-slate-200'
+                    errors.province ? 'border-red-300' : ''
                   "
                 />
               </div>
               <div>
                 <label
                   for="addr-postal"
-                  class="mb-1 block text-xs font-medium text-slate-600"
+                  class="theme-copy mb-1 block text-xs font-medium"
                   >Postal Code <span class="text-red-500">*</span></label
                 >
                 <input
@@ -337,9 +330,9 @@ async function setDefault(id) {
                   v-model="form.postal_code"
                   type="text"
                   required
-                  class="w-full rounded-xl border px-3 py-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+                  class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                   :class="
-                    errors.postal_code ? 'border-red-300' : 'border-slate-200'
+                    errors.postal_code ? 'border-red-300' : ''
                   "
                 />
               </div>
@@ -350,9 +343,10 @@ async function setDefault(id) {
               <input
                 v-model="form.is_default"
                 type="checkbox"
-                class="size-4 rounded border-slate-300 accent-brand-600"
+                class="size-4 rounded accent-brand-600"
+                style="border-color: var(--color-border)"
               />
-              <span class="text-sm text-slate-700"
+              <span class="theme-title text-sm"
                 >Set as default delivery address</span
               >
             </label>
@@ -361,7 +355,7 @@ async function setDefault(id) {
             <div class="flex justify-end gap-3 pt-1">
               <button
                 type="button"
-                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                class="btn-secondary rounded-xl px-4 py-2 text-sm font-medium transition-colors"
                 @click="showModal = false"
               >
                 Cancel
@@ -369,7 +363,7 @@ async function setDefault(id) {
               <button
                 type="submit"
                 :disabled="saving"
-                class="rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700 disabled:opacity-60"
+                class="btn-primary rounded-xl px-5 py-2 text-sm font-bold transition-all disabled:opacity-60"
               >
                 {{ saving ? "Saving…" : "Save Address" }}
               </button>

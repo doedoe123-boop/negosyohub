@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-  <section class="bg-gradient-to-b from-slate-50 to-white py-12">
+  <section class="theme-page-section-muted py-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <!-- Header -->
       <div class="mb-7 flex items-end justify-between">
@@ -18,8 +18,8 @@ defineProps({
           >
             Real Estate
           </p>
-          <h2 class="text-2xl font-bold text-slate-900">Verified Properties</h2>
-          <p class="mt-1 text-sm text-slate-500">
+          <h2 class="theme-title text-2xl font-bold">Verified Properties</h2>
+          <p class="theme-copy mt-1 text-sm">
             Government-verified listings from trusted agencies across the
             Philippines.
           </p>
@@ -53,13 +53,16 @@ defineProps({
         <div
           v-for="i in 4"
           :key="i"
-          class="animate-pulse rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700"
+          class="theme-card animate-pulse rounded-2xl"
         >
-          <div class="aspect-[16/9] rounded-t-2xl bg-slate-100" />
+          <div
+            class="aspect-[16/9] rounded-t-2xl"
+            style="background-color: var(--color-surface-muted)"
+          />
           <div class="p-4 space-y-2">
-            <div class="h-4 w-3/4 rounded bg-slate-100" />
-            <div class="h-3 w-1/2 rounded bg-slate-100" />
-            <div class="h-5 w-1/3 rounded bg-slate-200" />
+            <div class="h-4 w-3/4 rounded" style="background-color: var(--color-surface-muted)" />
+            <div class="h-3 w-1/2 rounded" style="background-color: var(--color-surface-muted)" />
+            <div class="h-5 w-1/3 rounded" style="background-color: color-mix(in srgb, var(--color-border) 80%, transparent)" />
           </div>
         </div>
       </div>
@@ -67,10 +70,10 @@ defineProps({
       <!-- Empty -->
       <div
         v-else-if="properties.length === 0"
-        class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center dark:bg-slate-900 dark:border-slate-700"
+        class="theme-card rounded-2xl border-dashed py-14 text-center"
       >
         <p class="text-2xl mb-2">🏡</p>
-        <p class="text-sm font-medium text-slate-500">
+        <p class="theme-copy text-sm font-medium">
           No verified listings yet — check back soon!
         </p>
       </div>

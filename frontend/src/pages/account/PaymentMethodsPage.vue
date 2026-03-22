@@ -63,11 +63,11 @@ const brandColor = {
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8 sm:px-0">
     <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+      <h1 class="theme-title text-2xl font-extrabold tracking-tight">
         Payment Methods
       </h1>
       <!-- Add card via PayMongo — redirect to checkout for now -->
-      <p class="text-xs text-slate-400">Cards are saved during checkout</p>
+      <p class="theme-copy text-xs">Cards are saved during checkout</p>
     </div>
 
     <!-- Info banner -->
@@ -83,21 +83,17 @@ const brandColor = {
 
     <!-- Skeleton -->
     <div v-if="loading" class="space-y-3">
-      <div
-        v-for="i in 2"
-        :key="i"
-        class="h-20 animate-pulse rounded-2xl bg-slate-100"
-      />
+      <div v-for="i in 2" :key="i" class="theme-skeleton h-20 animate-pulse rounded-2xl" />
     </div>
 
     <!-- Empty -->
     <div
       v-else-if="methods.length === 0"
-      class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center"
+      class="theme-empty-state rounded-2xl py-14 text-center"
     >
-      <CreditCardIcon class="mx-auto mb-3 size-10 text-slate-300" />
-      <p class="font-medium text-slate-500">No saved payment methods</p>
-      <p class="mt-1 text-sm text-slate-400">
+      <CreditCardIcon class="theme-copy mx-auto mb-3 size-10" />
+      <p class="theme-copy font-medium">No saved payment methods</p>
+      <p class="theme-copy mt-1 text-sm">
         Cards saved during checkout will appear here.
       </p>
     </div>
@@ -107,20 +103,20 @@ const brandColor = {
       <li
         v-for="method in methods"
         :key="method.id"
-        class="flex items-center gap-4 rounded-2xl border bg-white p-5 shadow-sm transition-colors"
-        :class="method.is_default ? 'border-brand-300' : 'border-slate-200'"
+        class="theme-card flex items-center gap-4 rounded-2xl p-5 transition-colors"
+        :class="method.is_default ? 'border-brand-300' : ''"
       >
         <!-- Brand icon placeholder -->
         <div
-          class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold"
-          :class="brandColor[method.brand] ?? 'text-slate-600'"
+          class="theme-icon-muted flex size-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
+          :class="brandColor[method.brand] ?? 'theme-copy'"
         >
           {{ brandLabel[method.brand] ?? method.brand?.toUpperCase() }}
         </div>
 
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <p class="text-sm font-semibold text-slate-900">
+            <p class="theme-title text-sm font-semibold">
               •••• {{ method.last4 }}
             </p>
             <span
@@ -129,7 +125,7 @@ const brandColor = {
               >Default</span
             >
           </div>
-          <p class="text-xs text-slate-400">
+          <p class="theme-copy text-xs">
             Expires {{ method.exp_month }}/{{ method.exp_year }}
           </p>
         </div>
@@ -138,14 +134,14 @@ const brandColor = {
         <div class="flex shrink-0 items-center gap-1">
           <button
             v-if="!method.is_default"
-            class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+            class="theme-copy flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
             @click="setDefault(method.id)"
           >
             <CheckCircleIcon class="size-3.5" />
             Set default
           </button>
           <button
-            class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+            class="theme-copy rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500"
             :disabled="deletingId === method.id"
             @click="remove(method.id)"
           >

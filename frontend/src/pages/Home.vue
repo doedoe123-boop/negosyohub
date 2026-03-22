@@ -120,7 +120,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="theme-page">
     <!-- ── 1. Hero ──────────────────────────────────────────────────── -->
     <div class="bg-navy-900">
       <DicedHeroSection
@@ -174,14 +174,15 @@ onMounted(async () => {
 
     <!-- ── 4. Sector picker ────────────────────────────────────────── -->
     <section
-      class="border-b border-slate-100 bg-white px-4 py-12 sm:px-6 dark:bg-slate-900 dark:border-slate-800"
+      class="theme-page-section border-b px-4 py-12 sm:px-6"
+      style="border-color: var(--color-border)"
     >
       <div class="mx-auto max-w-7xl">
         <div class="mb-7 text-center">
-          <h2 class="text-2xl font-bold text-slate-900">
+          <h2 class="theme-title text-2xl font-bold">
             What are you looking for?
           </h2>
-          <p class="mt-1.5 text-sm text-slate-500">
+          <p class="theme-copy mt-1.5 text-sm">
             Browse our growing list of local sectors.
           </p>
         </div>
@@ -194,8 +195,8 @@ onMounted(async () => {
             class="group relative flex items-start gap-4 rounded-2xl border p-6 transition-all"
             :class="
               sector.soon
-                ? 'cursor-not-allowed bg-slate-50 opacity-60 dark:bg-slate-800'
-                : 'cursor-pointer bg-white sector-card hover:-translate-y-0.5 dark:bg-slate-800'
+                ? 'theme-card-muted cursor-not-allowed opacity-60'
+                : 'theme-card theme-card-hover cursor-pointer sector-card'
             "
           >
             <span
@@ -205,7 +206,7 @@ onMounted(async () => {
               <component :is="sector.icon" class="size-6" />
             </span>
             <div class="min-w-0">
-              <p class="flex items-center gap-2 font-semibold text-slate-800">
+              <p class="theme-title flex items-center gap-2 font-semibold">
                 {{ sector.label }}
                 <span
                   v-if="sector.soon"
@@ -214,13 +215,14 @@ onMounted(async () => {
                   >Coming Soon</span
                 >
               </p>
-              <p class="mt-0.5 text-sm text-slate-500 line-clamp-2">
+              <p class="theme-copy mt-0.5 text-sm line-clamp-2">
                 {{ sector.description }}
               </p>
             </div>
             <svg
               v-if="!sector.soon"
-              class="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-slate-300 transition-all group-hover:text-emerald-400 group-hover:translate-x-0.5"
+              class="absolute right-4 top-1/2 size-4 -translate-y-1/2 transition-all group-hover:text-emerald-400 group-hover:translate-x-0.5"
+              style="color: var(--color-text-muted)"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -247,7 +249,7 @@ onMounted(async () => {
     <TrendingCarousel :products="featuredProducts" :loading="productsLoading" />
 
     <!-- ── 7. Featured Stores Spotlight ─────────────────────────────── -->
-    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <section class="theme-page-section mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div class="mb-5 flex items-end justify-between">
         <div>
           <p
@@ -255,7 +257,7 @@ onMounted(async () => {
           >
             Discover
           </p>
-          <h2 class="text-2xl font-bold text-slate-900">Featured Stores</h2>
+          <h2 class="theme-title text-2xl font-bold">Featured Stores</h2>
         </div>
         <RouterLink
           to="/stores"
@@ -283,7 +285,8 @@ onMounted(async () => {
         <div
           v-for="i in 3"
           :key="i"
-          class="h-36 animate-pulse rounded-2xl bg-slate-100"
+          class="h-36 animate-pulse rounded-2xl"
+          style="background-color: var(--color-surface-muted)"
         />
       </div>
 
@@ -355,9 +358,12 @@ onMounted(async () => {
           v-for="store in featuredStores.slice(3)"
           :key="store.id"
           :to="`/stores/${store.slug}`"
-          class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white hover:-translate-y-0.5 transition-all store-card dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl transition-all store-card"
         >
-          <div class="aspect-[3/2] w-full overflow-hidden bg-slate-100">
+          <div
+            class="aspect-[3/2] w-full overflow-hidden"
+            style="background-color: var(--color-surface-muted)"
+          >
             <img
               v-if="store.banner_url"
               :src="store.banner_url"
@@ -383,21 +389,26 @@ onMounted(async () => {
               v-if="store.logo_url"
               :src="store.logo_url"
               :alt="store.name"
-              class="size-10 shrink-0 rounded-xl bg-slate-100 object-cover ring-2 ring-white shadow-sm dark:ring-slate-700"
+              class="size-10 shrink-0 rounded-xl object-cover shadow-sm"
+              style="
+                background-color: var(--color-surface-muted);
+                box-shadow: 0 0 0 2px var(--color-surface);
+              "
             />
             <div
               v-else
-              class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg"
+              class="flex size-10 shrink-0 items-center justify-center rounded-xl text-lg"
+              style="background-color: var(--color-surface-muted)"
             >
               🏪
             </div>
             <div class="min-w-0">
               <p
-                class="truncate text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors"
+                class="theme-title truncate text-sm font-semibold transition-colors group-hover:text-emerald-700"
               >
                 {{ store.name }}
               </p>
-              <p class="text-xs text-slate-400">
+              <p class="theme-copy text-xs">
                 {{ store.sector_label ?? store.sector }}
               </p>
             </div>
@@ -413,15 +424,16 @@ onMounted(async () => {
         <div
           v-for="i in 4"
           :key="i"
-          class="h-44 animate-pulse rounded-2xl bg-slate-100"
+          class="h-44 animate-pulse rounded-2xl"
+          style="background-color: var(--color-surface-muted)"
         />
       </div>
       <div
         v-else-if="featuredStores.length === 0"
-        class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center dark:bg-slate-900 dark:border-slate-700"
+        class="theme-card rounded-2xl border-dashed py-14 text-center"
       >
         <p class="text-2xl mb-2">🏪</p>
-        <p class="text-sm font-medium text-slate-500">
+        <p class="theme-copy text-sm font-medium">
           No featured stores yet — check back soon!
         </p>
       </div>

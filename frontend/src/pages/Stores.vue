@@ -79,7 +79,7 @@ watch(
 </script>
 
 <template>
-  <div>
+  <div class="theme-page">
     <!-- Page header with integrated search -->
     <div
       class="relative overflow-hidden py-14 text-white"
@@ -138,14 +138,20 @@ watch(
         <form class="mt-8 flex max-w-xl gap-3" @submit.prevent="onSearch">
           <div class="relative flex-1">
             <MagnifyingGlassIcon
-              class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-slate-400"
+              class="absolute left-4 top-1/2 size-5 -translate-y-1/2"
+              style="color: color-mix(in srgb, var(--color-primary) 35%, white 20%)"
             />
             <input
               ref="searchInputRef"
               v-model="search"
               type="search"
               placeholder="Search stores by name or location…"
-              class="w-full rounded-2xl border-0 bg-white shadow-xl py-3.5 pl-12 pr-4 text-sm text-[#0F2044] font-medium placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-500/30 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
+              class="w-full rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium shadow-xl theme-input"
+              style="
+                background-color: var(--color-surface);
+                color: var(--color-primary);
+                border-color: transparent;
+              "
             />
           </div>
           <button
@@ -158,7 +164,7 @@ watch(
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div class="theme-page-section mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <!-- Sector filter pills -->
       <div class="mb-7 flex flex-wrap gap-2">
         <button
@@ -168,8 +174,8 @@ watch(
           class="rounded-full px-4 py-1.5 text-sm font-medium transition-all"
           :class="
             sector === s.value
-              ? 'bg-brand-500 text-white shadow-sm'
-              : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600'
+              ? 'chip-filter-active'
+              : 'chip-filter'
           "
           @click="setSector(s.value)"
         >
@@ -185,7 +191,8 @@ watch(
         <div
           v-for="i in 12"
           :key="i"
-          class="h-52 animate-pulse rounded-2xl bg-slate-100"
+          class="h-52 animate-pulse rounded-2xl"
+          style="background-color: var(--color-surface-muted)"
         />
       </div>
 
@@ -207,16 +214,16 @@ watch(
       <!-- Empty -->
       <div
         v-else-if="stores.length === 0"
-        class="rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center dark:bg-slate-900 dark:border-slate-700"
+        class="theme-card rounded-2xl border-dashed py-20 text-center"
       >
         <p class="text-2xl mb-3">🔍</p>
-        <p class="font-medium text-slate-600">No stores found</p>
-        <p class="mt-1 text-sm text-slate-400">
+        <p class="theme-title font-medium">No stores found</p>
+        <p class="theme-copy mt-1 text-sm">
           Try a different search term or sector filter.
         </p>
         <button
           type="button"
-          class="mt-5 inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
+          class="btn-secondary mt-5 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
           @click="
             search = '';
             sector = '';
@@ -236,10 +243,13 @@ watch(
           v-for="store in stores"
           :key="store.id"
           :to="`/stores/${store.slug}`"
-          class="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-brand-200 transition-all duration-300 dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-3xl transition-all duration-300"
         >
           <!-- Banner -->
-          <div class="relative h-32 w-full overflow-hidden bg-slate-100">
+          <div
+            class="relative h-32 w-full overflow-hidden"
+            style="background-color: var(--color-surface-muted)"
+          >
             <img
               v-if="store.banner_url"
               :src="store.banner_url"
@@ -271,7 +281,11 @@ watch(
             <div class="relative -mt-10 mb-3 flex justify-start">
               <div
                 v-if="store.logo_url"
-                class="size-20 overflow-hidden rounded-full border-4 border-white bg-white shadow-md relative z-10 transition-transform group-hover:scale-105 dark:border-slate-700 dark:bg-slate-700"
+                class="size-20 overflow-hidden rounded-full shadow-md relative z-10 transition-transform group-hover:scale-105"
+                style="
+                  border: 4px solid var(--color-surface);
+                  background-color: var(--color-surface);
+                "
               >
                 <img
                   :src="store.logo_url"
@@ -289,19 +303,19 @@ watch(
 
             <div class="min-w-0">
               <h3
-                class="truncate text-lg font-bold text-[#0F2044] leading-tight group-hover:text-brand-600 transition-colors"
+                class="theme-title truncate text-lg font-bold leading-tight transition-colors group-hover:text-brand-600"
               >
                 {{ store.name }}
               </h3>
               <p
                 v-if="store.tagline"
-                class="truncate text-sm text-slate-500 font-medium mt-0.5"
+                class="theme-copy mt-0.5 truncate text-sm font-medium"
               >
                 {{ store.tagline }}
               </p>
 
               <div
-                class="mt-4 flex items-center justify-between text-xs text-slate-500 font-medium pt-4 border-t border-slate-50"
+                class="theme-copy theme-divider-soft mt-4 flex items-center justify-between border-t pt-4 text-xs font-medium"
               >
                 <span class="flex items-center gap-1.5 truncate">
                   <MapPinIcon class="size-4 shrink-0 text-brand-500" />
@@ -309,7 +323,8 @@ watch(
                 </span>
                 <!-- Arrow indicator -->
                 <ChevronRightIcon
-                  class="size-5 shrink-0 text-slate-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all"
+                  class="size-5 shrink-0 transition-all group-hover:text-brand-500 group-hover:translate-x-0.5"
+                  style="color: var(--color-text-muted)"
                 />
               </div>
             </div>
@@ -326,8 +341,8 @@ watch(
           class="size-9 rounded-xl text-sm font-medium transition-all"
           :class="
             meta.current_page === page
-              ? 'bg-brand-500 text-white shadow-sm'
-              : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+              ? 'chip-filter-active'
+              : 'chip-filter'
           "
           @click="load(page)"
         >

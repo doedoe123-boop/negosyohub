@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router"
+import { RouterLink, RouterView } from "vue-router";
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
@@ -14,7 +14,7 @@ const stats = [
   { value: "500+", label: "Stores" },
   { value: "8", label: "Cities" },
   { value: "3", label: "Sectors" },
-]
+];
 </script>
 
 <template>
@@ -133,13 +133,13 @@ const stats = [
     </div>
 
     <!-- ─── Right: form area ──────────────────────────────────────────── -->
-    <div class="flex flex-1 flex-col items-center justify-center bg-white dark:bg-slate-900 px-6 py-12 lg:px-16 transition-colors">
+    <div class="theme-app flex flex-1 flex-col items-center justify-center px-6 py-12 lg:px-16 transition-colors">
       <!-- Mobile-only compact logo -->
       <RouterLink to="/" class="mb-8 flex items-center gap-2 lg:hidden group">
         <span class="flex size-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-white">
           N
         </span>
-        <span class="text-lg font-bold tracking-tight text-slate-900">
+        <span class="text-lg font-bold tracking-tight" style="color: var(--color-text)">
           Negosyo<span class="text-brand-500">Hub</span>
         </span>
       </RouterLink>

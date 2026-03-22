@@ -13,6 +13,8 @@ vi.mock("@heroicons/vue/24/outline", () => ({
   XMarkIcon: { template: "<svg />" },
   UserCircleIcon: { template: "<svg />" },
   MagnifyingGlassIcon: { template: "<svg />" },
+  MoonIcon: { template: "<svg />" },
+  SunIcon: { template: "<svg />" },
 }));
 
 const router = createRouter({

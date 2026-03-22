@@ -94,7 +94,11 @@ function onInputKeydown(e) {
           v-model="inputValue"
           type="text"
           placeholder="e.g. Cebu City"
-          class="ml-1 w-40 rounded-md border border-emerald-300 bg-white px-2 py-0.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-emerald-400"
+          class="ml-1 w-40 rounded-md border border-emerald-300 px-2 py-0.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
+          style="
+            background-color: var(--color-surface);
+            color: var(--color-text);
+          "
           @keydown="onInputKeydown"
           autofocus
         />

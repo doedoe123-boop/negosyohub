@@ -44,17 +44,17 @@ async function submit() {
 
 <template>
   <div class="mx-auto max-w-xl px-4 py-8 sm:px-0">
-    <h1 class="mb-6 text-2xl font-extrabold tracking-tight text-slate-900">
+    <h1 class="theme-title mb-6 text-2xl font-extrabold tracking-tight">
       Change Password
     </h1>
 
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="theme-card rounded-2xl p-6">
       <form class="space-y-5" @submit.prevent="submit">
         <!-- Current password -->
         <div>
           <label
             for="current-password"
-            class="mb-1.5 block text-sm font-medium text-slate-700"
+            class="theme-title mb-1.5 block text-sm font-medium"
             >Current Password</label
           >
           <input
@@ -63,7 +63,7 @@ async function submit() {
             type="password"
             required
             autocomplete="current-password"
-            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+            class="theme-input w-full rounded-xl px-4 py-2.5 text-sm"
             :class="{ 'border-red-300': errors.current_password }"
           />
           <p v-if="errors.current_password" class="mt-1 text-xs text-red-600">
@@ -75,7 +75,7 @@ async function submit() {
         <div>
           <label
             for="new-password"
-            class="mb-1.5 block text-sm font-medium text-slate-700"
+            class="theme-title mb-1.5 block text-sm font-medium"
             >New Password</label
           >
           <input
@@ -85,7 +85,7 @@ async function submit() {
             required
             minlength="8"
             autocomplete="new-password"
-            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+            class="theme-input w-full rounded-xl px-4 py-2.5 text-sm"
             :class="{ 'border-red-300': errors.password }"
           />
           <p v-if="errors.password" class="mt-1 text-xs text-red-600">
@@ -97,7 +97,7 @@ async function submit() {
         <div>
           <label
             for="confirm-password"
-            class="mb-1.5 block text-sm font-medium text-slate-700"
+            class="theme-title mb-1.5 block text-sm font-medium"
             >Confirm New Password</label
           >
           <input
@@ -106,7 +106,7 @@ async function submit() {
             type="password"
             required
             autocomplete="new-password"
-            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+            class="theme-input w-full rounded-xl px-4 py-2.5 text-sm"
           />
         </div>
 
@@ -121,7 +121,7 @@ async function submit() {
         <button
           type="submit"
           :disabled="saving"
-          class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700 disabled:opacity-60"
+          class="btn-primary w-full rounded-xl px-6 py-2.5 text-sm font-bold transition-all disabled:opacity-60"
         >
           {{ saving ? "Updating…" : "Update Password" }}
         </button>

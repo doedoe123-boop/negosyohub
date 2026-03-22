@@ -79,7 +79,7 @@ const inquiryStatusColors = {
   contacted: "bg-yellow-100 text-yellow-700",
   viewing_scheduled: "bg-purple-100 text-purple-700",
   negotiating: "bg-emerald-100 text-emerald-700",
-  closed: "bg-slate-100 text-slate-600",
+  closed: "theme-badge-neutral",
 };
 
 const bookingStatusColors = {
@@ -158,7 +158,7 @@ const quickLinks = [
     label: "My Profile",
     description: "Name, email and phone",
     icon: UserCircleIcon,
-    color: "bg-slate-100 text-slate-600 group-hover:bg-slate-200",
+    color: "theme-icon-muted theme-copy",
   },
   {
     to: "/account/settings",
@@ -174,16 +174,16 @@ const quickLinks = [
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
     <!-- Header -->
     <div class="mb-8">
-      <p class="text-sm text-slate-500">Welcome back,</p>
-      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+      <p class="theme-copy text-sm">Welcome back,</p>
+      <h1 class="theme-title text-3xl font-extrabold tracking-tight">
         {{ auth.user?.name }}
       </h1>
       <div
-        class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-500"
+        class="theme-copy mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm"
       >
         <span>{{ auth.user?.email }}</span>
         <span v-if="auth.user?.phone" class="flex items-center gap-1">
-          <span class="text-slate-300">·</span>
+          <span class="opacity-60">·</span>
           {{ auth.user?.phone }}
         </span>
       </div>
@@ -194,7 +194,7 @@ const quickLinks = [
       <div class="mb-3 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <BellAlertIcon class="size-4.5 text-brand-500" />
-          <h2 class="text-sm font-bold text-slate-900">
+          <h2 class="theme-title text-sm font-bold">
             Notifications
             <span
               class="ml-1 inline-flex size-5 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white"
@@ -219,13 +219,13 @@ const quickLinks = [
         >
           <BellIcon class="mt-0.5 size-4 shrink-0 text-brand-400" />
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-semibold text-slate-800">
+            <p class="theme-title text-sm font-semibold">
               {{ notif.data.title }}
             </p>
-            <p class="text-xs text-slate-500">{{ notif.data.body }}</p>
+            <p class="theme-copy text-xs">{{ notif.data.body }}</p>
           </div>
           <button
-            class="shrink-0 rounded-lg p-1 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500"
+            class="theme-copy shrink-0 rounded-lg p-1 transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
             title="Dismiss"
             @click="dismissNotification(notif.id)"
           >
@@ -241,7 +241,7 @@ const quickLinks = [
         v-for="link in quickLinks"
         :key="link.to"
         :to="link.to"
-        class="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+        class="theme-card theme-card-hover group flex items-center gap-4 rounded-2xl p-4"
       >
         <div
           class="flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors"
@@ -250,11 +250,11 @@ const quickLinks = [
           <component :is="link.icon" class="size-5" />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="font-semibold text-slate-900">{{ link.label }}</p>
-          <p class="truncate text-xs text-slate-500">{{ link.description }}</p>
+          <p class="theme-title font-semibold">{{ link.label }}</p>
+          <p class="theme-copy truncate text-xs">{{ link.description }}</p>
         </div>
         <ChevronRightIcon
-          class="size-4 shrink-0 text-slate-300 transition-colors group-hover:text-brand-500"
+          class="theme-copy size-4 shrink-0 transition-colors group-hover:text-brand-500"
         />
       </RouterLink>
     </div>
@@ -266,7 +266,7 @@ const quickLinks = [
         <div
           v-for="i in 3"
           :key="i"
-          class="h-16 animate-pulse rounded-2xl bg-slate-100"
+          class="theme-skeleton h-16 animate-pulse rounded-2xl"
         />
       </div>
 
@@ -275,8 +275,8 @@ const quickLinks = [
         <div>
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <ShoppingBagIcon class="size-4.5 text-slate-400" />
-              <h2 class="text-base font-bold text-slate-900">Recent Orders</h2>
+              <ShoppingBagIcon class="theme-copy size-4.5" />
+              <h2 class="theme-title text-base font-bold">Recent Orders</h2>
             </div>
             <RouterLink
               to="/account/orders"
@@ -288,13 +288,13 @@ const quickLinks = [
 
           <div
             v-if="recentOrders.length === 0"
-            class="rounded-2xl border border-dashed border-slate-200 bg-white py-8 text-center"
+            class="theme-empty-state rounded-2xl py-8 text-center"
           >
-            <ShoppingBagIcon class="mx-auto mb-2 size-8 text-slate-300" />
-            <p class="text-sm font-medium text-slate-500">No orders yet</p>
+            <ShoppingBagIcon class="theme-copy mx-auto mb-2 size-8" />
+            <p class="theme-copy text-sm font-medium">No orders yet</p>
             <RouterLink
               to="/stores"
-              class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700"
+              class="btn-primary mt-3 inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-bold transition-all"
             >
               Browse Stores
             </RouterLink>
@@ -304,29 +304,29 @@ const quickLinks = [
             <li v-for="order in recentOrders" :key="order.id">
               <RouterLink
                 :to="`/account/orders/${order.id}`"
-                class="group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-brand-200 hover:shadow-md"
+                class="theme-card theme-card-hover group flex items-center justify-between gap-3 rounded-2xl p-4"
               >
                 <div class="min-w-0">
-                  <p class="font-semibold text-slate-800">
+                  <p class="theme-title font-semibold">
                     Order #{{ order.id }}
                   </p>
-                  <p class="text-xs text-slate-400">{{ order.created_at }}</p>
+                  <p class="theme-copy text-xs">{{ order.created_at }}</p>
                 </div>
                 <div class="flex shrink-0 items-center gap-3">
                   <span
                     class="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
                     :class="
                       statusColors[order.status] ??
-                      'bg-slate-100 text-slate-500'
+                      'theme-badge-neutral'
                     "
                   >
                     {{ order.status }}
                   </span>
-                  <span class="hidden font-bold text-slate-900 sm:block">{{
+                  <span class="theme-title hidden font-bold sm:block">{{
                     order.total?.formatted
                   }}</span>
                   <ChevronRightIcon
-                    class="size-4 text-slate-300 transition-colors group-hover:text-brand-500"
+                    class="theme-copy size-4 transition-colors group-hover:text-brand-500"
                   />
                 </div>
               </RouterLink>
@@ -338,8 +338,8 @@ const quickLinks = [
         <div>
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <HeartIcon class="size-4.5 text-slate-400" />
-              <h2 class="text-base font-bold text-slate-900">
+              <HeartIcon class="theme-copy size-4.5" />
+              <h2 class="theme-title text-base font-bold">
                 My Property Inquiries
               </h2>
             </div>
@@ -353,16 +353,16 @@ const quickLinks = [
 
           <div
             v-if="recentInquiries.length === 0"
-            class="rounded-2xl border border-dashed border-slate-200 bg-white py-8 text-center"
+            class="theme-empty-state rounded-2xl py-8 text-center"
           >
-            <HomeModernIcon class="mx-auto mb-2 size-8 text-slate-300" />
-            <p class="text-sm font-medium text-slate-500">No inquiries yet</p>
-            <p class="mt-1 text-xs text-slate-400">
+            <HomeModernIcon class="theme-copy mx-auto mb-2 size-8" />
+            <p class="theme-copy text-sm font-medium">No inquiries yet</p>
+            <p class="theme-copy mt-1 text-xs">
               Browse properties and express your interest.
             </p>
             <RouterLink
               to="/properties"
-              class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700"
+              class="btn-primary mt-3 inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-bold transition-all"
             >
               Browse Properties
             </RouterLink>
@@ -372,7 +372,7 @@ const quickLinks = [
             <li v-for="inquiry in recentInquiries" :key="inquiry.id">
               <RouterLink
                 :to="`/properties/${inquiry.property?.slug}`"
-                class="group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-brand-200 hover:shadow-md"
+                class="theme-card theme-card-hover group flex items-center justify-between gap-3 rounded-2xl p-4"
               >
                 <div class="flex items-center gap-3 min-w-0">
                   <img
@@ -383,15 +383,15 @@ const quickLinks = [
                   />
                   <div
                     v-else
-                    class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-slate-100"
+                    class="theme-icon-muted flex size-12 shrink-0 items-center justify-center rounded-xl"
                   >
-                    <HomeModernIcon class="size-5 text-slate-400" />
+                    <HomeModernIcon class="theme-copy size-5" />
                   </div>
                   <div class="min-w-0">
-                    <p class="truncate font-semibold text-slate-800">
+                    <p class="theme-title truncate font-semibold">
                       {{ inquiry.property?.title }}
                     </p>
-                    <p class="text-xs text-slate-400">
+                    <p class="theme-copy text-xs">
                       {{ inquiry.store?.name }} ·
                       {{ inquiry.property?.city }}
                     </p>
@@ -402,13 +402,13 @@ const quickLinks = [
                     class="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
                     :class="
                       inquiryStatusColors[inquiry.status] ??
-                      'bg-slate-100 text-slate-500'
+                      'theme-badge-neutral'
                     "
                   >
                     {{ inquiry.status_label }}
                   </span>
                   <ChevronRightIcon
-                    class="size-4 text-slate-300 transition-colors group-hover:text-brand-500"
+                    class="theme-copy size-4 transition-colors group-hover:text-brand-500"
                   />
                 </div>
               </RouterLink>
@@ -420,8 +420,8 @@ const quickLinks = [
         <div v-if="recentBookings.length > 0">
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <TruckIcon class="size-4.5 text-slate-400" />
-              <h2 class="text-base font-bold text-slate-900">
+              <TruckIcon class="theme-copy size-4.5" />
+              <h2 class="theme-title text-base font-bold">
                 Moving Bookings
               </h2>
             </div>
@@ -437,13 +437,13 @@ const quickLinks = [
             <li v-for="booking in recentBookings" :key="booking.id">
               <RouterLink
                 :to="`/account/moving/${booking.id}`"
-                class="group flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-brand-200 hover:shadow-md"
+                class="theme-card theme-card-hover group flex items-center justify-between gap-3 rounded-2xl p-4"
               >
                 <div class="min-w-0">
-                  <p class="font-semibold text-slate-800">
+                  <p class="theme-title font-semibold">
                     Booking #{{ booking.id }}
                   </p>
-                  <p class="text-xs text-slate-400">
+                  <p class="theme-copy text-xs">
                     {{ booking.mover_name ?? booking.store?.name }} ·
                     {{ booking.moving_date }}
                   </p>
@@ -453,13 +453,13 @@ const quickLinks = [
                     class="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
                     :class="
                       bookingStatusColors[booking.status] ??
-                      'bg-slate-100 text-slate-500'
+                      'theme-badge-neutral'
                     "
                   >
                     {{ booking.status?.replace(/_/g, " ") }}
                   </span>
                   <ChevronRightIcon
-                    class="size-4 text-slate-300 transition-colors group-hover:text-brand-500"
+                    class="theme-copy size-4 transition-colors group-hover:text-brand-500"
                   />
                 </div>
               </RouterLink>

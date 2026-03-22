@@ -5,6 +5,29 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NegosyoHub — Multi-Sector Marketplace</title>
+    <script>
+      (() => {
+        const storageKey = "negosyohub-theme";
+        const validThemes = new Set(["light", "dark", "system"]);
+        const storedTheme = localStorage.getItem(storageKey);
+        const preferredTheme = validThemes.has(storedTheme)
+          ? storedTheme
+          : "system";
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+          .matches
+          ? "dark"
+          : "light";
+        const resolvedTheme =
+          preferredTheme === "system" ? systemTheme : preferredTheme;
+
+        document.documentElement.classList.toggle(
+          "dark",
+          resolvedTheme === "dark",
+        );
+        document.documentElement.dataset.theme = resolvedTheme;
+        document.documentElement.style.colorScheme = resolvedTheme;
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

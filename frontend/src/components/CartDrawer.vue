@@ -18,7 +18,7 @@ const cart = useCartStore();
   <Transition name="fade">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-sm"
+      class="theme-overlay fixed inset-0 z-50"
       @click="$emit('close')"
     />
   </Transition>
@@ -27,15 +27,15 @@ const cart = useCartStore();
   <Transition name="slide">
     <aside
       v-if="open"
-      class="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl"
+      class="theme-modal fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-y-0 border-r-0"
     >
       <!-- Header -->
       <div
-        class="flex items-center justify-between border-b border-slate-100 px-5 py-4"
+        class="theme-divider flex items-center justify-between border-b px-5 py-4"
       >
         <div class="flex items-center gap-2">
-          <ShoppingBagIcon class="size-5 text-slate-600" />
-          <h2 class="text-base font-semibold text-slate-900">
+          <ShoppingBagIcon class="size-5" style="color: var(--color-text-muted)" />
+          <h2 class="text-base font-semibold" style="color: var(--color-text)">
             Your Cart
             <span
               v-if="cart.lineCount > 0"
@@ -47,7 +47,8 @@ const cart = useCartStore();
         </div>
         <button
           type="button"
-          class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          class="rounded-lg p-1.5 transition-colors hover:bg-[var(--color-surface-muted)]"
+          style="color: var(--color-text-muted)"
           @click="$emit('close')"
         >
           <XMarkIcon class="size-4.5" />
@@ -60,13 +61,14 @@ const cart = useCartStore();
         class="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center"
       >
         <div
-          class="flex size-16 items-center justify-center rounded-full bg-slate-100"
+          class="flex size-16 items-center justify-center rounded-full"
+          style="background-color: var(--color-surface-muted)"
         >
-          <ShoppingBagIcon class="size-8 text-slate-400" />
+          <ShoppingBagIcon class="size-8" style="color: var(--color-text-muted)" />
         </div>
         <div>
-          <p class="font-medium text-slate-700">Your cart is empty</p>
-          <p class="mt-1 text-sm text-slate-400">
+          <p class="font-medium" style="color: var(--color-text)">Your cart is empty</p>
+          <p class="mt-1 text-sm" style="color: var(--color-text-muted)">
             Add items from a store to get started.
           </p>
         </div>
@@ -90,7 +92,7 @@ const cart = useCartStore();
           </p>
         </template>
         <template v-else>
-          <p class="text-slate-600">
+          <p style="color: var(--color-text-muted)">
             Add
             <span class="font-bold text-brand-600">
               ₱{{
@@ -117,14 +119,18 @@ const cart = useCartStore();
       <!-- Lines -->
       <ul
         v-if="cart.lineCount > 0"
-        class="flex-1 divide-y divide-slate-100 overflow-y-auto px-1"
+        class="flex-1 overflow-y-auto px-1"
       >
         <li
           v-for="line in cart.cart?.lines"
           :key="line.id"
-          class="flex gap-3 px-4 py-3.5"
+          class="flex gap-3 border-b px-4 py-3.5 last:border-b-0"
+          style="border-color: var(--color-border)"
         >
-          <div class="size-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+          <div
+            class="size-16 shrink-0 overflow-hidden rounded-xl"
+            style="background-color: var(--color-surface-muted)"
+          >
             <img
               :src="line.purchasable?.thumbnail ?? '/placeholder.png'"
               :alt="line.purchasable?.name"
@@ -133,43 +139,52 @@ const cart = useCartStore();
           </div>
           <div class="flex flex-1 flex-col justify-between min-w-0">
             <p
-              class="text-sm font-medium text-slate-800 line-clamp-2 leading-snug"
+              class="line-clamp-2 text-sm font-medium leading-snug"
+              style="color: var(--color-text)"
             >
               {{ line.purchasable?.name }}
             </p>
             <div class="flex items-center justify-between mt-2">
               <!-- Quantity controls -->
               <div
-                class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5"
+                class="flex items-center gap-1 rounded-lg p-0.5"
+                style="
+                  border: 1px solid var(--color-border);
+                  background-color: var(--color-surface-muted);
+                "
               >
                 <button
                   type="button"
-                  class="flex size-6 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 disabled:opacity-40 transition-colors"
+                  class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-[var(--color-surface)] disabled:opacity-40"
+                  style="color: var(--color-text-muted)"
                   @click="cart.updateItem(line.id, line.quantity - 1)"
                   :disabled="line.quantity <= 1"
                 >
                   −
                 </button>
                 <span
-                  class="w-5 text-center text-xs font-semibold text-slate-700"
+                  class="w-5 text-center text-xs font-semibold"
+                  style="color: var(--color-text)"
                 >
                   {{ line.quantity }}
                 </span>
                 <button
                   type="button"
-                  class="flex size-6 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 transition-colors"
+                  class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-[var(--color-surface)]"
+                  style="color: var(--color-text-muted)"
                   @click="cart.updateItem(line.id, line.quantity + 1)"
                 >
                   +
                 </button>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-sm font-bold text-slate-900">{{
+                <span class="text-sm font-bold" style="color: var(--color-text)">{{
                   line.sub_total?.formatted
                 }}</span>
                 <button
                   type="button"
-                  class="rounded-md p-1 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  class="rounded-md p-1 transition-colors hover:bg-red-50 hover:text-red-500"
+                  style="color: var(--color-text-muted)"
                   @click="cart.removeItem(line.id)"
                 >
                   <TrashIcon class="size-3.5" />
@@ -183,17 +198,18 @@ const cart = useCartStore();
       <!-- Footer -->
       <div
         v-if="cart.lineCount > 0"
-        class="border-t border-slate-100 px-5 py-4 space-y-3 bg-slate-50/60"
+        class="theme-divider space-y-3 border-t px-5 py-4"
+        style="background-color: color-mix(in srgb, var(--color-surface-muted) 76%, transparent)"
       >
         <div class="flex items-center justify-between">
-          <span class="text-sm text-slate-600">Subtotal</span>
-          <span class="text-base font-bold text-slate-900">{{
+          <span class="text-sm" style="color: var(--color-text-muted)">Subtotal</span>
+          <span class="text-base font-bold" style="color: var(--color-text)">{{
             cart.total
           }}</span>
         </div>
         <RouterLink
           to="/checkout"
-          class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-bold text-white shadow-sm hover:from-brand-600 hover:to-brand-700 hover:shadow-brand-500/25 hover:shadow-md active:scale-[0.98] transition-all"
+          class="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold shadow-sm active:scale-[0.98] transition-all hover:shadow-brand-500/25 hover:shadow-md"
           @click="$emit('close')"
         >
           Proceed to Checkout
@@ -211,7 +227,7 @@ const cart = useCartStore();
             />
           </svg>
         </RouterLink>
-        <p class="text-center text-xs text-slate-400">
+        <p class="text-center text-xs" style="color: var(--color-text-muted)">
           Taxes and delivery calculated at checkout
         </p>
       </div>

@@ -60,43 +60,45 @@ async function deleteAccount() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-xl px-4 py-8 sm:px-0 space-y-8">
-    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+  <div class="mx-auto max-w-xl space-y-8 px-4 py-8 sm:px-0">
+    <h1 class="theme-title text-2xl font-extrabold tracking-tight">
       Settings
     </h1>
 
     <!-- Notifications -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-base font-bold text-slate-900">Notifications</h2>
+    <section class="theme-card rounded-2xl p-6">
+      <h2 class="theme-title mb-4 text-base font-bold">Notifications</h2>
 
       <div class="space-y-4">
         <label class="flex cursor-pointer items-center justify-between gap-3">
           <div>
-            <p class="text-sm font-medium text-slate-800">
+            <p class="theme-title text-sm font-medium">
               Order status updates
             </p>
-            <p class="text-xs text-slate-400">
+            <p class="theme-copy text-xs">
               Receive email when your order status changes.
             </p>
           </div>
           <input
             v-model="notifications.order_updates"
             type="checkbox"
-            class="size-5 rounded border-slate-300 accent-brand-600"
+            class="size-5 rounded accent-brand-600"
+            style="border-color: var(--color-border)"
           />
         </label>
 
         <label class="flex cursor-pointer items-center justify-between gap-3">
           <div>
-            <p class="text-sm font-medium text-slate-800">Promotions & deals</p>
-            <p class="text-xs text-slate-400">
+            <p class="theme-title text-sm font-medium">Promotions & deals</p>
+            <p class="theme-copy text-xs">
               Occasional emails about new stores, discounts, and events.
             </p>
           </div>
           <input
             v-model="notifications.promotions"
             type="checkbox"
-            class="size-5 rounded border-slate-300 accent-brand-600"
+            class="size-5 rounded accent-brand-600"
+            style="border-color: var(--color-border)"
           />
         </label>
       </div>
@@ -109,7 +111,7 @@ async function deleteAccount() {
       </p>
 
       <button
-        class="mt-5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700 disabled:opacity-60"
+        class="btn-primary mt-5 rounded-xl px-5 py-2 text-sm font-bold transition-all disabled:opacity-60"
         :disabled="savingNotifications"
         @click="saveNotifications"
       >
@@ -118,21 +120,21 @@ async function deleteAccount() {
     </section>
 
     <!-- Security -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-base font-bold text-slate-900">Security</h2>
+    <section class="theme-card rounded-2xl p-6">
+      <h2 class="theme-title mb-4 text-base font-bold">Security</h2>
       <RouterLink
         to="/account/password"
-        class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        class="btn-secondary flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
       >
-        <KeyIcon class="size-5 text-slate-400" />
+        <KeyIcon class="theme-copy size-5" />
         Change Password
       </RouterLink>
     </section>
 
     <!-- Danger zone -->
-    <section class="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+    <section class="theme-card rounded-2xl border-red-200 p-6 shadow-sm">
       <h2 class="mb-1 text-base font-bold text-red-700">Danger Zone</h2>
-      <p class="mb-4 text-sm text-slate-500">
+      <p class="theme-copy mb-4 text-sm">
         Once deleted, your account and all data are permanently removed.
       </p>
       <button
@@ -147,14 +149,14 @@ async function deleteAccount() {
     <Teleport to="body">
       <div
         v-if="showDeleteModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        class="theme-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
         @click.self="showDeleteModal = false"
       >
-        <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-          <h3 class="mb-2 text-lg font-bold text-slate-900">
+        <div class="theme-modal w-full max-w-sm rounded-2xl p-6 shadow-xl">
+          <h3 class="theme-title mb-2 text-lg font-bold">
             Delete your account?
           </h3>
-          <p class="mb-4 text-sm text-slate-500">
+          <p class="theme-copy mb-4 text-sm">
             This cannot be undone. Type your email
             <strong>{{ auth.user?.email }}</strong> to confirm.
           </p>
@@ -163,12 +165,12 @@ async function deleteAccount() {
             v-model="deletePhrase"
             type="email"
             :placeholder="auth.user?.email"
-            class="mb-4 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-red-400 focus:ring-2 focus:ring-red-100 focus:outline-none"
+            class="theme-input mb-4 w-full rounded-xl px-4 py-2.5 text-sm"
           />
 
           <div class="flex justify-end gap-3">
             <button
-              class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              class="btn-secondary rounded-xl px-4 py-2 text-sm font-medium transition-colors"
               @click="showDeleteModal = false"
             >
               Cancel

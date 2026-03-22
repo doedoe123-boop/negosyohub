@@ -84,21 +84,88 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ─── Semantic theme tokens ─────────────────────────────────── */
+:root {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-primary: #0f2044;
+  --color-accent: #059669;
+  --color-brand: #f95d2f;
+  --color-overlay: rgba(2, 6, 23, 0.52);
+  --color-navbar-surface: rgba(15, 32, 68, 0.94);
+  --color-navbar-border: rgba(255, 255, 255, 0.12);
+  --color-navbar-text: rgba(255, 255, 255, 0.72);
+  --color-navbar-text-strong: #ffffff;
+  --color-navbar-muted-surface: rgba(255, 255, 255, 0.1);
+  --color-footer-surface: #060e1f;
+  --color-footer-muted: #94a3b8;
+  --shadow-card:
+    0 1px 3px rgba(15, 23, 42, 0.08),
+    0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-elevated:
+    0 4px 16px rgba(15, 23, 42, 0.1),
+    0 2px 4px rgba(15, 23, 42, 0.06);
+  --diced-hero-section-top-text: #f95d2f;
+  --diced-hero-section-main-gradient-from: #ffffff;
+  --diced-hero-section-main-gradient-to: #a7f3d0;
+  --diced-hero-section-separator: #059669;
+  --diced-hero-section-sub-text: rgba(255, 255, 255, 0.6);
+  --diced-hero-section-button-bg: #059669;
+  --diced-hero-section-button-fg: #ffffff;
+  --diced-hero-section-button-hover-bg: #047857;
+  --diced-hero-section-button-hover-fg: #ffffff;
+}
+
+.dark {
+  --color-bg: #08111f;
+  --color-surface: #111c2d;
+  --color-surface-muted: #162336;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-border: rgba(148, 163, 184, 0.2);
+  --color-primary: #d6e0f5;
+  --color-accent: #34d399;
+  --color-brand: #ff7a52;
+  --color-overlay: rgba(2, 6, 23, 0.72);
+  --color-navbar-surface: rgba(6, 14, 31, 0.94);
+  --color-navbar-border: rgba(214, 224, 245, 0.12);
+  --color-navbar-text: rgba(241, 245, 249, 0.76);
+  --color-navbar-text-strong: #ffffff;
+  --color-navbar-muted-surface: rgba(214, 224, 245, 0.08);
+  --color-footer-surface: #040916;
+  --color-footer-muted: #64748b;
+  --shadow-card:
+    0 1px 3px rgba(2, 6, 23, 0.34),
+    0 1px 2px rgba(2, 6, 23, 0.24);
+  --shadow-elevated:
+    0 18px 40px rgba(2, 6, 23, 0.36),
+    0 6px 12px rgba(2, 6, 23, 0.24);
+}
+
 /* ─── Base ──────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
+  background-color: var(--color-bg);
 }
 
 body {
-  background-color: var(--color-slate-50);
-  color: var(--color-slate-800);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.dark body {
-  background-color: var(--color-slate-950);
-  color: var(--color-slate-100);
+a {
+  color: inherit;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--color-brand) 24%, transparent);
+  color: var(--color-text);
 }
 
 /* ─── Scrollbar styling ──────────────────────────────────────── */
@@ -110,16 +177,16 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
+  background-color: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+  background-color: color-mix(in srgb, var(--color-text-muted) 68%, transparent);
 }
 
 /* ─── Focus ring ─────────────────────────────────────────────── */
 :focus-visible:not(input):not(textarea):not(select) {
-  outline: 2px solid #f95d2f;
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
 
@@ -147,17 +214,288 @@ button {
   transition-duration: 150ms;
 }
 
-/* ─── DicedHeroSection CSS variables ────────────────────────── */
-:root {
-  --diced-hero-section-top-text: #f95d2f;
-  --diced-hero-section-main-gradient-from: #ffffff;
-  --diced-hero-section-main-gradient-to: #a7f3d0;
-  --diced-hero-section-separator: #059669;
-  --diced-hero-section-sub-text: rgba(255, 255, 255, 0.6);
-  --diced-hero-section-button-bg: #059669;
-  --diced-hero-section-button-fg: #ffffff;
-  --diced-hero-section-button-hover-bg: #047857;
-  --diced-hero-section-button-hover-fg: #ffffff;
+/* ─── Shared semantic utilities ─────────────────────────────── */
+@layer components {
+  .theme-app {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .theme-surface {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .theme-surface-muted {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .theme-divider {
+    border-color: var(--color-border);
+  }
+
+  .theme-text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .theme-input {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease,
+      box-shadow 150ms ease,
+      color 150ms ease;
+  }
+
+  .theme-input::placeholder {
+    color: color-mix(in srgb, var(--color-text-muted) 78%, transparent);
+  }
+
+  .theme-input:focus {
+    background-color: var(--color-surface);
+    border-color: color-mix(in srgb, var(--color-brand) 62%, white);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 16%, transparent);
+  }
+
+  .theme-overlay {
+    background-color: var(--color-overlay);
+    backdrop-filter: blur(10px);
+  }
+
+  .theme-modal {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .theme-page {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .theme-page-section {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .theme-page-section-muted {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-surface-muted) 88%, var(--color-bg)) 0%,
+        var(--color-bg) 100%
+      );
+    color: var(--color-text);
+  }
+
+  .theme-page-hero {
+    background-color: var(--color-primary);
+    color: #ffffff;
+  }
+
+  .theme-card {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .theme-card-muted {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .theme-card-hover {
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+
+  .theme-card-hover:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--color-brand) 20%, var(--color-border));
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .theme-title {
+    color: var(--color-text);
+  }
+
+  .theme-copy {
+    color: var(--color-text-muted);
+  }
+
+  .theme-divider-soft {
+    border-color: color-mix(in srgb, var(--color-border) 78%, transparent);
+  }
+
+  .theme-skeleton {
+    background-color: color-mix(in srgb, var(--color-surface-muted) 82%, transparent);
+  }
+
+  .theme-empty-state {
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 1px dashed color-mix(in srgb, var(--color-border) 90%, transparent);
+    box-shadow: var(--shadow-card);
+  }
+
+  .theme-badge-neutral {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+
+  .theme-icon-muted {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+  }
+
+  .theme-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .theme-table thead {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+  }
+
+  .theme-table th,
+  .theme-table td {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: #ffffff;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-emerald-700);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-muted);
+    border-color: color-mix(in srgb, var(--color-brand) 28%, var(--color-border));
+  }
+
+  .btn-brand {
+    background-color: var(--color-brand);
+    color: #ffffff;
+  }
+
+  .btn-brand:hover {
+    background-color: var(--color-brand-600);
+  }
+
+  .chip-filter {
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .chip-filter:hover {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
+  }
+
+  .chip-filter-active {
+    background-color: var(--color-accent);
+    color: #ffffff;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 82%, black 6%);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+
+  .theme-tab {
+    color: var(--color-text-muted);
+    border-bottom: 2px solid transparent;
+  }
+
+  .theme-tab:hover {
+    color: var(--color-text);
+    background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent);
+  }
+
+  .theme-tab-active {
+    border-bottom-width: 2px;
+    color: var(--color-brand);
+    border-bottom-color: var(--color-brand);
+  }
+
+  .theme-breadcrumb {
+    color: var(--color-text-muted);
+  }
+
+  .theme-breadcrumb-current {
+    color: var(--color-text);
+  }
+
+  .theme-floating-bar {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -8px 24px rgba(2, 6, 23, 0.08);
+  }
+
+  .nav-shell {
+    background-color: var(--color-navbar-surface);
+    border-bottom: 1px solid var(--color-navbar-border);
+    color: var(--color-navbar-text-strong);
+    backdrop-filter: blur(16px);
+  }
+
+  .nav-button {
+    color: var(--color-navbar-text);
+  }
+
+  .nav-button:hover,
+  .nav-button-active {
+    background-color: var(--color-navbar-muted-surface);
+    color: var(--color-navbar-text-strong);
+  }
+
+  .nav-search-trigger {
+    border: 1px solid var(--color-navbar-border);
+    background-color: var(--color-navbar-muted-surface);
+    color: var(--color-navbar-text);
+  }
+
+  .nav-search-trigger:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--color-navbar-muted-surface) 70%,
+      white 10%
+    );
+    color: var(--color-navbar-text-strong);
+  }
+
+  .footer-shell {
+    background-color: var(--color-footer-surface);
+    color: var(--color-footer-muted);
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 22%, transparent);
+  }
 }
 
 /* ─── ChronicleButton 3D flip ────────────────────────────────── */

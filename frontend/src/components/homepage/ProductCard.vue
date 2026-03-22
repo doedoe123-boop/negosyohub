@@ -27,11 +27,12 @@ function discount(product) {
 <template>
   <RouterLink
     :to="`/products/${product.id}`"
-    class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-150 ease-out product-card dark:bg-slate-800 dark:border-slate-700"
+    class="theme-card theme-card-hover group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-150 ease-out"
   >
     <!-- Image -->
     <div
-      class="relative aspect-square overflow-hidden bg-white dark:bg-slate-700"
+      class="relative aspect-square overflow-hidden"
+      style="background-color: var(--color-surface)"
     >
       <img
         v-if="product.thumbnail"
@@ -58,7 +59,8 @@ function discount(product) {
     <!-- Info -->
     <div class="flex flex-1 flex-col p-3">
       <p
-        class="line-clamp-2 text-sm font-medium leading-snug text-slate-700 transition-colors group-hover:text-emerald-700"
+        class="line-clamp-2 text-sm font-medium leading-snug transition-colors group-hover:text-emerald-700"
+        style="color: var(--color-text)"
       >
         {{ product.name }}
       </p>
@@ -66,10 +68,10 @@ function discount(product) {
       <!-- Rating -->
       <div v-if="product.average_rating" class="mt-1.5 flex items-center gap-1">
         <span class="text-xs text-amber-500">⭐</span>
-        <span class="text-xs font-semibold text-slate-600">{{
+        <span class="theme-copy text-xs font-semibold">{{
           product.average_rating
         }}</span>
-        <span v-if="product.review_count" class="text-xs text-slate-400">
+        <span v-if="product.review_count" class="theme-copy text-xs">
           · {{ product.review_count }} reviews
         </span>
       </div>
@@ -81,7 +83,7 @@ function discount(product) {
         </p>
         <!-- Original + savings -->
         <template v-if="discount(product)">
-          <p class="text-xs text-slate-400 line-through">
+          <p class="theme-copy text-xs line-through">
             {{ peso(discount(product).original) }}
           </p>
           <p class="text-xs font-semibold text-emerald-600">
@@ -92,17 +94,3 @@ function discount(product) {
     </div>
   </RouterLink>
 </template>
-
-<style scoped>
-.product-card {
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06);
-}
-</style>

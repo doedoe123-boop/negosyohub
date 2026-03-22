@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { useCompare } from "@/composables/useCompare";
 import { propertiesApi } from "@/api/properties";
@@ -15,26 +15,42 @@ const { compareList, removeFromCompare, clearCompare } = useCompare();
 const properties = ref([]);
 const loading = ref(true);
 
+function syncVisibleProperties() {
+  const visibleIds = new Set(compareList.value.map((item) => String(item.id)));
+  properties.value = properties.value.filter((property) =>
+    visibleIds.has(String(property.id)),
+  );
+}
+
 onMounted(async () => {
-  if (compareList.value.length < 1) {
-    router.replace("/properties");
-    return;
-  }
   try {
-    // Load full property details for each slug in parallel
-    const results = await Promise.all(
-      compareList.value.map((item) =>
-        propertiesApi
-          .show(item.slug)
-          .then((r) => r.data.data ?? r.data)
-          .catch(() => null),
-      ),
-    );
-    properties.value = results.filter(Boolean);
+    if (compareList.value.length > 0) {
+      // Load full property details for each slug in parallel
+      const results = await Promise.all(
+        compareList.value.map((item) =>
+          propertiesApi
+            .show(item.slug)
+            .then((r) => r.data.data ?? r.data)
+            .catch(() => null),
+        ),
+      );
+      properties.value = results.filter(Boolean);
+    } else {
+      properties.value = [];
+    }
   } finally {
     loading.value = false;
   }
 });
+
+watch(compareList, () => {
+  syncVisibleProperties();
+});
+
+function handleRemove(propertyId) {
+  removeFromCompare(propertyId);
+  syncVisibleProperties();
+}
 
 const specs = [
   { label: "Price", key: "formatted_price" },
@@ -70,7 +86,7 @@ function val(property, spec) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-950">
+  <div class="theme-page min-h-screen">
     <!-- Header -->
     <div class="py-10 text-white" style="background: #0f2044">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
@@ -104,16 +120,42 @@ function val(property, spec) {
     </div>
 
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div class="mb-5 flex flex-wrap items-center gap-2">
+        <RouterLink
+          to="/properties"
+          class="theme-tab rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Properties
+        </RouterLink>
+        <RouterLink
+          to="/developments"
+          class="theme-tab rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Developments
+        </RouterLink>
+        <RouterLink
+          to="/properties/compare"
+          class="theme-tab-active rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Compare
+          <span v-if="compareList.length" class="ml-1">({{ compareList.length }})</span>
+        </RouterLink>
+      </div>
+
       <!-- Redirect hint if empty -->
       <div
         v-if="!loading && properties.length === 0"
-        class="rounded-2xl border border-dashed border-slate-300 py-20 text-center"
+        class="theme-empty-state rounded-2xl py-20 text-center"
       >
-        <HomeModernIcon class="mx-auto mb-3 size-10 text-slate-300" />
-        <p class="font-medium text-slate-500">No properties to compare</p>
+        <HomeModernIcon class="theme-copy mx-auto mb-3 size-10" />
+        <p class="theme-copy font-medium">No properties to compare yet</p>
+        <p class="theme-copy mt-1 text-sm">
+          Add at least 2 properties from the listings page, then come back here
+          for a side-by-side comparison.
+        </p>
         <RouterLink
           to="/properties"
-          class="mt-3 inline-flex rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"
+          class="btn-primary mt-3 inline-flex rounded-xl px-5 py-2.5 text-sm font-bold"
         >
           Browse Properties
         </RouterLink>
@@ -129,11 +171,12 @@ function val(property, spec) {
           <div
             v-for="property in properties"
             :key="property.id"
-            class="relative overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700"
+            class="theme-card relative overflow-hidden rounded-2xl shadow-sm"
           >
             <button
-              class="absolute right-2 top-2 z-10 rounded-full bg-white/80 p-1 shadow-sm hover:bg-red-50 hover:text-red-500"
-              @click="removeFromCompare(property.id)"
+              class="absolute right-2 top-2 z-10 rounded-full p-1 shadow-sm transition-colors hover:bg-red-50 hover:text-red-500"
+              style="background-color: color-mix(in srgb, var(--color-surface) 84%, transparent); color: var(--color-text-muted)"
+              @click="handleRemove(property.id)"
             >
               <XMarkIcon class="size-4" />
             </button>
@@ -145,22 +188,20 @@ function val(property, spec) {
             />
             <div
               v-else
-              class="flex aspect-[16/9] items-center justify-center bg-slate-100"
+              class="theme-card-muted flex aspect-[16/9] items-center justify-center"
             >
-              <HomeModernIcon class="size-10 text-slate-300" />
+              <HomeModernIcon class="theme-copy size-10" />
             </div>
             <div class="p-3">
-              <p
-                class="line-clamp-2 text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
+              <p class="theme-title line-clamp-2 text-sm font-semibold">
                 {{ property.title }}
               </p>
-              <p class="text-xs text-slate-500 mt-0.5">
+              <p class="theme-copy mt-0.5 text-xs">
                 {{ property.city }}, {{ property.province }}
               </p>
               <RouterLink
                 :to="`/properties/${property.slug}`"
-                class="mt-2 inline-flex rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
+                class="btn-primary mt-2 inline-flex rounded-lg px-3 py-1.5 text-xs font-bold"
               >
                 View Listing
               </RouterLink>
@@ -173,35 +214,36 @@ function val(property, spec) {
           <div
             v-for="i in 8"
             :key="i"
-            class="h-12 animate-pulse rounded-xl bg-slate-100"
+            class="theme-skeleton h-12 animate-pulse rounded-xl"
           />
         </div>
 
         <!-- Spec rows -->
         <div
           v-else
-          class="overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card overflow-hidden rounded-2xl shadow-sm"
         >
           <div
             v-for="(spec, i) in specs"
             :key="spec.key"
-            class="grid gap-0 border-b border-slate-100 last:border-b-0 dark:border-slate-700"
-            :style="`grid-template-columns: 180px repeat(${properties.length}, 1fr)`"
-            :class="
-              i % 2 === 0
-                ? 'bg-white dark:bg-slate-800'
-                : 'bg-slate-50/50 dark:bg-slate-900/60'
+            class="theme-divider-soft grid gap-0 border-b last:border-b-0"
+            :style="
+              `grid-template-columns: 180px repeat(${properties.length}, 1fr); ${
+                i % 2 === 0
+                  ? 'background-color: var(--color-surface)'
+                  : 'background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent)'
+              }`
             "
           >
             <div
-              class="flex items-center px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500"
+              class="theme-copy flex items-center px-4 py-3 text-xs font-semibold uppercase tracking-wide"
             >
               {{ spec.label }}
             </div>
             <div
               v-for="property in properties"
               :key="property.id"
-              class="flex items-center border-l border-slate-100 px-4 py-3 text-sm text-slate-800 dark:border-slate-700 dark:text-slate-200"
+              class="theme-title theme-divider-soft flex items-center border-l px-4 py-3 text-sm"
             >
               {{ val(property, spec) }}
             </div>

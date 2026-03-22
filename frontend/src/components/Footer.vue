@@ -4,7 +4,7 @@ const year = new Date().getFullYear();
 </script>
 
 <template>
-  <footer class="border-t border-slate-800/60 bg-slate-950 text-slate-400">
+  <footer class="footer-shell">
     <div class="mx-auto max-w-7xl px-4 pt-14 pb-10 sm:px-6">
       <!-- Top grid -->
       <div class="grid grid-cols-2 gap-8 md:grid-cols-4 lg:gap-12">
@@ -20,7 +20,7 @@ const year = new Date().getFullYear();
               >Negosyo<span class="text-brand-400">Hub</span></span
             >
           </div>
-          <p class="text-sm leading-relaxed text-slate-500">
+          <p class="text-sm leading-relaxed" style="color: var(--color-footer-muted)">
             Multi-sector marketplace connecting buyers with trusted local
             Philippine businesses — e-commerce, real estate, and more.
           </p>
@@ -29,7 +29,11 @@ const year = new Date().getFullYear();
             <a
               href="#"
               aria-label="Facebook"
-              class="flex size-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+              class="flex size-8 items-center justify-center rounded-lg transition-colors hover:text-white"
+              style="
+                background-color: color-mix(in srgb, var(--color-surface) 10%, transparent);
+                color: var(--color-footer-muted);
+              "
             >
               <svg class="size-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -40,7 +44,11 @@ const year = new Date().getFullYear();
             <a
               href="#"
               aria-label="Instagram"
-              class="flex size-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+              class="flex size-8 items-center justify-center rounded-lg transition-colors hover:text-white"
+              style="
+                background-color: color-mix(in srgb, var(--color-surface) 10%, transparent);
+                color: var(--color-footer-muted);
+              "
             >
               <svg class="size-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -151,9 +159,15 @@ const year = new Date().getFullYear();
       <!-- Trust badges -->
       <div
         class="mt-10 flex flex-wrap items-center gap-4 border-t border-slate-800/60 pt-8"
+        style="border-color: color-mix(in srgb, var(--color-border) 22%, transparent)"
       >
         <div
-          class="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-400"
+          class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+          style="
+            border-color: color-mix(in srgb, var(--color-border) 22%, transparent);
+            background-color: color-mix(in srgb, var(--color-surface) 8%, transparent);
+            color: var(--color-footer-muted);
+          "
         >
           <svg
             class="size-4 text-emerald-500 shrink-0"
@@ -171,7 +185,12 @@ const year = new Date().getFullYear();
           Secure checkout
         </div>
         <div
-          class="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-400"
+          class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+          style="
+            border-color: color-mix(in srgb, var(--color-border) 22%, transparent);
+            background-color: color-mix(in srgb, var(--color-surface) 8%, transparent);
+            color: var(--color-footer-muted);
+          "
         >
           <svg
             class="size-4 text-brand-400 shrink-0"
@@ -189,7 +208,12 @@ const year = new Date().getFullYear();
           PayMongo &amp; Stripe
         </div>
         <div
-          class="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-400"
+          class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+          style="
+            border-color: color-mix(in srgb, var(--color-border) 22%, transparent);
+            background-color: color-mix(in srgb, var(--color-surface) 8%, transparent);
+            color: var(--color-footer-muted);
+          "
         >
           <span class="text-sm">🇵🇭</span>
           Made in the Philippines
@@ -198,7 +222,8 @@ const year = new Date().getFullYear();
 
       <!-- Copyright -->
       <div
-        class="mt-8 flex flex-col items-center justify-between gap-2 text-xs text-slate-700 sm:flex-row"
+        class="mt-8 flex flex-col items-center justify-between gap-2 text-xs sm:flex-row"
+        style="color: color-mix(in srgb, var(--color-footer-muted) 72%, transparent)"
       >
         <p>&copy; {{ year }} NegosyoHub. All rights reserved.</p>
         <p>Built with ❤️ in the Philippines</p>

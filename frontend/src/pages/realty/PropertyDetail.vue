@@ -300,7 +300,7 @@ async function submitPropertyReview(payload) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50">
+  <div class="theme-page min-h-screen">
     <!-- ── Skeleton ──────────────────────────────────────────────────── -->
     <div v-if="loading" class="animate-pulse">
       <div class="h-[420px] w-full bg-slate-200" />
@@ -467,12 +467,10 @@ async function submitPropertyReview(payload) {
       </div>
 
       <!-- ─ Breadcrumb ─────────────────────────────────────────────────── -->
-      <div
-        class="border-b border-slate-100 bg-white dark:bg-slate-900 dark:border-slate-800"
-      >
+      <div class="theme-page-section border-b" style="border-color: var(--color-border)">
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
           <nav
-            class="flex items-center gap-1.5 py-3 text-xs text-slate-400"
+            class="theme-breadcrumb flex items-center gap-1.5 py-3 text-xs"
             aria-label="Breadcrumb"
           >
             <RouterLink to="/" class="transition-colors hover:text-emerald-600"
@@ -485,7 +483,7 @@ async function submitPropertyReview(payload) {
               >Properties</RouterLink
             >
             <ChevronRightIcon class="size-3" />
-            <span class="max-w-xs truncate text-slate-600">{{
+            <span class="theme-breadcrumb-current max-w-xs truncate">{{
               property.title
             }}</span>
           </nav>
@@ -526,12 +524,12 @@ async function submitPropertyReview(payload) {
                   </span>
                 </div>
                 <div class="flex items-center gap-3">
-                  <span v-if="publishedAgo" class="text-xs text-slate-400"
+                  <span v-if="publishedAgo" class="theme-copy text-xs"
                     >Listed {{ publishedAgo }}</span
                   >
                   <span
                     v-if="property.views_count"
-                    class="flex items-center gap-1 text-xs font-semibold text-slate-400"
+                    class="theme-copy flex items-center gap-1 text-xs font-semibold"
                   >
                     <EyeIcon class="size-4" />
                     {{ property.views_count.toLocaleString() }} views
@@ -541,7 +539,7 @@ async function submitPropertyReview(payload) {
 
               <!-- Title -->
               <h1
-                class="text-3xl font-extrabold leading-tight text-[#0F2044] sm:text-4xl lg:text-[40px]"
+                class="theme-title text-3xl font-extrabold leading-tight sm:text-4xl lg:text-[40px]"
               >
                 {{ property.title }}
               </h1>
@@ -549,22 +547,22 @@ async function submitPropertyReview(payload) {
               <!-- Location -->
               <p
                 v-if="fullAddress"
-                class="flex items-center gap-1.5 text-[15px] font-medium text-slate-500 mt-1"
+                class="theme-copy mt-1 flex items-center gap-1.5 text-[15px] font-medium"
               >
-                <MapPinIcon class="size-5 shrink-0 text-slate-400" />
+                <MapPinIcon class="theme-copy size-5 shrink-0" />
                 {{ fullAddress }}
               </p>
 
               <!-- Development badge -->
               <p
                 v-if="!isRental && property.development"
-                class="flex items-center gap-1.5 text-sm text-slate-500"
+                class="theme-copy flex items-center gap-1.5 text-sm"
               >
                 <BuildingOffice2Icon class="size-4 shrink-0 text-indigo-400" />
                 {{ property.development.name }}
                 <span
                   v-if="property.development.developer_name"
-                  class="text-slate-400"
+                  class="theme-copy"
                   >by {{ property.development.developer_name }}</span
                 >
               </p>
@@ -572,7 +570,7 @@ async function submitPropertyReview(payload) {
               <!-- Unit info for condos -->
               <p
                 v-if="property.unit_number || property.unit_floor"
-                class="text-sm text-slate-500"
+                class="theme-copy text-sm"
               >
                 <span v-if="property.unit_floor"
                   >Floor {{ property.unit_floor }}</span
@@ -598,17 +596,17 @@ async function submitPropertyReview(payload) {
             <!-- Pag-IBIG monthly estimate -->
             <div
               v-if="!isRental && monthlyEstimate"
-              class="flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm shadow-sm dark:bg-slate-800 dark:border-slate-700"
+              class="theme-card flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
             >
               <span class="text-base">🏦</span>
-              <span class="text-slate-600">
+              <span class="theme-copy">
                 Est.
-                <strong class="text-slate-900"
+                <strong class="theme-title"
                   >₱{{ monthlyEstimate }}/mo</strong
                 >
                 via Pag-IBIG
               </span>
-              <span class="ml-auto text-xs text-slate-400">~20yr @ 6.5%</span>
+              <span class="theme-copy ml-auto text-xs">~20yr @ 6.5%</span>
             </div>
 
             <!-- ═══ BENTO BOX: Key Specs ══════════════════════════════ -->
@@ -632,16 +630,14 @@ async function submitPropertyReview(payload) {
               <!-- Large: Floor Area -->
               <div
                 v-if="property.floor_area"
-                class="rounded-2xl bg-white p-5 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-5"
               >
-                <p
-                  class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1"
-                >
+                <p class="theme-copy mb-1 text-xs font-semibold uppercase tracking-wider">
                   Floor Area
                 </p>
-                <p class="text-2xl font-black text-[#0F2044]">
+                <p class="theme-title text-2xl font-black">
                   {{ property.floor_area
-                  }}<span class="text-sm font-semibold text-slate-400 ml-1"
+                  }}<span class="theme-copy ml-1 text-sm font-semibold"
                     >sqm</span
                   >
                 </p>
@@ -649,16 +645,14 @@ async function submitPropertyReview(payload) {
               <!-- Large: Bedrooms -->
               <div
                 v-if="property.bedrooms != null"
-                class="rounded-2xl bg-white p-5 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-5"
               >
-                <p
-                  class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1"
-                >
+                <p class="theme-copy mb-1 text-xs font-semibold uppercase tracking-wider">
                   Bedrooms
                 </p>
-                <p class="text-2xl font-black text-[#0F2044]">
+                <p class="theme-title text-2xl font-black">
                   {{ property.bedrooms
-                  }}<span class="text-sm font-semibold text-slate-400 ml-1"
+                  }}<span class="theme-copy ml-1 text-sm font-semibold"
                     >beds</span
                   >
                 </p>
@@ -666,71 +660,61 @@ async function submitPropertyReview(payload) {
               <!-- Small: Bathrooms -->
               <div
                 v-if="property.bathrooms != null"
-                class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-4"
               >
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5"
-                >
+                <p class="theme-copy mb-0.5 text-[10px] font-semibold uppercase tracking-wider">
                   Baths
                 </p>
-                <p class="text-lg font-bold text-[#0F2044]">
+                <p class="theme-title text-lg font-bold">
                   {{ property.bathrooms }}
                 </p>
               </div>
               <!-- Small: Garage -->
               <div
                 v-if="property.garage_spaces != null"
-                class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-4"
               >
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5"
-                >
+                <p class="theme-copy mb-0.5 text-[10px] font-semibold uppercase tracking-wider">
                   Garage
                 </p>
-                <p class="text-lg font-bold text-[#0F2044]">
+                <p class="theme-title text-lg font-bold">
                   {{ property.garage_spaces }}
                 </p>
               </div>
               <!-- Small: Lot Area -->
               <div
                 v-if="property.lot_area && !isRental"
-                class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-4"
               >
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5"
-                >
+                <p class="theme-copy mb-0.5 text-[10px] font-semibold uppercase tracking-wider">
                   Lot Area
                 </p>
-                <p class="text-lg font-bold text-[#0F2044]">
+                <p class="theme-title text-lg font-bold">
                   {{ property.lot_area
-                  }}<span class="text-xs text-slate-400 ml-0.5">sqm</span>
+                  }}<span class="theme-copy ml-0.5 text-xs">sqm</span>
                 </p>
               </div>
               <!-- Small: Year Built -->
               <div
                 v-if="property.year_built && !isRental"
-                class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-4"
               >
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5"
-                >
+                <p class="theme-copy mb-0.5 text-[10px] font-semibold uppercase tracking-wider">
                   Year Built
                 </p>
-                <p class="text-lg font-bold text-[#0F2044]">
+                <p class="theme-title text-lg font-bold">
                   {{ property.year_built }}
                 </p>
               </div>
               <!-- Small: Floors -->
               <div
                 v-if="property.floors && !isRental"
-                class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/60 shadow-sm dark:bg-slate-800 dark:ring-slate-700"
+                class="theme-card rounded-2xl p-4"
               >
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5"
-                >
+                <p class="theme-copy mb-0.5 text-[10px] font-semibold uppercase tracking-wider">
                   Floors
                 </p>
-                <p class="text-lg font-bold text-[#0F2044]">
+                <p class="theme-title text-lg font-bold">
                   {{ property.floors }}
                 </p>
               </div>
@@ -738,25 +722,26 @@ async function submitPropertyReview(payload) {
 
             <!-- About -->
             <section v-if="property.description">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">
+              <h2 class="theme-title mb-3 text-lg font-bold">
                 About this property
               </h2>
               <div
-                class="prose prose-sm prose-slate max-w-none text-slate-600"
+                class="prose prose-sm max-w-none"
+                style="color: var(--color-text-muted)"
                 v-html="property.description"
               ></div>
             </section>
 
             <!-- ═══ Features & Amenities (dense grid) ═════════════════ -->
             <section v-if="property.features?.length && !isRental">
-              <h2 class="mb-4 text-lg font-bold text-slate-900">
+              <h2 class="theme-title mb-4 text-lg font-bold">
                 Features & Amenities
               </h2>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div
                   v-for="feature in property.features"
                   :key="feature"
-                  class="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm font-medium text-slate-700 ring-1 ring-slate-100 shadow-sm dark:bg-slate-800 dark:ring-slate-700 dark:text-slate-200"
+                  class="theme-card flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium"
                 >
                   <CheckCircleIcon class="size-4 shrink-0 text-emerald-500" />
                   {{ feature }}
@@ -766,83 +751,96 @@ async function submitPropertyReview(payload) {
 
             <!-- Property Details Table -->
             <section>
-              <h2 class="mb-4 text-xl font-bold text-[#0F2044]">
+              <h2 class="theme-title mb-4 text-xl font-bold">
                 Property Details
               </h2>
-              <div
-                class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700"
-              >
-                <table class="w-full text-sm">
-                  <tbody class="divide-y divide-slate-100">
+              <div class="theme-card overflow-hidden rounded-2xl">
+                <table class="theme-table text-sm">
+                  <tbody>
                     <tr v-if="property.property_type">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">Type</td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                      <td class="theme-copy w-1/3 px-5 py-3.5">Type</td>
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{
                           property.property_type_label ?? property.property_type
                         }}
                       </td>
                     </tr>
-                    <tr v-if="property.listing_type" class="bg-slate-50/50">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">Listing</td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                    <tr
+                      v-if="property.listing_type"
+                      style="background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent)"
+                    >
+                      <td class="theme-copy w-1/3 px-5 py-3.5">Listing</td>
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{
                           property.listing_type_label ?? property.listing_type
                         }}
                       </td>
                     </tr>
                     <tr v-if="property.floor_area">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">
+                      <td class="theme-copy w-1/3 px-5 py-3.5">
                         Floor Area
                       </td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.floor_area }} sqm
                       </td>
                     </tr>
-                    <tr v-if="property.lot_area" class="bg-slate-50/50">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">Lot Area</td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                    <tr
+                      v-if="property.lot_area"
+                      style="background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent)"
+                    >
+                      <td class="theme-copy w-1/3 px-5 py-3.5">Lot Area</td>
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.lot_area }} sqm
                       </td>
                     </tr>
                     <tr v-if="property.year_built">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">
+                      <td class="theme-copy w-1/3 px-5 py-3.5">
                         Year Built
                       </td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.year_built }}
                       </td>
                     </tr>
-                    <tr v-if="property.floors" class="bg-slate-50/50">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">Floors</td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                    <tr
+                      v-if="property.floors"
+                      style="background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent)"
+                    >
+                      <td class="theme-copy w-1/3 px-5 py-3.5">Floors</td>
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.floors }}
                       </td>
                     </tr>
                     <tr v-if="property.unit_floor">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">
+                      <td class="theme-copy w-1/3 px-5 py-3.5">
                         Unit Floor
                       </td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.unit_floor }}
                       </td>
                     </tr>
-                    <tr v-if="property.unit_number" class="bg-slate-50/50">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">
+                    <tr
+                      v-if="property.unit_number"
+                      style="background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent)"
+                    >
+                      <td class="theme-copy w-1/3 px-5 py-3.5">
                         Unit Number
                       </td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.unit_number }}
                       </td>
                     </tr>
                     <tr v-if="property.zip_code">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">ZIP Code</td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                      <td class="theme-copy w-1/3 px-5 py-3.5">ZIP Code</td>
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ property.zip_code }}
                       </td>
                     </tr>
-                    <tr v-if="fullAddress" class="bg-slate-50/50">
-                      <td class="w-1/3 px-5 py-3.5 text-slate-500">Address</td>
-                      <td class="px-5 py-3.5 font-semibold text-[#0F2044]">
+                    <tr
+                      v-if="fullAddress"
+                      style="background-color: color-mix(in srgb, var(--color-surface-muted) 72%, transparent)"
+                    >
+                      <td class="theme-copy w-1/3 px-5 py-3.5">Address</td>
+                      <td class="theme-title px-5 py-3.5 font-semibold">
                         {{ fullAddress }}
                       </td>
                     </tr>
@@ -853,7 +851,7 @@ async function submitPropertyReview(payload) {
 
             <!-- Virtual Tour & Video -->
             <section v-if="property.video_url || property.virtual_tour_url">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">
+              <h2 class="theme-title mb-3 text-lg font-bold">
                 Tours & Media
               </h2>
               <div class="flex flex-wrap gap-3">
@@ -862,7 +860,7 @@ async function submitPropertyReview(payload) {
                   :href="property.virtual_tour_url"
                   target="_blank"
                   rel="noopener"
-                  class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
+                  class="theme-card inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
                 >
                   <GlobeAltIcon class="size-5" />
                   Virtual Tour
@@ -872,7 +870,7 @@ async function submitPropertyReview(payload) {
                   :href="property.video_url"
                   target="_blank"
                   rel="noopener"
-                  class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+                  class="theme-card inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-500"
                 >
                   <VideoCameraIcon class="size-5" />
                   Video Tour
@@ -882,7 +880,7 @@ async function submitPropertyReview(payload) {
 
             <!-- Floor Plans -->
             <section v-if="property.floor_plans?.length">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">Floor Plans</h2>
+              <h2 class="theme-title mb-3 text-lg font-bold">Floor Plans</h2>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <a
                   v-for="(plan, i) in property.floor_plans"
@@ -890,11 +888,9 @@ async function submitPropertyReview(payload) {
                   :href="plan.url || plan"
                   target="_blank"
                   rel="noopener"
-                  class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+                  class="theme-card flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
                 >
-                  <DocumentArrowDownIcon
-                    class="size-5 shrink-0 text-slate-400"
-                  />
+                  <DocumentArrowDownIcon class="theme-copy size-5 shrink-0" />
                   {{ plan.name || `Floor Plan ${i + 1}` }}
                 </a>
               </div>
@@ -902,7 +898,7 @@ async function submitPropertyReview(payload) {
 
             <!-- Documents -->
             <section v-if="property.documents?.length">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">Documents</h2>
+              <h2 class="theme-title mb-3 text-lg font-bold">Documents</h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <a
                   v-for="(doc, i) in property.documents"
@@ -910,11 +906,9 @@ async function submitPropertyReview(payload) {
                   :href="doc.url || doc"
                   target="_blank"
                   rel="noopener"
-                  class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+                  class="theme-card flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
                 >
-                  <DocumentArrowDownIcon
-                    class="size-5 shrink-0 text-slate-400"
-                  />
+                  <DocumentArrowDownIcon class="theme-copy size-5 shrink-0" />
                   {{ doc.name || `Document ${i + 1}` }}
                 </a>
               </div>
@@ -922,10 +916,8 @@ async function submitPropertyReview(payload) {
 
             <!-- Map -->
             <section v-if="property.latitude && property.longitude">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">Location</h2>
-              <div
-                class="overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
-              >
+              <h2 class="theme-title mb-3 text-lg font-bold">Location</h2>
+              <div class="theme-card overflow-hidden rounded-2xl shadow-sm">
                 <iframe
                   :src="`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.01},${property.latitude - 0.01},${property.longitude + 0.01},${property.latitude + 0.01}&layer=mapnik&marker=${property.latitude},${property.longitude}`"
                   class="h-[300px] w-full border-0"
@@ -937,16 +929,16 @@ async function submitPropertyReview(payload) {
 
             <!-- Open Houses -->
             <section v-if="openHouses.length">
-              <h2 class="mb-4 text-lg font-bold text-slate-900">Open Houses</h2>
+              <h2 class="theme-title mb-4 text-lg font-bold">Open Houses</h2>
               <ul class="flex flex-col gap-3">
                 <li
                   v-for="oh in openHouses"
                   :key="oh.id"
-                  class="flex items-start justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700"
+                  class="theme-card flex items-start justify-between gap-4 rounded-2xl p-4 shadow-sm"
                 >
                   <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-2">
-                      <span class="font-semibold text-slate-900 text-sm">{{
+                      <span class="theme-title text-sm font-semibold">{{
                         oh.title
                       }}</span>
                       <span
@@ -955,7 +947,7 @@ async function submitPropertyReview(payload) {
                         >Virtual</span
                       >
                     </div>
-                    <p class="text-xs text-slate-500">
+                    <p class="theme-copy text-xs">
                       {{
                         new Date(oh.event_date).toLocaleDateString("en-PH", {
                           weekday: "long",
@@ -973,13 +965,13 @@ async function submitPropertyReview(payload) {
                     </p>
                     <p
                       v-if="oh.description"
-                      class="text-xs text-slate-600 mt-0.5"
+                      class="theme-copy mt-0.5 text-xs"
                     >
                       {{ oh.description }}
                     </p>
                   </div>
                   <button
-                    class="shrink-0 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
+                    class="btn-primary shrink-0 rounded-xl px-4 py-2 text-xs font-bold transition-colors"
                     @click="openRsvpModal(oh)"
                   >
                     RSVP
@@ -991,16 +983,14 @@ async function submitPropertyReview(payload) {
               <Teleport to="body">
                 <div
                   v-if="rsvpModalOpen"
-                  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                  class="theme-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
                   @click.self="closeRsvpModal"
                 >
-                  <div
-                    class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900"
-                  >
-                    <h3 class="mb-1 text-lg font-bold text-slate-900">
+                  <div class="theme-modal w-full max-w-md rounded-2xl p-6 shadow-xl">
+                    <h3 class="theme-title mb-1 text-lg font-bold">
                       RSVP for Open House
                     </h3>
-                    <p class="mb-4 text-sm text-slate-500">
+                    <p class="theme-copy mb-4 text-sm">
                       {{ selectedOpenHouse?.title }}
                     </p>
 
@@ -1009,12 +999,12 @@ async function submitPropertyReview(payload) {
                       class="flex flex-col items-center gap-3 py-4 text-center"
                     >
                       <CheckCircleIcon class="size-10 text-emerald-500" />
-                      <p class="font-bold text-slate-900">You're registered!</p>
-                      <p class="text-sm text-slate-500">
+                      <p class="theme-title font-bold">You're registered!</p>
+                      <p class="theme-copy text-sm">
                         We'll see you at the open house.
                       </p>
                       <button
-                        class="mt-2 rounded-xl bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                        class="btn-secondary mt-2 rounded-xl px-5 py-2 text-sm font-semibold"
                         @click="closeRsvpModal"
                       >
                         Close
@@ -1028,51 +1018,51 @@ async function submitPropertyReview(payload) {
                     >
                       <div>
                         <label
-                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          class="theme-copy mb-1 block text-xs font-semibold"
                           >Full Name *</label
                         >
                         <input
                           v-model="rsvpForm.name"
                           required
                           type="text"
-                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                           placeholder="Your full name"
                         />
                       </div>
                       <div>
                         <label
-                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          class="theme-copy mb-1 block text-xs font-semibold"
                           >Email *</label
                         >
                         <input
                           v-model="rsvpForm.email"
                           required
                           type="email"
-                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                           placeholder="you@email.com"
                         />
                       </div>
                       <div>
                         <label
-                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          class="theme-copy mb-1 block text-xs font-semibold"
                           >Phone</label
                         >
                         <input
                           v-model="rsvpForm.phone"
                           type="tel"
-                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                           placeholder="+63 9xx xxx xxxx"
                         />
                       </div>
                       <div>
                         <label
-                          class="mb-1 block text-xs font-semibold text-slate-600"
+                          class="theme-copy mb-1 block text-xs font-semibold"
                           >Notes</label
                         >
                         <textarea
                           v-model="rsvpForm.notes"
                           rows="2"
-                          class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                          class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                           placeholder="Any questions or notes..."
                         ></textarea>
                       </div>
@@ -1085,7 +1075,7 @@ async function submitPropertyReview(payload) {
                       <div class="flex gap-2 pt-1">
                         <button
                           type="button"
-                          class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                          class="btn-secondary flex-1 rounded-xl py-2.5 text-sm font-semibold"
                           @click="closeRsvpModal"
                         >
                           Cancel
@@ -1093,7 +1083,7 @@ async function submitPropertyReview(payload) {
                         <button
                           type="submit"
                           :disabled="rsvpSubmitting"
-                          class="flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+                          class="btn-primary flex-1 rounded-xl py-2.5 text-sm font-bold transition-colors disabled:opacity-60"
                         >
                           {{
                             rsvpSubmitting ? "Registering..." : "Confirm RSVP"
@@ -1108,27 +1098,28 @@ async function submitPropertyReview(payload) {
 
             <!-- Nearby Places -->
             <section v-if="property.nearby_places?.length">
-              <h2 class="mb-4 text-lg font-bold text-slate-900">
+              <h2 class="theme-title mb-4 text-lg font-bold">
                 Nearby Places
               </h2>
               <ul class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <li
                   v-for="place in property.nearby_places"
                   :key="place.name ?? place"
-                  class="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-sm text-slate-700 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700 dark:text-slate-200"
+                  class="theme-card flex items-center justify-between rounded-xl px-4 py-3 text-sm shadow-sm"
                 >
                   <div class="flex items-center gap-2">
                     <MapPinIcon class="size-4 shrink-0 text-emerald-500" />
                     <span class="font-medium">{{ place.name ?? place }}</span>
                     <span
                       v-if="place.type"
-                      class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-500"
+                      class="theme-copy rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase"
+                      style="background-color: var(--color-surface-muted)"
                       >{{ place.type }}</span
                     >
                   </div>
                   <span
                     v-if="place.distance"
-                    class="text-xs font-semibold text-slate-400 shrink-0 ml-2"
+                    class="theme-copy ml-2 shrink-0 text-xs font-semibold"
                   >
                     {{ place.distance }} {{ place.distance_unit || "km" }}
                   </span>
@@ -1141,7 +1132,7 @@ async function submitPropertyReview(payload) {
             <!-- Paano Pumunta (How to Get There) -->
             <section v-if="property.direction_steps?.length">
               <h2
-                class="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900"
+                class="theme-title mb-4 flex items-center gap-2 text-lg font-bold"
               >
                 <MapIcon class="size-5 text-emerald-600" />
                 Paano Pumunta (How to Get There)
@@ -1154,19 +1145,19 @@ async function submitPropertyReview(payload) {
                 >
                   <!-- Step number dot -->
                   <div
-                    class="absolute -left-[33px] flex size-6 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white ring-4 ring-white"
+                    class="absolute -left-[33px] flex size-6 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white"
+                    style="box-shadow: 0 0 0 4px var(--color-bg)"
                   >
                     {{ i + 1 }}
                   </div>
 
-                  <div
-                    class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:bg-slate-800 dark:border-slate-700"
-                  >
+                  <div class="theme-card rounded-xl p-4 shadow-sm">
                     <!-- Transport mode badge -->
                     <div class="mb-1 flex items-center gap-2">
                       <span
                         v-if="step.transport_mode"
-                        class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600"
+                        class="theme-copy rounded-full px-2 py-0.5 text-xs font-semibold"
+                        style="background-color: var(--color-surface-muted)"
                       >
                         {{
                           {
@@ -1181,14 +1172,14 @@ async function submitPropertyReview(payload) {
                       </span>
                       <span
                         v-if="step.landmark"
-                        class="inline-flex items-center gap-1 text-xs text-slate-400"
+                        class="theme-copy inline-flex items-center gap-1 text-xs"
                       >
                         <MapPinIcon class="size-3.5 shrink-0" />
                         {{ step.landmark }}
                       </span>
                     </div>
 
-                    <p class="text-sm font-medium text-slate-700">
+                    <p class="theme-title text-sm font-medium">
                       {{ step.instruction }}
                     </p>
 
@@ -1210,7 +1201,7 @@ async function submitPropertyReview(payload) {
                     <!-- Direction photo -->
                     <div
                       v-if="step.photo && visibleDirectionPhotos.has(i)"
-                      class="mt-2 overflow-hidden rounded-lg border border-slate-100 shadow-sm"
+                      class="theme-card mt-2 overflow-hidden rounded-lg shadow-sm"
                     >
                       <img
                         :src="step.photo"
@@ -1225,7 +1216,7 @@ async function submitPropertyReview(payload) {
             <!-- ═══ RENTAL INFO SECTIONS ══════════════════════════════ -->
             <!-- Utility Inclusions -->
             <section v-if="property.utility_inclusions?.length">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">
+              <h2 class="theme-title mb-3 text-lg font-bold">
                 Utility Inclusions
               </h2>
               <div class="flex flex-wrap gap-2">
@@ -1253,7 +1244,7 @@ async function submitPropertyReview(payload) {
 
             <!-- House Rules -->
             <section v-if="property.house_rules?.length">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">House Rules</h2>
+              <h2 class="theme-title mb-3 text-lg font-bold">House Rules</h2>
               <div class="flex flex-wrap gap-2">
                 <span
                   v-for="rule in property.house_rules"
@@ -1281,7 +1272,7 @@ async function submitPropertyReview(payload) {
 
             <!-- Safety & Security -->
             <section v-if="property.safety_features?.length">
-              <h2 class="mb-3 text-lg font-bold text-slate-900">
+              <h2 class="theme-title mb-3 text-lg font-bold">
                 Safety & Security
               </h2>
               <div class="flex flex-wrap gap-2">
@@ -1308,7 +1299,7 @@ async function submitPropertyReview(payload) {
             </section>
 
             <!-- ═══ Reviews & Testimonials ═════════════════════════════ -->
-            <section class="border-t border-slate-100 pt-8">
+            <section class="theme-divider-soft border-t pt-8">
               <ReviewForm
                 ref="propertyReviewFormRef"
                 :review-count="property.review_count ?? 0"
@@ -1320,12 +1311,12 @@ async function submitPropertyReview(payload) {
             </section>
 
             <!-- Share row -->
-            <div class="flex items-center gap-3 border-t border-slate-100 pt-6">
-              <span class="text-xs font-semibold text-slate-400"
+            <div class="theme-divider-soft flex items-center gap-3 border-t pt-6">
+              <span class="theme-copy text-xs font-semibold"
                 >Share this listing</span
               >
               <button
-                class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                class="btn-secondary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium shadow-sm transition-colors"
                 @click="
                   copyLink();
                   trackEvent('share_click');
@@ -1337,7 +1328,7 @@ async function submitPropertyReview(payload) {
                 :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(route.fullPath)}`"
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition-colors hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
+                class="btn-secondary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium shadow-sm transition-colors hover:text-blue-600"
                 @click="trackEvent('share_click')"
               >
                 <svg class="size-4" fill="currentColor" viewBox="0 0 24 24">
@@ -1353,13 +1344,11 @@ async function submitPropertyReview(payload) {
           <!-- RIGHT: Sticky sidebar ──────────────────────────────────── -->
           <div class="space-y-4 lg:sticky lg:top-24 self-start">
             <!-- Agent / Landlord Inquiry Card -->
-            <div
-              class="rounded-3xl border border-slate-100 bg-white p-7 shadow-2xl shadow-slate-200/50 dark:bg-slate-800 dark:border-slate-700"
-            >
+            <div class="theme-card rounded-3xl p-7 shadow-2xl">
               <!-- Agent / Landlord Header -->
               <div
                 v-if="property.store"
-                class="mb-6 border-b border-slate-100 pb-6"
+                class="theme-divider-soft mb-6 border-b pb-6"
               >
                 <div class="flex items-start gap-4">
                   <div class="relative shrink-0">
@@ -1376,19 +1365,20 @@ async function submitPropertyReview(payload) {
                     />
                     <UserCircleIcon
                       v-else
-                      class="size-16 rounded-full text-slate-300"
+                      class="theme-copy size-16 rounded-full"
                     />
                     <div
-                      class="absolute -bottom-1 -right-1 flex size-5 justify-center items-center rounded-full border-2 border-white bg-brand-500 text-white"
+                      class="absolute -bottom-1 -right-1 flex size-5 justify-center items-center rounded-full bg-brand-500 text-white"
+                      style="border: 2px solid var(--color-surface)"
                     >
                       <ShieldCheckIcon class="size-3" />
                     </div>
                   </div>
                   <div>
-                    <h4 class="font-bold text-[#0F2044] text-lg leading-tight">
+                    <h4 class="theme-title text-lg leading-tight font-bold">
                       {{ property.store.agent_name || property.store.name }}
                     </h4>
-                    <p class="text-sm text-slate-500 mt-0.5">
+                    <p class="theme-copy mt-0.5 text-sm">
                       <RouterLink
                         :to="`/agent/${property.store.slug}`"
                         class="text-brand-600 hover:text-brand-700 font-semibold"
@@ -1402,15 +1392,15 @@ async function submitPropertyReview(payload) {
                           v-if="n <= ratingStars.full"
                           class="size-4 text-amber-400"
                         />
-                        <StarIcon v-else class="size-4 text-slate-200" />
+                        <StarIcon v-else class="theme-copy size-4" />
                       </template>
-                      <span class="text-xs text-slate-500 font-medium ml-1">
+                      <span class="theme-copy ml-1 text-xs font-medium">
                         {{
                           ratingStars.value
                             ? ratingStars.value.toFixed(1)
                             : "New"
                         }}
-                        <span v-if="ratingStars.count" class="text-slate-400"
+                        <span v-if="ratingStars.count" class="theme-copy opacity-80"
                           >({{ ratingStars.count }})</span
                         >
                       </span>
@@ -1422,7 +1412,7 @@ async function submitPropertyReview(payload) {
                 <a
                   v-if="property.store.phone"
                   :href="`tel:${property.store.phone}`"
-                  class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100"
+                  class="btn-secondary mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-colors"
                   @click="trackEvent('phone_click')"
                 >
                   <PhoneIcon class="size-4" />
@@ -1438,10 +1428,10 @@ async function submitPropertyReview(payload) {
                   class="flex flex-col items-center gap-2 rounded-2xl bg-[#059669]/10 p-6 text-center ring-1 ring-[#059669]/20"
                 >
                   <CheckCircleIcon class="size-8 text-[#059669]" />
-                  <p class="font-bold text-[#0F2044]">
+                  <p class="theme-title font-bold">
                     Inquiry sent successfully!
                   </p>
-                  <p class="text-xs text-slate-500">
+                  <p class="theme-copy text-xs">
                     {{ inquirySuccessMessage }}
                   </p>
                   <button
@@ -1459,10 +1449,10 @@ async function submitPropertyReview(payload) {
                 >
                   <HomeModernIcon class="size-8 text-emerald-600" />
                   <div>
-                    <p class="font-bold text-[#0F2044]">
+                    <p class="theme-title font-bold">
                       You rent this property!
                     </p>
-                    <p class="mt-1 text-xs text-slate-500">
+                    <p class="theme-copy mt-1 text-xs">
                       You have an active or pending rental agreement for this
                       listing.
                     </p>
@@ -1478,12 +1468,12 @@ async function submitPropertyReview(payload) {
                 <!-- Unavailable State -->
                 <div
                   v-else-if="!property.is_active"
-                  class="flex flex-col items-center gap-3 rounded-2xl bg-slate-50 p-6 text-center ring-1 ring-slate-200"
+                  class="theme-card-muted flex flex-col items-center gap-3 rounded-2xl p-6 text-center"
                 >
-                  <LockClosedIcon class="size-8 text-slate-400" />
+                  <LockClosedIcon class="theme-copy size-8" />
                   <div>
-                    <p class="font-bold text-[#0F2044]">No longer available</p>
-                    <p class="mt-1 text-xs text-slate-500">
+                    <p class="theme-title font-bold">No longer available</p>
+                    <p class="theme-copy mt-1 text-xs">
                       This property has already been rented or is currently off
                       the market.
                     </p>
@@ -1492,7 +1482,7 @@ async function submitPropertyReview(payload) {
 
                 <!-- Quick Inquiry (logged-in users) -->
                 <template v-else-if="auth.isLoggedIn">
-                  <h3 class="font-bold text-[#0F2044]">Interested?</h3>
+                  <h3 class="theme-title font-bold">Interested?</h3>
 
                   <!-- Already-inquired label -->
                   <div
@@ -1503,25 +1493,23 @@ async function submitPropertyReview(payload) {
                     You've already sent an inquiry for this listing.
                   </div>
 
-                  <p class="text-xs text-slate-500">
+                  <p class="theme-copy text-xs">
                     Express your interest instantly — your contact details will
                     be shared with the
                     {{ isRental ? "landlord" : "agent" }} automatically.
                   </p>
 
-                  <div
-                    class="flex items-center gap-3 rounded-xl bg-slate-50 p-3"
-                  >
+                  <div class="theme-card-muted flex items-center gap-3 rounded-xl p-3">
                     <div
                       class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700"
                     >
                       {{ auth.user?.name?.charAt(0)?.toUpperCase() }}
                     </div>
                     <div class="min-w-0 text-sm">
-                      <p class="truncate font-medium text-slate-800">
+                      <p class="theme-title truncate font-medium">
                         {{ auth.user?.name }}
                       </p>
-                      <p class="truncate text-xs text-slate-500">
+                      <p class="theme-copy truncate text-xs">
                         {{ auth.user?.email }}
                         <span v-if="auth.user?.phone">
                           · {{ auth.user?.phone }}
@@ -1533,7 +1521,7 @@ async function submitPropertyReview(payload) {
                   <!-- Auto-generated message preview -->
                   <div
                     v-if="!showQuickMessage"
-                    class="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-relaxed text-slate-500 italic"
+                    class="theme-card-muted theme-copy rounded-xl px-4 py-3 text-xs italic leading-relaxed"
                   >
                     "{{ defaultMessage }}"
                   </div>
@@ -1542,7 +1530,7 @@ async function submitPropertyReview(payload) {
                   <button
                     v-if="!showQuickMessage"
                     type="button"
-                    class="flex items-center gap-1.5 self-start text-xs font-medium text-slate-500 transition-colors hover:text-slate-700"
+                    class="theme-copy flex items-center gap-1.5 self-start text-xs font-medium transition-colors hover:text-[var(--color-text)]"
                     @click="showQuickMessage = true"
                   >
                     <ChatBubbleLeftIcon class="size-3.5" />
@@ -1553,7 +1541,7 @@ async function submitPropertyReview(payload) {
                     v-model="quickMessage"
                     rows="2"
                     placeholder="I'd like to schedule a viewing…"
-                    class="w-full resize-none rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20 dark:bg-slate-700/60 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-slate-700"
+                    class="theme-input w-full resize-none rounded-xl px-4 py-3.5 text-sm"
                   />
 
                   <div
@@ -1567,7 +1555,7 @@ async function submitPropertyReview(payload) {
                   <button
                     type="button"
                     :disabled="inquirySubmitting"
-                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#059669] py-4 text-sm font-bold text-white shadow-lg shadow-[#059669]/25 transition-all hover:bg-[#047857] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                    class="btn-primary flex w-full items-center justify-center gap-2 rounded-xl py-4 text-sm font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                     @click="submitQuickInquiry"
                   >
                     <span
@@ -1601,9 +1589,7 @@ async function submitPropertyReview(payload) {
                     </template>
                   </button>
 
-                  <p
-                    class="flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400"
-                  >
+                  <p class="theme-copy flex items-center justify-center gap-1.5 text-[11px] font-medium">
                     <LockClosedIcon class="size-3.5 shrink-0" />
                     Your data is protected and never shared.
                   </p>
@@ -1611,7 +1597,7 @@ async function submitPropertyReview(payload) {
 
                 <!-- Manual Inquiry Form (guests) -->
                 <template v-else>
-                  <h3 class="font-bold text-[#0F2044]">Send an Inquiry</h3>
+                  <h3 class="theme-title font-bold">Send an Inquiry</h3>
 
                   <form
                     class="flex flex-col gap-3"
@@ -1622,26 +1608,26 @@ async function submitPropertyReview(payload) {
                       required
                       type="text"
                       placeholder="Full Name *"
-                      class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20 dark:bg-slate-700/60 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-slate-700"
+                      class="theme-input w-full rounded-xl px-4 py-3.5 text-sm"
                     />
                     <input
                       v-model="inquiry.email"
                       required
                       type="email"
                       placeholder="Email Address *"
-                      class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20 dark:bg-slate-700/60 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-slate-700"
+                      class="theme-input w-full rounded-xl px-4 py-3.5 text-sm"
                     />
                     <input
                       v-model="inquiry.phone"
                       type="tel"
                       placeholder="Phone Number"
-                      class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20 dark:bg-slate-700/60 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-slate-700"
+                      class="theme-input w-full rounded-xl px-4 py-3.5 text-sm"
                     />
                     <textarea
                       v-model="inquiry.message"
                       rows="3"
                       placeholder="I'm interested in this property. Please contact me for a viewing."
-                      class="w-full resize-none rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-500/20 dark:bg-slate-700/60 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-slate-700"
+                      class="theme-input w-full resize-none rounded-xl px-4 py-3.5 text-sm"
                     />
 
                     <div
@@ -1685,15 +1671,13 @@ async function submitPropertyReview(payload) {
                       <span v-else>Submit Inquiry</span>
                     </button>
 
-                    <p
-                      class="mt-2 flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-400"
-                    >
+                    <p class="theme-copy mt-2 flex items-center justify-center gap-1.5 text-[11px] font-medium">
                       <LockClosedIcon class="size-3.5 shrink-0" />
                       Your data is protected and never shared.
                     </p>
                   </form>
 
-                  <p class="text-center text-xs text-slate-400">
+                  <p class="theme-copy text-center text-xs">
                     <RouterLink
                       to="/login"
                       class="font-semibold text-brand-600 hover:underline"
@@ -1708,16 +1692,14 @@ async function submitPropertyReview(payload) {
 
             <!-- Share mini card -->
             <div
-              class="rounded-2xl border border-slate-100 bg-white px-5 py-4 shadow-sm dark:bg-slate-800 dark:border-slate-700"
+              class="theme-card rounded-2xl px-5 py-4"
             >
-              <p
-                class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400"
-              >
+              <p class="theme-copy mb-3 text-xs font-semibold uppercase tracking-wide">
                 Share this listing
               </p>
               <div class="flex gap-2">
                 <button
-                  class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                  class="btn-secondary flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition-colors"
                   @click="copyLink"
                 >
                   <ShareIcon class="size-3.5" /> Copy
@@ -1726,7 +1708,7 @@ async function submitPropertyReview(payload) {
                   :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(route.fullPath)}`"
                   target="_blank"
                   rel="noopener"
-                  class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
+                  class="btn-secondary flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition-colors hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
                 >
                   <svg class="size-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <path
@@ -1739,7 +1721,7 @@ async function submitPropertyReview(payload) {
                   :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(route.fullPath)}&text=${encodeURIComponent(property.title)}`"
                   target="_blank"
                   rel="noopener"
-                  class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900"
+                  class="btn-secondary flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition-colors"
                 >
                   <svg class="size-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <path

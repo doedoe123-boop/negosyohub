@@ -52,10 +52,10 @@ function isActive(item) {
 </script>
 
 <template>
-  <div class="bg-slate-50 dark:bg-slate-950 transition-colors">
+  <div class="theme-app transition-colors">
     <!-- Mobile / tablet tab strip (hidden on lg+) -->
     <div
-      class="sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm lg:hidden"
+      class="theme-surface sticky top-0 z-10 rounded-none border-x-0 border-t-0 lg:hidden"
     >
       <div class="overflow-x-auto">
         <div class="flex min-w-max px-4 sm:px-6">
@@ -67,7 +67,12 @@ function isActive(item) {
             :class="
               isActive(item)
                 ? 'border-brand-600 text-brand-700'
-                : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                : 'border-transparent'
+            "
+            :style="
+              isActive(item)
+                ? ''
+                : 'color: var(--color-text-muted); border-color: transparent'
             "
           >
             <component :is="item.icon" class="size-4 shrink-0" />
@@ -81,24 +86,28 @@ function isActive(item) {
     <div class="mx-auto max-w-7xl lg:flex">
       <!-- Desktop sidebar -->
       <aside
-        class="hidden w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 lg:block"
-        style="min-height: calc(100vh - 64px)"
+        class="hidden w-64 shrink-0 border-r p-6 lg:block"
+        style="
+          border-color: var(--color-border);
+          background-color: var(--color-surface);
+          min-height: calc(100vh - 64px);
+        "
       >
         <!-- User card -->
-        <div class="mb-5 flex items-center gap-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-3">
+        <div class="theme-surface-muted mb-5 flex items-center gap-3 rounded-2xl p-3">
           <div
             class="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white"
           >
             {{ auth.user?.name?.[0]?.toUpperCase() ?? "?" }}
           </div>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-slate-900">
+            <p class="truncate text-sm font-semibold" style="color: var(--color-text)">
               {{ auth.user?.name }}
             </p>
-            <p class="truncate text-xs text-slate-400">
+            <p class="truncate text-xs theme-text-muted">
               {{ auth.user?.email }}
             </p>
-            <p v-if="auth.user?.phone" class="truncate text-xs text-slate-400">
+            <p v-if="auth.user?.phone" class="truncate text-xs theme-text-muted">
               {{ auth.user?.phone }}
             </p>
           </div>
@@ -111,16 +120,21 @@ function isActive(item) {
             :key="item.to"
             :to="item.to"
             class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
-            :class="
+            :style="
               isActive(item)
-                ? 'bg-brand-50 text-brand-700'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                ? 'background-color: color-mix(in srgb, var(--color-brand) 14%, var(--color-surface)); color: var(--color-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-brand) 24%, var(--color-border));'
+                : 'color: var(--color-text-muted)'
             "
+            :class="isActive(item) ? '' : 'hover:bg-[var(--color-surface-muted)]'"
           >
             <component
               :is="item.icon"
               class="size-4.5 shrink-0 transition-colors"
-              :class="isActive(item) ? 'text-brand-600' : 'text-slate-400'"
+              :style="
+                isActive(item)
+                  ? 'color: var(--color-brand)'
+                  : 'color: var(--color-text-muted)'
+              "
             />
             {{ item.label }}
           </RouterLink>

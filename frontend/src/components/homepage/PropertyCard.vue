@@ -38,10 +38,13 @@ const monthlyEstimate = computed(() => {
 <template>
   <RouterLink
     :to="`/properties/${property.slug}`"
-    class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-150 ease-out property-card dark:bg-slate-800 dark:border-slate-700"
+    class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl transition-all duration-150 ease-out"
   >
     <!-- Image -->
-    <div class="relative aspect-[16/9] overflow-hidden bg-slate-100">
+    <div
+      class="relative aspect-[16/9] overflow-hidden"
+      style="background-color: var(--color-surface-muted)"
+    >
       <img
         v-if="property.images && property.images[0]"
         :src="property.images[0]"
@@ -60,7 +63,7 @@ const monthlyEstimate = computed(() => {
         class="absolute left-2.5 top-2.5 rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm"
         :class="
           listingBadgeClass[property.listing_type] ??
-          'bg-slate-100 text-slate-600'
+          'theme-card-muted'
         "
       >
         {{ listingLabel[property.listing_type] ?? property.listing_type }}
@@ -90,12 +93,13 @@ const monthlyEstimate = computed(() => {
     <!-- Info -->
     <div class="flex flex-1 flex-col p-4">
       <p
-        class="line-clamp-2 font-semibold leading-snug text-slate-800 transition-colors group-hover:text-emerald-700"
+        class="line-clamp-2 font-semibold leading-snug transition-colors group-hover:text-emerald-700"
+        style="color: var(--color-text)"
       >
         {{ property.title }}
       </p>
 
-      <p class="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
+      <p class="theme-copy mt-1.5 flex items-center gap-1 text-xs">
         <svg
           class="size-3 shrink-0"
           fill="none"
@@ -120,7 +124,7 @@ const monthlyEstimate = computed(() => {
       <!-- Social Proof -->
       <p
         v-if="property.average_rating || property.views_count"
-        class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500"
+        class="theme-copy mt-1.5 flex items-center gap-1.5 text-xs font-medium"
       >
         <span v-if="property.average_rating"
           >⭐ {{ property.average_rating }}</span
@@ -152,7 +156,7 @@ const monthlyEstimate = computed(() => {
         </p>
 
         <!-- Pag-IBIG estimate -->
-        <p v-if="monthlyEstimate" class="mt-0.5 text-xs text-slate-400">
+        <p v-if="monthlyEstimate" class="theme-copy mt-0.5 text-xs">
           Est. {{ monthlyEstimate }}/mo via Pag-IBIG
         </p>
       </div>
@@ -160,7 +164,7 @@ const monthlyEstimate = computed(() => {
       <!-- Verified Agency inline -->
       <div
         v-if="property.agency"
-        class="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3"
+        class="theme-divider-soft mt-3 flex items-center gap-2 border-t pt-3"
       >
         <div
           class="flex size-6 items-center justify-center rounded-full bg-emerald-50 text-xs"
@@ -179,24 +183,10 @@ const monthlyEstimate = computed(() => {
             />
           </svg>
         </div>
-        <span class="text-xs font-medium text-slate-500">
+        <span class="theme-copy text-xs font-medium">
           {{ property.agency?.name ?? "Verified Agency" }}
         </span>
       </div>
     </div>
   </RouterLink>
 </template>
-
-<style scoped>
-.property-card {
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.property-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.06);
-}
-</style>

@@ -77,21 +77,17 @@ function formatMoney(amount) {
 <template>
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
     <div class="mb-6">
-      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+      <h1 class="theme-title text-2xl font-extrabold tracking-tight">
         Rental Agreements
       </h1>
-      <p class="mt-1 text-sm text-slate-500">
+      <p class="theme-copy mt-1 text-sm">
         Your finalized and signed property rental contracts.
       </p>
     </div>
 
     <!-- Skeleton -->
     <div v-if="loading" class="space-y-3">
-      <div
-        v-for="i in 4"
-        :key="i"
-        class="h-20 animate-pulse rounded-2xl bg-slate-100"
-      />
+      <div v-for="i in 4" :key="i" class="theme-skeleton h-20 animate-pulse rounded-2xl" />
     </div>
 
     <!-- Error -->
@@ -105,18 +101,18 @@ function formatMoney(amount) {
     <!-- Empty -->
     <div
       v-else-if="agreements.length === 0"
-      class="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center"
+      class="theme-empty-state rounded-2xl py-12 text-center"
     >
       <DocumentTextIcon class="mx-auto mb-3 size-10 text-emerald-200" />
-      <p class="font-medium text-slate-500">No rental agreements yet</p>
-      <p class="mt-1 text-sm text-slate-400">
+      <p class="theme-copy font-medium">No rental agreements yet</p>
+      <p class="theme-copy mt-1 text-sm">
         When a landlord confirms your rental application, it will appear here.
       </p>
     </div>
 
     <!-- Agreements list -->
     <ul v-else class="space-y-4">
-      <li v-for="agreement in agreements" :key="agreement.id" class="rounded-2xl border bg-white shadow-sm transition-all"
+      <li v-for="agreement in agreements" :key="agreement.id" class="theme-card rounded-2xl shadow-sm transition-all"
         :class="agreement.status === 'pending' || agreement.status === 'negotiating' ? 'border-brand-200' : 'border-emerald-100'">
         <div class="p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-start gap-4 sm:items-center">
@@ -124,11 +120,12 @@ function formatMoney(amount) {
               v-if="agreement.property?.featured_image"
               :src="agreement.property.featured_image"
               :alt="agreement.property.title"
-              class="size-16 shrink-0 rounded-xl object-cover ring-1 ring-slate-100"
+              class="size-16 shrink-0 rounded-xl object-cover"
+              style="box-shadow: inset 0 0 0 1px var(--color-border)"
             />
             <div
               v-else
-              class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 ring-1 ring-slate-200"
+              class="theme-icon-muted flex size-16 shrink-0 items-center justify-center rounded-xl"
             >
               <HomeModernIcon class="size-6" />
             </div>
@@ -148,10 +145,10 @@ function formatMoney(amount) {
                   Active Contract
                 </span>
               </div>
-              <RouterLink :to="`/properties/${agreement.property?.slug}`" class="mt-1 block truncate font-bold text-slate-900 transition hover:text-brand-600">
+              <RouterLink :to="`/properties/${agreement.property?.slug}`" class="theme-title mt-1 block truncate font-bold transition hover:text-brand-600">
                 {{ agreement.property?.title }}
               </RouterLink>
-              <p class="text-xs text-slate-500">
+              <p class="theme-copy text-xs">
                 {{ agreement.store?.name }}
                 <span v-if="agreement.property?.city">
                   · {{ agreement.property.city }}
@@ -161,21 +158,21 @@ function formatMoney(amount) {
           </div>
 
           <div
-            class="flex flex-col gap-2 rounded-xl bg-slate-50 p-3 sm:items-end sm:bg-transparent sm:p-0 text-left sm:text-right"
+            class="flex flex-col gap-2 rounded-xl p-3 text-left sm:items-end sm:bg-transparent sm:p-0 sm:text-right"
           >
-            <p class="text-sm font-semibold text-slate-800">
+            <p class="theme-title text-sm font-semibold">
               {{ formatMoney(agreement.monthly_rent) }}
-              <span class="text-xs font-normal text-slate-500">/ mo</span>
+              <span class="theme-copy text-xs font-normal">/ mo</span>
             </p>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 sm:justify-end">
-              <p>Move-In: <span class="font-medium text-slate-700">{{ agreement.move_in_date || 'N/A' }}</span></p>
-              <p v-if="agreement.lease_term_months">Term: <span class="font-medium text-slate-700">{{ agreement.lease_term_months }} months</span></p>
+            <div class="theme-copy flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:justify-end">
+              <p>Move-In: <span class="theme-title font-medium">{{ agreement.move_in_date || 'N/A' }}</span></p>
+              <p v-if="agreement.lease_term_months">Term: <span class="theme-title font-medium">{{ agreement.lease_term_months }} months</span></p>
             </div>
           </div>
         </div>
 
         <!-- Pending Action Area -->
-        <div v-if="agreement.status === 'pending' || agreement.status === 'negotiating'" class="border-t border-slate-100 bg-slate-50 p-5 rounded-b-2xl">
+        <div v-if="agreement.status === 'pending' || agreement.status === 'negotiating'" class="theme-card-muted theme-divider-soft rounded-b-2xl border-t p-5">
           <div v-if="actingOn !== agreement.id" class="flex flex-wrap items-center gap-3">
              <button
                @click="acceptAgreement(agreement.id)"
@@ -187,18 +184,18 @@ function formatMoney(amount) {
              </button>
              <button
                @click="actingOn = agreement.id; questionText = ''"
-               class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+               class="btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition"
              >
-               <ChatBubbleLeftRightIcon class="size-4 text-slate-400" />
+               <ChatBubbleLeftRightIcon class="theme-copy size-4" />
                I have a question
              </button>
           </div>
           <div v-else class="space-y-3">
-             <label class="block text-sm font-semibold text-slate-900">What questions do you have for the landlord?</label>
+             <label class="theme-title block text-sm font-semibold">What questions do you have for the landlord?</label>
              <textarea
                v-model="questionText"
                rows="3"
-               class="w-full rounded-xl border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+               class="theme-input w-full rounded-xl px-3 py-2 shadow-sm sm:text-sm"
                placeholder="Example: Can we move the move-in date by 2 days?"
              ></textarea>
              <div class="flex items-center gap-2">
@@ -211,7 +208,7 @@ function formatMoney(amount) {
                </button>
                <button
                  @click="actingOn = null"
-                 class="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+                 class="theme-copy px-3 py-2 text-sm font-medium transition hover:text-[var(--color-text)]"
                >
                  Cancel
                </button>

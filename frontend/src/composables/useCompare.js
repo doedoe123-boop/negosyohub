@@ -21,8 +21,12 @@ function persist() {
 export function useCompare() {
   const canAdd = computed(() => compareList.value.length < MAX_COMPARE);
 
+  function sameId(left, right) {
+    return String(left) === String(right);
+  }
+
   function isInCompare(id) {
-    return compareList.value.some((p) => p.id === id);
+    return compareList.value.some((p) => sameId(p.id, id));
   }
 
   function addToCompare(property) {
@@ -39,7 +43,7 @@ export function useCompare() {
   }
 
   function removeFromCompare(id) {
-    compareList.value = compareList.value.filter((p) => p.id !== id);
+    compareList.value = compareList.value.filter((p) => !sameId(p.id, id));
     persist();
   }
 

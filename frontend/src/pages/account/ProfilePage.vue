@@ -35,17 +35,17 @@ async function save() {
 
 <template>
   <div class="mx-auto max-w-xl px-4 py-8 sm:px-0">
-    <h1 class="mb-6 text-2xl font-extrabold tracking-tight text-slate-900">
+    <h1 class="theme-title mb-6 text-2xl font-extrabold tracking-tight">
       My Profile
     </h1>
 
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="theme-card rounded-2xl p-6">
       <form class="space-y-5" @submit.prevent="save">
         <!-- Name -->
         <div>
           <label
             for="profile-name"
-            class="mb-1.5 block text-sm font-medium text-slate-700"
+            class="theme-title mb-1.5 block text-sm font-medium"
             >Full Name</label
           >
           <input
@@ -53,7 +53,7 @@ async function save() {
             v-model="form.name"
             type="text"
             required
-            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+            class="theme-input w-full rounded-xl px-4 py-2.5 text-sm"
           />
         </div>
 
@@ -61,7 +61,7 @@ async function save() {
         <div>
           <label
             for="profile-email"
-            class="mb-1.5 block text-sm font-medium text-slate-700"
+            class="theme-title mb-1.5 block text-sm font-medium"
             >Email Address</label
           >
           <input
@@ -69,9 +69,9 @@ async function save() {
             :value="auth.user?.email"
             type="email"
             disabled
-            class="w-full rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed"
+            class="theme-card-muted theme-copy w-full cursor-not-allowed rounded-xl px-4 py-2.5 text-sm"
           />
-          <p class="mt-1 text-xs text-slate-400">
+          <p class="theme-copy mt-1 text-xs">
             Email cannot be changed here.
           </p>
         </div>
@@ -80,7 +80,7 @@ async function save() {
         <div>
           <label
             for="profile-phone"
-            class="mb-1.5 block text-sm font-medium text-slate-700"
+            class="theme-title mb-1.5 block text-sm font-medium"
             >Phone Number</label
           >
           <input
@@ -88,7 +88,7 @@ async function save() {
             v-model="form.phone"
             type="tel"
             placeholder="e.g. 09171234567"
-            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 focus:outline-none"
+            class="theme-input w-full rounded-xl px-4 py-2.5 text-sm"
           />
         </div>
 
@@ -109,7 +109,7 @@ async function save() {
         <button
           type="submit"
           :disabled="saving"
-          class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-2.5 text-sm font-bold text-white transition-all hover:from-brand-600 hover:to-brand-700 disabled:opacity-60"
+          class="btn-primary w-full rounded-xl px-6 py-2.5 text-sm font-bold transition-all disabled:opacity-60"
         >
           {{ saving ? "Saving…" : "Save Changes" }}
         </button>

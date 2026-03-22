@@ -187,7 +187,7 @@ const hasActiveFilters = computed(() =>
 </script>
 
 <template>
-  <div>
+  <div class="theme-page">
     <!-- Page header -->
     <div class="py-12 text-white" style="background: #0f2044">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
@@ -204,7 +204,29 @@ const hasActiveFilters = computed(() =>
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div class="theme-page-section mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div class="mb-5 flex flex-wrap items-center gap-2">
+        <RouterLink
+          to="/properties"
+          class="theme-tab-active rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Properties
+        </RouterLink>
+        <RouterLink
+          to="/developments"
+          class="theme-tab rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Developments
+        </RouterLink>
+        <RouterLink
+          to="/properties/compare"
+          class="theme-tab rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Compare
+          <span v-if="compareList.length" class="ml-1">({{ compareList.length }})</span>
+        </RouterLink>
+      </div>
+
       <!-- Listing type quick-filter pills -->
       <div class="mb-5 flex flex-wrap gap-2">
         <button
@@ -214,8 +236,8 @@ const hasActiveFilters = computed(() =>
           class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
           :class="
             filters.listing_type === l.value
-              ? 'bg-emerald-600 text-white shadow-sm'
-              : 'border border-slate-300 bg-white text-slate-600 hover:border-emerald-400 hover:text-emerald-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+              ? 'chip-filter-active'
+              : 'chip-filter'
           "
           @click="
             filters.listing_type = l.value;
@@ -228,18 +250,18 @@ const hasActiveFilters = computed(() =>
 
       <!-- Filters -->
       <form
-        class="mb-8 rounded-2xl border bg-white p-4 shadow-sm dark:bg-slate-900 dark:border-slate-700"
+        class="theme-card mb-8 rounded-2xl p-4"
         @submit.prevent="onSearch"
       >
         <div class="relative mb-3">
           <MagnifyingGlassIcon
-            class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            class="absolute left-3 top-1/2 size-4 -translate-y-1/2 theme-copy"
           />
           <input
             v-model="filters.search"
             type="search"
             placeholder="Search by title, city, or address…"
-            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:placeholder-slate-500"
+            class="theme-input w-full rounded-xl py-2.5 pl-9 pr-4 text-sm"
           />
         </div>
 
@@ -248,7 +270,7 @@ const hasActiveFilters = computed(() =>
         >
           <select
             v-model="filters.type"
-            class="col-span-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 sm:w-auto dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            class="theme-input col-span-2 rounded-xl px-3 py-2 text-sm sm:w-auto"
           >
             <option v-for="t in propertyTypes" :key="t.value" :value="t.value">
               {{ t.label }}
@@ -260,7 +282,7 @@ const hasActiveFilters = computed(() =>
             type="number"
             min="1"
             placeholder="Min bedrooms"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 sm:w-32 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            class="theme-input rounded-xl px-3 py-2 text-sm sm:w-32"
           />
 
           <input
@@ -268,7 +290,7 @@ const hasActiveFilters = computed(() =>
             type="number"
             min="0"
             placeholder="Min price"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 sm:w-32 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            class="theme-input rounded-xl px-3 py-2 text-sm sm:w-32"
           />
 
           <input
@@ -276,14 +298,14 @@ const hasActiveFilters = computed(() =>
             type="number"
             min="0"
             placeholder="Max price"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 sm:w-32 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            class="theme-input rounded-xl px-3 py-2 text-sm sm:w-32"
           />
 
           <input
             v-model="filters.city"
             type="text"
             placeholder="City"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400 sm:w-36 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            class="theme-input rounded-xl px-3 py-2 text-sm sm:w-36"
           />
 
           <button
@@ -296,7 +318,7 @@ const hasActiveFilters = computed(() =>
 
           <button
             type="button"
-            class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 transition-colors hover:text-slate-700"
+            class="btn-secondary rounded-xl px-4 py-2 text-sm transition-colors"
             @click="resetFilters"
           >
             Reset
@@ -322,13 +344,13 @@ const hasActiveFilters = computed(() =>
         <div
           v-for="i in 6"
           :key="i"
-          class="animate-pulse overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card animate-pulse overflow-hidden rounded-2xl"
         >
-          <div class="aspect-[16/9] bg-slate-200" />
+          <div class="aspect-[16/9]" style="background-color: color-mix(in srgb, var(--color-border) 80%, transparent)" />
           <div class="p-4 space-y-3">
-            <div class="h-4 w-3/4 rounded bg-slate-200" />
-            <div class="h-3 w-1/2 rounded bg-slate-100" />
-            <div class="h-5 w-1/3 rounded bg-slate-200" />
+            <div class="h-4 w-3/4 rounded" style="background-color: color-mix(in srgb, var(--color-border) 80%, transparent)" />
+            <div class="h-3 w-1/2 rounded" style="background-color: var(--color-surface-muted)" />
+            <div class="h-5 w-1/3 rounded" style="background-color: color-mix(in srgb, var(--color-border) 80%, transparent)" />
           </div>
         </div>
       </div>
@@ -336,11 +358,11 @@ const hasActiveFilters = computed(() =>
       <!-- Empty state -->
       <div
         v-else-if="properties.length === 0"
-        class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 py-20 text-center"
+        class="theme-card flex flex-col items-center justify-center rounded-2xl border-dashed py-20 text-center"
       >
-        <HomeModernIcon class="mb-3 size-10 text-slate-300" />
-        <p class="font-medium text-slate-500">No properties found</p>
-        <p class="mt-1 text-sm text-slate-400">
+        <HomeModernIcon class="theme-copy mb-3 size-10" />
+        <p class="theme-copy font-medium">No properties found</p>
+        <p class="theme-copy mt-1 text-sm">
           Try adjusting your filters or
           <button
             class="text-emerald-600 underline underline-offset-2"
@@ -351,10 +373,10 @@ const hasActiveFilters = computed(() =>
         </p>
         <p
           v-if="cityStore.activeCity && filters.city"
-          class="mt-3 text-sm text-slate-400"
+          class="theme-copy mt-3 text-sm"
         >
           No listings found in
-          <strong class="text-slate-600">{{ cityStore.activeCity }}</strong
+          <strong class="theme-title">{{ cityStore.activeCity }}</strong
           >.
           <button
             class="ml-1 text-emerald-600 underline underline-offset-2"
@@ -373,10 +395,13 @@ const hasActiveFilters = computed(() =>
         <div
           v-for="property in properties"
           :key="property.id"
-          class="group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl transition-shadow"
         >
           <RouterLink :to="`/properties/${property.slug}`" class="flex-1">
-            <div class="relative aspect-[16/9] overflow-hidden bg-slate-100">
+            <div
+              class="relative aspect-[16/9] overflow-hidden"
+              style="background-color: var(--color-surface-muted)"
+            >
               <img
                 v-if="property.images && property.images[0]"
                 :src="property.images[0]"
@@ -387,13 +412,13 @@ const hasActiveFilters = computed(() =>
                 v-else
                 class="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"
               >
-                <HomeModernIcon class="size-12 text-slate-300" />
+                <HomeModernIcon class="theme-copy size-12" />
               </div>
               <span
                 class="absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold"
                 :class="
                   listingBadgeClass[property.listing_type] ??
-                  'bg-slate-100 text-slate-600'
+                  'theme-card-muted'
                 "
               >
                 {{
@@ -404,17 +429,17 @@ const hasActiveFilters = computed(() =>
 
             <div class="p-4">
               <p
-                class="mb-1 line-clamp-2 font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors"
+                class="theme-title mb-1 line-clamp-2 font-semibold transition-colors group-hover:text-emerald-700"
               >
                 {{ property.title }}
               </p>
-              <p class="mb-2 text-xs text-slate-400">
+              <p class="theme-copy mb-2 text-xs">
                 {{ property.city
                 }}{{ property.province ? `, ${property.province}` : "" }}
               </p>
               <div
                 v-if="property.bedrooms || property.floor_area"
-                class="mb-3 flex flex-wrap gap-3 text-xs text-slate-500"
+                class="theme-copy mb-3 flex flex-wrap gap-3 text-xs"
               >
                 <span v-if="property.bedrooms"
                   >🛏 {{ property.bedrooms }} BR</span
@@ -439,15 +464,15 @@ const hasActiveFilters = computed(() =>
           </RouterLink>
 
           <!-- Compare footer -->
-          <div class="flex items-center border-t border-slate-100 px-4 py-2">
+          <div class="theme-divider-soft flex items-center border-t px-4 py-2">
             <button
               class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
               :class="
                 isInCompare(property.id)
                   ? 'bg-emerald-50 text-emerald-700'
                   : !canAdd
-                    ? 'cursor-not-allowed text-slate-300'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-slate-700'
+                    ? 'cursor-not-allowed theme-copy opacity-50'
+                    : 'theme-copy hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]'
               "
               :disabled="!canAdd && !isInCompare(property.id)"
               @click="
@@ -475,8 +500,8 @@ const hasActiveFilters = computed(() =>
           class="size-9 rounded-xl border text-sm font-medium transition-colors"
           :class="
             meta.current_page === page
-              ? 'bg-emerald-600 text-white border-emerald-600'
-              : 'bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+              ? 'chip-filter-active'
+              : 'chip-filter'
           "
           @click="load(page)"
         >
@@ -495,28 +520,28 @@ const hasActiveFilters = computed(() =>
       >
         <div
           v-if="compareList.length"
-          class="fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white shadow-xl dark:bg-slate-900 dark:border-slate-700"
+          class="theme-floating-bar fixed bottom-0 inset-x-0 z-40"
         >
           <div
             class="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6"
           >
             <div class="flex flex-1 items-center gap-3 overflow-x-auto">
               <span
-                class="shrink-0 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                class="theme-copy shrink-0 text-xs font-semibold uppercase tracking-wide"
               >
                 Compare ({{ compareList.length }}/3)
               </span>
               <div
                 v-for="item in compareList"
                 :key="item.id"
-                class="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs dark:bg-slate-800 dark:border-slate-700"
+                class="theme-card-muted flex shrink-0 items-center gap-2 rounded-xl px-3 py-1.5 text-xs"
               >
                 <span
-                  class="max-w-[120px] truncate font-medium text-slate-700"
+                  class="theme-title max-w-[120px] truncate font-medium"
                   >{{ item.title }}</span
                 >
                 <button
-                  class="text-slate-400 hover:text-red-500"
+                  class="theme-copy hover:text-red-500"
                   @click="removeFromCompare(item.id)"
                 >
                   <XMarkIcon class="size-3.5" />
@@ -537,16 +562,16 @@ const hasActiveFilters = computed(() =>
       <!-- Save Search Modal -->
       <div
         v-if="saveSearchModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        class="theme-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
         @click.self="saveSearchModalOpen = false"
       >
         <div
-          class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900"
+          class="theme-modal w-full max-w-sm rounded-2xl p-6"
         >
-          <h3 class="mb-1 text-lg font-bold text-slate-900">
+          <h3 class="theme-title mb-1 text-lg font-bold">
             Save this Search
           </h3>
-          <p class="mb-4 text-sm text-slate-500">
+          <p class="theme-copy mb-4 text-sm">
             Get notified when new matching properties are listed.
           </p>
 
@@ -555,12 +580,12 @@ const hasActiveFilters = computed(() =>
             class="flex flex-col items-center gap-3 py-4 text-center"
           >
             <CheckCircleIcon class="size-10 text-emerald-500" />
-            <p class="font-bold text-slate-900">Search saved!</p>
-            <p class="text-sm text-slate-500">
+            <p class="theme-title font-bold">Search saved!</p>
+            <p class="theme-copy text-sm">
               You'll be notified of new matches.
             </p>
             <button
-              class="mt-2 rounded-xl bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+              class="btn-secondary mt-2 rounded-xl px-5 py-2 text-sm font-semibold"
               @click="saveSearchModalOpen = false"
             >
               Close
@@ -573,24 +598,24 @@ const hasActiveFilters = computed(() =>
             @submit.prevent="submitSaveSearch"
           >
             <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600"
+              <label class="theme-copy mb-1 block text-xs font-semibold"
                 >Search Name *</label
               >
               <input
                 v-model="saveSearchName"
                 required
                 type="text"
-                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                class="theme-input w-full rounded-xl px-3 py-2 text-sm"
                 placeholder="e.g. 3BR Condo in Makati"
               />
             </div>
             <div>
-              <label class="mb-1 block text-xs font-semibold text-slate-600"
+              <label class="theme-copy mb-1 block text-xs font-semibold"
                 >Notify me</label
               >
               <select
                 v-model="saveSearchFrequency"
-                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                class="theme-input w-full rounded-xl px-3 py-2 text-sm"
               >
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
@@ -600,7 +625,7 @@ const hasActiveFilters = computed(() =>
             <div class="flex gap-2 pt-1">
               <button
                 type="button"
-                class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                class="btn-secondary flex-1 rounded-xl py-2.5 text-sm font-semibold"
                 @click="saveSearchModalOpen = false"
               >
                 Cancel

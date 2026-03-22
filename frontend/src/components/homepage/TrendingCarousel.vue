@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="py-12">
+  <section class="theme-page-section py-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <!-- Header -->
       <div class="mb-6 flex items-end justify-between">
@@ -48,8 +48,8 @@ onBeforeUnmount(() => {
           >
             E-Commerce
           </p>
-          <h2 class="text-2xl font-bold text-slate-900">Trending Products</h2>
-          <p class="mt-1 text-sm text-slate-500">
+          <h2 class="theme-title text-2xl font-bold">Trending Products</h2>
+          <p class="theme-copy mt-1 text-sm">
             Popular picks from local Filipino stores.
           </p>
         </div>
@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
           <button
             @click="scroll(-1)"
             :disabled="!canScrollLeft"
-            class="hidden sm:flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all hover:border-slate-300 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+            class="theme-card hidden size-8 items-center justify-center rounded-full transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:flex"
           >
             <svg
               class="size-4"
@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
           <button
             @click="scroll(1)"
             :disabled="!canScrollRight"
-            class="hidden sm:flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all hover:border-slate-300 hover:text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+            class="theme-card hidden size-8 items-center justify-center rounded-full transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:flex"
           >
             <svg
               class="size-4"
@@ -121,12 +121,12 @@ onBeforeUnmount(() => {
         <div
           v-for="i in 5"
           :key="i"
-          class="w-[220px] shrink-0 animate-pulse rounded-2xl bg-white ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700"
+          class="theme-card w-[220px] shrink-0 animate-pulse rounded-2xl"
         >
-          <div class="aspect-square rounded-t-2xl bg-slate-100" />
+          <div class="aspect-square rounded-t-2xl" style="background-color: var(--color-surface-muted)" />
           <div class="p-3 space-y-2">
-            <div class="h-4 w-3/4 rounded bg-slate-100" />
-            <div class="h-4 w-1/2 rounded bg-slate-200" />
+            <div class="h-4 w-3/4 rounded" style="background-color: var(--color-surface-muted)" />
+            <div class="h-4 w-1/2 rounded" style="background-color: color-mix(in srgb, var(--color-border) 80%, transparent)" />
           </div>
         </div>
       </div>
@@ -134,10 +134,10 @@ onBeforeUnmount(() => {
       <!-- Empty -->
       <div
         v-else-if="products.length === 0"
-        class="rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center dark:bg-slate-900 dark:border-slate-700"
+        class="theme-card rounded-2xl border-dashed py-14 text-center"
       >
         <p class="text-2xl mb-2">🛍️</p>
-        <p class="text-sm font-medium text-slate-500">
+        <p class="theme-copy text-sm font-medium">
           No trending products yet — check back soon!
         </p>
       </div>
@@ -147,11 +147,13 @@ onBeforeUnmount(() => {
         <!-- Gradient fade edges -->
         <div
           v-if="canScrollLeft"
-          class="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-950"
+          class="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r to-transparent"
+          style="--tw-gradient-from: var(--color-bg) var(--tw-gradient-from-position)"
         />
         <div
           v-if="canScrollRight"
-          class="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-slate-50 to-transparent dark:from-slate-950"
+          class="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l to-transparent"
+          style="--tw-gradient-from: var(--color-bg) var(--tw-gradient-from-position)"
         />
 
         <div

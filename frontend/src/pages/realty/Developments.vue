@@ -70,7 +70,7 @@ watch(
 </script>
 
 <template>
-  <div>
+  <div class="theme-page min-h-screen">
     <!-- Header -->
     <div class="py-12 text-white" style="background: #0f2044">
       <div class="mx-auto max-w-7xl px-4 sm:px-6">
@@ -88,31 +88,52 @@ watch(
     </div>
 
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div class="mb-5 flex flex-wrap items-center gap-2">
+        <RouterLink
+          to="/properties"
+          class="theme-tab rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Properties
+        </RouterLink>
+        <RouterLink
+          to="/developments"
+          class="theme-tab-active rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Developments
+        </RouterLink>
+        <RouterLink
+          to="/properties/compare"
+          class="theme-tab rounded-full px-4 py-2 text-sm font-semibold"
+        >
+          Compare
+        </RouterLink>
+      </div>
+
       <!-- Filters -->
       <form
-        class="mb-8 flex flex-wrap items-center gap-2 rounded-2xl border bg-white p-4 shadow-sm dark:bg-slate-900 dark:border-slate-700"
+        class="theme-card mb-8 flex flex-wrap items-center gap-2 rounded-2xl p-4 shadow-sm"
         @submit.prevent="onSearch"
       >
         <div class="relative flex-1 min-w-[200px]">
           <MagnifyingGlassIcon
-            class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            class="theme-copy absolute left-3 top-1/2 size-4 -translate-y-1/2"
           />
           <input
             v-model="filters.search"
             type="search"
             placeholder="Search developments…"
-            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:placeholder-slate-500"
+            class="theme-input w-full rounded-xl py-2.5 pl-9 pr-4 text-sm"
           />
         </div>
         <input
           v-model="filters.city"
           type="text"
           placeholder="City"
-          class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 sm:w-36 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+          class="theme-input rounded-xl px-3 py-2.5 text-sm sm:w-36"
         />
         <select
           v-model="filters.type"
-          class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+          class="theme-input rounded-xl px-3 py-2.5 text-sm"
         >
           <option v-for="t in developmentTypes" :key="t.value" :value="t.value">
             {{ t.label }}
@@ -120,7 +141,7 @@ watch(
         </select>
         <button
           type="submit"
-          class="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+          class="btn-primary rounded-xl px-5 py-2.5 text-sm font-medium"
         >
           Search
         </button>
@@ -134,12 +155,12 @@ watch(
         <div
           v-for="i in 6"
           :key="i"
-          class="animate-pulse overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card animate-pulse overflow-hidden rounded-2xl shadow-sm"
         >
-          <div class="aspect-[16/9] bg-slate-200" />
+          <div class="theme-skeleton aspect-[16/9]" />
           <div class="p-4 space-y-2">
-            <div class="h-4 w-3/4 rounded bg-slate-200" />
-            <div class="h-3 w-1/2 rounded bg-slate-100" />
+            <div class="theme-skeleton h-4 w-3/4 rounded" />
+            <div class="theme-skeleton h-3 w-1/2 rounded" />
           </div>
         </div>
       </div>
@@ -147,19 +168,19 @@ watch(
       <!-- Empty -->
       <div
         v-else-if="developments.length === 0"
-        class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 py-20 text-center"
+        class="theme-empty-state flex flex-col items-center justify-center rounded-2xl py-20 text-center"
       >
-        <BuildingOffice2Icon class="mb-3 size-10 text-slate-300" />
-        <p class="font-medium text-slate-500">No developments found</p>
-        <p class="mt-1 text-sm text-slate-400">
+        <BuildingOffice2Icon class="theme-copy mb-3 size-10" />
+        <p class="theme-copy font-medium">No developments found</p>
+        <p class="theme-copy mt-1 text-sm">
           Try adjusting your search filters.
         </p>
         <p
           v-if="cityStore.activeCity && filters.city"
-          class="mt-3 text-sm text-slate-400"
+          class="theme-copy mt-3 text-sm"
         >
           No developments in
-          <strong class="text-slate-600">{{ cityStore.activeCity }}</strong
+          <strong class="theme-title">{{ cityStore.activeCity }}</strong
           >.
           <button
             class="ml-1 text-emerald-600 underline underline-offset-2"
@@ -180,10 +201,10 @@ watch(
           v-for="dev in developments"
           :key="dev.id"
           :to="`/developments/${dev.slug}`"
-          class="group overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card theme-card-hover group overflow-hidden rounded-2xl shadow-sm transition-shadow"
         >
           <!-- Image -->
-          <div class="relative aspect-[16/9] overflow-hidden bg-slate-100">
+          <div class="theme-card-muted relative aspect-[16/9] overflow-hidden">
             <img
               v-if="dev.images?.[0]"
               :src="dev.images[0]"
@@ -192,9 +213,9 @@ watch(
             />
             <div
               v-else
-              class="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"
+              class="theme-card-muted flex h-full items-center justify-center"
             >
-              <BuildingOffice2Icon class="size-12 text-slate-300" />
+              <BuildingOffice2Icon class="theme-copy size-12" />
             </div>
             <span
               v-if="dev.is_featured"
@@ -205,29 +226,29 @@ watch(
               v-if="dev.logo_url"
               :src="dev.logo_url"
               :alt="`${dev.name} logo`"
-              class="absolute bottom-3 right-3 size-10 rounded-xl bg-white object-contain p-1 shadow dark:bg-slate-700"
+              class="theme-card absolute bottom-3 right-3 size-10 rounded-xl object-contain p-1 shadow"
             />
           </div>
 
           <div class="p-4">
             <p
-              class="mb-0.5 line-clamp-1 font-bold text-slate-800 group-hover:text-emerald-700 transition-colors"
+              class="theme-title mb-0.5 line-clamp-1 font-bold transition-colors group-hover:text-emerald-700"
             >
               {{ dev.name }}
             </p>
-            <p class="text-xs text-slate-500">{{ dev.developer_name }}</p>
-            <p class="mt-1 text-xs text-slate-400">
+            <p class="theme-copy text-xs">{{ dev.developer_name }}</p>
+            <p class="theme-copy mt-1 text-xs">
               {{ dev.city }}, {{ dev.province }}
             </p>
             <div class="mt-3 flex items-center justify-between">
               <div>
-                <p class="text-[11px] text-slate-400 uppercase tracking-wide">
+                <p class="theme-copy text-[11px] uppercase tracking-wide">
                   Starting from
                 </p>
                 <p class="font-bold text-[#F95D2F]">{{ dev.price_range }}</p>
               </div>
               <div class="text-right">
-                <p class="text-xs text-slate-500">
+                <p class="theme-copy text-xs">
                   {{ dev.available_units ?? "—" }} units available
                 </p>
               </div>
@@ -248,7 +269,7 @@ watch(
           :class="
             meta.current_page === page
               ? 'bg-emerald-600 text-white border-emerald-600'
-              : 'bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+              : 'btn-secondary'
           "
           @click="load(page)"
         >

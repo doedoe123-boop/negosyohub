@@ -91,7 +91,7 @@ defineExpose({ onSuccess, onError });
     <div
       class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
-      <h2 class="text-xl font-bold text-[#0F2044]">
+      <h2 class="text-xl font-bold text-[#0F2044] dark:text-white">
         Reviews
         <span v-if="reviewCount" class="text-base font-normal text-slate-400">
           ({{ reviewCount }})
@@ -180,7 +180,7 @@ defineExpose({ onSuccess, onError });
     <div
       class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:bg-slate-800 dark:border-slate-700"
     >
-      <h3 class="mb-5 text-base font-bold text-[#0F2044]">Write a Review</h3>
+      <h3 class="mb-5 text-base font-bold text-[#0F2044] dark:text-white">Write a Review</h3>
 
       <!-- Not logged in -->
       <div
@@ -220,7 +220,7 @@ defineExpose({ onSuccess, onError });
       <form v-else class="space-y-5" @submit.prevent="handleSubmit">
         <!-- Star rating -->
         <div>
-          <label class="mb-2 block text-sm font-medium text-slate-700"
+          <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-gray-300"
             >Rating</label
           >
           <div class="flex gap-1">
@@ -256,10 +256,10 @@ defineExpose({ onSuccess, onError });
             type="text"
             placeholder=" "
             maxlength="255"
-            class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 dark:text-white transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           />
           <label
-            class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+            class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white dark:bg-slate-700 px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
           >
             Review Title
           </label>
@@ -272,7 +272,7 @@ defineExpose({ onSuccess, onError });
             rows="4"
             :placeholder="`Share your experience with this ${itemLabel}...`"
             maxlength="2000"
-            class="w-full resize-none rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            class="w-full resize-none rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           />
           <p class="mt-1 text-right text-xs text-slate-400">
             {{ content.length }} / 2000

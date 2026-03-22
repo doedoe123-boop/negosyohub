@@ -91,7 +91,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950 transition-colors">
+  <div class="theme-app flex min-h-screen flex-col transition-colors">
     <AnnouncementBar />
     <CityBanner />
     <Navbar />

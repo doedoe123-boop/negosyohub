@@ -12,12 +12,12 @@ import {
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/cart";
-import { useDarkMode } from "@/composables/useDarkMode";
+import { useTheme } from "@/composables/useTheme";
 import { searchApi } from "@/api/search";
 
 const auth = useAuthStore();
 const cart = useCartStore();
-const { isDark, toggleDark } = useDarkMode();
+const { isDark, toggleTheme } = useTheme();
 const route = useRoute();
 const router = useRouter();
 
@@ -139,7 +139,7 @@ function isActive(path) {
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 bg-navy-900 shadow-md">
+  <header class="nav-shell sticky top-0 z-40 shadow-md">
     <div
       class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6"
     >
@@ -172,8 +172,8 @@ function isActive(path) {
               isActive('/stores') ||
               isActive('/properties') ||
               isActive('/movers')
-                ? 'bg-white/10 text-white'
-                : 'text-white/70 hover:bg-white/10 hover:text-white'
+                ? 'nav-button-active'
+                : 'nav-button'
             "
           >
             Sectors
@@ -212,13 +212,14 @@ function isActive(path) {
           >
             <div v-if="storesFlyout" class="absolute left-0 top-full z-50 pt-1">
               <div
-                class="w-48 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-xl ring-1 ring-black/5 dark:bg-slate-800 dark:border-slate-700"
+                class="theme-modal w-48 overflow-hidden rounded-2xl py-2 ring-1 ring-black/5"
               >
                 <RouterLink
                   v-for="s in sectorLinks"
                   :key="s.label"
                   :to="s.to"
-                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+                  class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+                  style="color: var(--color-text)"
                   @click="storesFlyout = false"
                 >
                   <span class="text-base">{{ s.icon }}</span>
@@ -229,12 +230,15 @@ function isActive(path) {
           </Transition>
         </div>
 
-        <span class="mx-1 h-4 w-px bg-white/20" />
+        <span
+          class="mx-1 h-4 w-px"
+          style="background-color: var(--color-navbar-border)"
+        />
 
         <a
           :href="`${backendUrl}/register/sector`"
           target="_blank"
-          class="flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+          class="nav-button flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
         >
           Sell with us
           <svg
@@ -255,29 +259,33 @@ function isActive(path) {
 
       <!-- Right utilities -->
       <div class="flex items-center gap-1.5">
-        <!-- Dark Mode Toggle To be implemented it needs a proper dark mode support -->
-         <!-- for now lets just leave this as it is -->
-        <!-- <button
+        <!-- Dark Mode Toggle -->
+        <button
           type="button"
-          class="rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          class="nav-button rounded-lg p-2 transition-colors"
           aria-label="Toggle dark mode"
-          @click="toggleDark"
+          @click="toggleTheme"
         >
           <MoonIcon v-if="!isDark" class="size-5" />
           <SunIcon v-else class="size-5" />
-        </button> -->
+        </button>
 
         <!-- Search (desktop) -->
         <button
           type="button"
-          class="hidden items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white/60 transition-colors hover:border-white/30 hover:bg-white/20 hover:text-white md:flex"
+          class="nav-search-trigger hidden items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors md:flex"
           aria-label="Search stores"
           @click="openSearch"
         >
           <MagnifyingGlassIcon class="size-3.5 shrink-0" />
           <span class="text-xs">Search…</span>
           <kbd
-            class="ml-1 hidden rounded border border-white/20 bg-white/10 px-1 py-0.5 text-[10px] text-white/40 lg:inline"
+            class="ml-1 hidden rounded border px-1 py-0.5 text-[10px] lg:inline"
+            style="
+              border-color: var(--color-navbar-border);
+              background-color: var(--color-navbar-muted-surface);
+              color: color-mix(in srgb, var(--color-navbar-text) 70%, transparent);
+            "
             >/</kbd
           >
         </button>
@@ -285,7 +293,7 @@ function isActive(path) {
         <!-- Cart -->
         <button
           type="button"
-          class="relative rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          class="nav-button relative rounded-lg p-2 transition-colors"
           aria-label="Shopping cart"
           @click="cart.toggleDrawer"
         >
@@ -300,7 +308,8 @@ function isActive(path) {
           >
             <span
               v-if="cart.lineCount > 0"
-              class="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white ring-2 ring-[#0F2044]"
+              class="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white"
+              style="box-shadow: 0 0 0 2px var(--color-navbar-surface)"
             >
               {{ cart.lineCount > 9 ? "9+" : cart.lineCount }}
             </span>
@@ -311,13 +320,13 @@ function isActive(path) {
         <template v-if="!auth.isLoggedIn">
           <RouterLink
             to="/login"
-            class="hidden rounded-lg px-3 py-2 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors sm:block"
+            class="nav-button hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:block"
           >
             Sign in
           </RouterLink>
           <RouterLink
             to="/register"
-            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-500 hover:shadow-emerald-500/25 hover:shadow-md active:scale-[0.98] transition-all"
+            class="btn-primary rounded-lg px-4 py-2 text-sm font-bold active:scale-[0.98] transition-all"
           >
             Register
           </RouterLink>
@@ -327,14 +336,17 @@ function isActive(path) {
         <template v-else>
           <RouterLink
             to="/account"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors sm:flex"
+            class="nav-button hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:flex"
           >
             <UserCircleIcon class="size-4.5" />
             Account
           </RouterLink>
           <button
             type="button"
-            class="rounded-lg px-3 py-2 text-sm font-medium text-white/40 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+            class="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+            style="
+              color: color-mix(in srgb, var(--color-navbar-text) 68%, transparent);
+            "
             @click="handleLogout"
           >
             Sign out
@@ -344,7 +356,7 @@ function isActive(path) {
         <!-- Mobile toggle -->
         <button
           type="button"
-          class="rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white transition-colors md:hidden"
+          class="nav-button rounded-lg p-2 transition-colors md:hidden"
           :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
           @click="mobileOpen = !mobileOpen"
         >
@@ -365,7 +377,7 @@ function isActive(path) {
     >
       <nav
         v-if="mobileOpen"
-        class="border-t border-white/10 bg-navy-900 px-4 py-2 md:hidden"
+        class="nav-shell border-t px-4 py-2 md:hidden"
       >
         <RouterLink
           v-for="s in sectorLinks"
@@ -374,8 +386,8 @@ function isActive(path) {
           class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
           :class="
             isActive(s.to.split('?')[0])
-              ? 'bg-white/10 text-white'
-              : 'text-white/70 hover:bg-white/10 hover:text-white'
+              ? 'nav-button-active'
+              : 'nav-button'
           "
           @click="mobileOpen = false"
         >
@@ -383,11 +395,14 @@ function isActive(path) {
           {{ s.label }}
         </RouterLink>
 
-        <div class="mt-2 border-t border-white/10 pt-2">
+        <div
+          class="mt-2 border-t pt-2"
+          style="border-color: var(--color-navbar-border)"
+        >
           <RouterLink
             v-if="auth.isLoggedIn"
             to="/account"
-            class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white"
+            class="nav-button flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium"
             @click="mobileOpen = false"
           >
             <UserCircleIcon class="size-4" />
@@ -396,14 +411,14 @@ function isActive(path) {
           <template v-else>
             <RouterLink
               to="/login"
-              class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white"
+              class="nav-button flex items-center rounded-xl px-3 py-2.5 text-sm font-medium"
               @click="mobileOpen = false"
             >
               Sign in
             </RouterLink>
             <RouterLink
               to="/register"
-              class="mt-1 flex items-center rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
+              class="btn-primary mt-1 flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold"
               @click="mobileOpen = false"
             >
               Create account
@@ -412,7 +427,7 @@ function isActive(path) {
           <a
             :href="`${backendUrl}/register/sector`"
             target="_blank"
-            class="mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:bg-white/10 hover:text-white"
+            class="nav-button mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium"
             @click="mobileOpen = false"
           >
             Sell with us
@@ -439,7 +454,7 @@ function isActive(path) {
       >
         <!-- Backdrop -->
         <div
-          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          class="theme-overlay absolute inset-0"
           @click="closeSearch"
         />
 
@@ -447,21 +462,25 @@ function isActive(path) {
         <div class="relative w-full max-w-xl">
           <form @submit.prevent="submitSearch">
             <div
-              class="flex items-center gap-3 rounded-t-2xl border border-slate-200 bg-white px-4 py-3 shadow-2xl dark:bg-slate-900 dark:border-slate-700"
+              class="theme-modal flex items-center gap-3 rounded-t-2xl px-4 py-3"
               :class="
                 searchResults && searchQuery.trim().length >= 2
                   ? ''
                   : 'rounded-b-2xl'
               "
             >
-              <MagnifyingGlassIcon class="size-5 shrink-0 text-slate-400" />
+              <MagnifyingGlassIcon
+                class="size-5 shrink-0"
+                style="color: var(--color-text-muted)"
+              />
               <input
                 ref="searchInputRef"
                 v-model="searchQuery"
                 type="search"
                 placeholder="Search stores, products, properties…"
                 autocomplete="off"
-                class="flex-1 text-base text-slate-800 placeholder-slate-400 outline-none dark:text-slate-100 dark:placeholder-slate-500"
+                class="flex-1 bg-transparent text-base outline-none"
+                style="color: var(--color-text)"
               />
               <svg
                 v-if="searchLoading"
@@ -485,7 +504,12 @@ function isActive(path) {
               </svg>
               <kbd
                 v-else
-                class="hidden rounded-lg border border-slate-200 bg-slate-100 px-2 py-1 text-xs text-slate-400 sm:block"
+                class="hidden rounded-lg px-2 py-1 text-xs sm:block"
+                style="
+                  border: 1px solid var(--color-border);
+                  background-color: var(--color-surface-muted);
+                  color: var(--color-text-muted);
+                "
                 >ESC</kbd
               >
             </div>
@@ -494,15 +518,16 @@ function isActive(path) {
           <!-- Live results dropdown -->
           <div
             v-if="searchResults && searchQuery.trim().length >= 2"
-            class="max-h-80 overflow-y-auto rounded-b-2xl border border-t-0 border-slate-200 bg-white shadow-2xl dark:bg-slate-900 dark:border-slate-700"
+            class="theme-modal max-h-80 overflow-y-auto rounded-b-2xl border-t-0"
           >
             <!-- No results -->
             <div
               v-if="!hasNavResults()"
-              class="py-6 text-center text-sm text-slate-400"
+              class="py-6 text-center text-sm"
+              style="color: var(--color-text-muted)"
             >
               <p class="text-lg mb-1">🔍</p>
-              No results for "<span class="font-medium text-slate-600">{{
+              No results for "<span class="font-medium" style="color: var(--color-text)">{{
                 searchQuery.trim()
               }}</span
               >"
@@ -512,11 +537,15 @@ function isActive(path) {
               <!-- Stores -->
               <div
                 v-if="searchResults.stores?.length"
-                class="border-b border-slate-100"
+                class="theme-divider border-b"
               >
-                <div class="px-4 py-2 bg-slate-50/80">
+                <div
+                  class="px-4 py-2"
+                  style="background-color: color-mix(in srgb, var(--color-surface-muted) 88%, transparent)"
+                >
                   <span
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    class="text-[10px] font-bold uppercase tracking-widest"
+                    style="color: var(--color-text-muted)"
                     >Stores</span
                   >
                 </div>
@@ -531,22 +560,28 @@ function isActive(path) {
                     v-if="s.logo_url"
                     :src="s.logo_url"
                     :alt="s.name"
-                    class="size-8 rounded-lg bg-slate-100 object-cover"
+                    class="size-8 rounded-lg object-cover"
+                    style="background-color: var(--color-surface-muted)"
                   />
                   <div
                     v-else
-                    class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm"
+                    class="flex size-8 items-center justify-center rounded-lg text-sm"
+                    style="background-color: var(--color-surface-muted)"
                   >
                     🏪
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-slate-800">
+                    <p class="truncate text-sm font-semibold" style="color: var(--color-text)">
                       {{ s.name }}
                     </p>
-                    <p class="truncate text-xs text-slate-400">
+                    <p class="truncate text-xs" style="color: var(--color-text-muted)">
                       <span
                         v-if="s.sector"
-                        class="mr-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-semibold text-slate-500"
+                        class="mr-1 rounded px-1 py-0.5 text-[10px] font-semibold"
+                        style="
+                          background-color: var(--color-surface-muted);
+                          color: var(--color-text-muted);
+                        "
                         >{{ s.sector_label ?? s.sector }}</span
                       >
                       {{ s.city ?? "" }}
@@ -558,11 +593,15 @@ function isActive(path) {
               <!-- Products -->
               <div
                 v-if="searchResults.products?.length"
-                class="border-b border-slate-100"
+                class="theme-divider border-b"
               >
-                <div class="px-4 py-2 bg-slate-50/80">
+                <div
+                  class="px-4 py-2"
+                  style="background-color: color-mix(in srgb, var(--color-surface-muted) 88%, transparent)"
+                >
                   <span
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    class="text-[10px] font-bold uppercase tracking-widest"
+                    style="color: var(--color-text-muted)"
                     >Products</span
                   >
                 </div>
@@ -577,16 +616,18 @@ function isActive(path) {
                     v-if="p.thumbnail"
                     :src="p.thumbnail"
                     :alt="p.name"
-                    class="size-8 rounded-lg bg-slate-100 object-cover"
+                    class="size-8 rounded-lg object-cover"
+                    style="background-color: var(--color-surface-muted)"
                   />
                   <div
                     v-else
-                    class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm"
+                    class="flex size-8 items-center justify-center rounded-lg text-sm"
+                    style="background-color: var(--color-surface-muted)"
                   >
                     🛍️
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-slate-800">
+                    <p class="truncate text-sm font-semibold" style="color: var(--color-text)">
                       {{ p.name ?? "Untitled Product" }}
                     </p>
                     <p
@@ -601,9 +642,13 @@ function isActive(path) {
 
               <!-- Properties -->
               <div v-if="searchResults.properties?.length">
-                <div class="px-4 py-2 bg-slate-50/80">
+                <div
+                  class="px-4 py-2"
+                  style="background-color: color-mix(in srgb, var(--color-surface-muted) 88%, transparent)"
+                >
                   <span
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    class="text-[10px] font-bold uppercase tracking-widest"
+                    style="color: var(--color-text-muted)"
                     >Properties</span
                   >
                 </div>
@@ -618,19 +663,21 @@ function isActive(path) {
                     v-if="pr.images?.[0]"
                     :src="pr.images[0]"
                     :alt="pr.title"
-                    class="size-8 rounded-lg bg-slate-100 object-cover"
+                    class="size-8 rounded-lg object-cover"
+                    style="background-color: var(--color-surface-muted)"
                   />
                   <div
                     v-else
-                    class="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-sm"
+                    class="flex size-8 items-center justify-center rounded-lg text-sm"
+                    style="background-color: var(--color-surface-muted)"
                   >
                     🏠
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-slate-800">
+                    <p class="truncate text-sm font-semibold" style="color: var(--color-text)">
                       {{ pr.title }}
                     </p>
-                    <p class="truncate text-xs text-slate-400">
+                    <p class="truncate text-xs" style="color: var(--color-text-muted)">
                       <span
                         v-if="pr.listing_type"
                         class="mr-1 rounded bg-emerald-50 px-1 py-0.5 text-[10px] font-semibold text-emerald-600"
@@ -652,10 +699,24 @@ function isActive(path) {
             </template>
           </div>
 
-          <p class="mt-2 text-center text-xs text-white/50">
-            Press <kbd class="rounded bg-white/20 px-1 py-0.5">Enter</kbd> to
+          <p
+            class="mt-2 text-center text-xs"
+            style="color: color-mix(in srgb, var(--color-navbar-text) 72%, transparent)"
+          >
+            Press
+            <kbd
+              class="rounded px-1 py-0.5"
+              style="background-color: var(--color-navbar-muted-surface)"
+              >Enter</kbd
+            >
+            to
             search all ·
-            <kbd class="rounded bg-white/20 px-1 py-0.5">Esc</kbd> to close
+            <kbd
+              class="rounded px-1 py-0.5"
+              style="background-color: var(--color-navbar-muted-surface)"
+              >Esc</kbd
+            >
+            to close
           </p>
         </div>
       </div>

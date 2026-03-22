@@ -62,16 +62,16 @@ function criteriaLabel(criteria) {
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
     <div class="mb-6 flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+        <h1 class="theme-title text-2xl font-extrabold tracking-tight">
           Saved Searches
         </h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <p class="theme-copy mt-1 text-sm">
           Get notified when new matching properties are listed.
         </p>
       </div>
       <RouterLink
         to="/properties"
-        class="shrink-0 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
+        class="btn-primary shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition-colors"
       >
         Browse Properties
       </RouterLink>
@@ -79,11 +79,7 @@ function criteriaLabel(criteria) {
 
     <!-- Skeleton -->
     <div v-if="loading" class="space-y-3">
-      <div
-        v-for="i in 3"
-        :key="i"
-        class="h-20 animate-pulse rounded-2xl bg-slate-100"
-      />
+      <div v-for="i in 3" :key="i" class="theme-skeleton h-20 animate-pulse rounded-2xl" />
     </div>
 
     <!-- Error -->
@@ -97,16 +93,16 @@ function criteriaLabel(criteria) {
     <!-- Empty -->
     <div
       v-else-if="searches.length === 0"
-      class="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center"
+      class="theme-empty-state rounded-2xl py-12 text-center"
     >
-      <BookmarkIcon class="mx-auto mb-3 size-10 text-slate-300" />
-      <p class="font-medium text-slate-500">No saved searches yet</p>
-      <p class="mt-1 text-sm text-slate-400">
+      <BookmarkIcon class="theme-copy mx-auto mb-3 size-10" />
+      <p class="theme-copy font-medium">No saved searches yet</p>
+      <p class="theme-copy mt-1 text-sm">
         Browse properties and use the "Save Search" button to save your filters.
       </p>
       <RouterLink
         to="/properties"
-        class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-emerald-700"
+        class="btn-primary mt-4 inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-bold transition-colors"
       >
         Browse Properties
       </RouterLink>
@@ -117,12 +113,12 @@ function criteriaLabel(criteria) {
       <li
         v-for="search in searches"
         :key="search.id"
-        class="flex items-start justify-between gap-4 rounded-2xl border bg-white p-4 shadow-sm transition-opacity"
+        class="theme-card flex items-start justify-between gap-4 rounded-2xl p-4 transition-opacity"
         :class="{ 'opacity-60': !search.is_active }"
       >
         <div class="flex min-w-0 flex-1 flex-col gap-1">
           <div class="flex items-center gap-2">
-            <span class="font-semibold text-slate-900">{{ search.name }}</span>
+            <span class="theme-title font-semibold">{{ search.name }}</span>
             <span
               v-if="search.notify_frequency !== 'never'"
               class="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sky-600"
@@ -131,15 +127,15 @@ function criteriaLabel(criteria) {
             </span>
             <span
               v-if="!search.is_active"
-              class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500"
+              class="theme-badge-neutral rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
             >
               Paused
             </span>
           </div>
-          <p class="truncate text-xs text-slate-500">
+          <p class="theme-copy truncate text-xs">
             {{ criteriaLabel(search.criteria) }}
           </p>
-          <p v-if="search.last_notified_at" class="text-[11px] text-slate-400">
+          <p v-if="search.last_notified_at" class="theme-copy text-[11px]">
             Last notified
             {{ new Date(search.last_notified_at).toLocaleDateString("en-PH") }}
           </p>
@@ -147,7 +143,7 @@ function criteriaLabel(criteria) {
 
         <div class="flex shrink-0 items-center gap-1">
           <button
-            class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
+            class="theme-copy rounded-lg p-2 transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
             :title="
               search.is_active ? 'Pause notifications' : 'Resume notifications'
             "
@@ -159,7 +155,7 @@ function criteriaLabel(criteria) {
 
           <RouterLink
             :to="`/properties?${new URLSearchParams(Object.fromEntries(Object.entries(search.criteria).filter(([, v]) => v))).toString()}`"
-            class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-emerald-600"
+            class="theme-copy rounded-lg p-2 transition-colors hover:bg-[var(--color-surface-muted)] hover:text-emerald-600"
             title="Run this search"
           >
             <svg
@@ -178,7 +174,7 @@ function criteriaLabel(criteria) {
           </RouterLink>
 
           <button
-            class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+            class="theme-copy rounded-lg p-2 transition-colors hover:bg-red-50 hover:text-red-500"
             title="Delete saved search"
             @click="removeSearch(search.id)"
           >

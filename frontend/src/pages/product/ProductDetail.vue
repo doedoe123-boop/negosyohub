@@ -142,7 +142,7 @@ async function submitProductReview(payload) {
 </script>
 
 <template>
-  <div>
+  <div class="theme-page">
     <!-- Skeleton -->
     <div
       v-if="loading"
@@ -171,9 +171,9 @@ async function submitProductReview(payload) {
     </div>
 
     <template v-else-if="product">
-      <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div class="theme-page-section mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <!-- Breadcrumb -->
-        <nav class="mb-6 flex items-center gap-1.5 text-xs text-slate-400">
+        <nav class="theme-breadcrumb mb-6 flex items-center gap-1.5 text-xs">
           <RouterLink to="/" class="transition-colors hover:text-brand-600"
             >Home</RouterLink
           >
@@ -193,7 +193,7 @@ async function submitProductReview(payload) {
             Stores
           </RouterLink>
           <ChevronRightIcon class="size-3" />
-          <span class="line-clamp-1 text-slate-600">{{ product.name }}</span>
+          <span class="theme-breadcrumb-current line-clamp-1">{{ product.name }}</span>
         </nav>
 
         <!-- Top section: gallery + info -->
@@ -202,7 +202,7 @@ async function submitProductReview(payload) {
           <div>
             <!-- Main image -->
             <div
-              class="relative aspect-square overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm cursor-pointer group"
+              class="theme-card relative aspect-square overflow-hidden rounded-2xl cursor-pointer group"
               @click="images[selectedImage] && openLightbox(selectedImage)"
             >
               <img
@@ -213,7 +213,8 @@ async function submitProductReview(payload) {
               />
               <div
                 v-else
-                class="flex h-full items-center justify-center text-7xl bg-slate-50"
+                class="flex h-full items-center justify-center text-7xl"
+                style="background-color: var(--color-surface-muted)"
               >
                 🛍️
               </div>
@@ -224,7 +225,11 @@ async function submitProductReview(payload) {
                 class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors"
               >
                 <div
-                  class="rounded-full bg-white/90 p-3 shadow-lg text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                  class="rounded-full p-3 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                  style="
+                    background-color: color-mix(in srgb, var(--color-surface) 90%, transparent);
+                    color: var(--color-text);
+                  "
                 >
                   <MagnifyingGlassPlusIcon class="size-6" />
                 </div>
@@ -239,7 +244,8 @@ async function submitProductReview(payload) {
               <button
                 v-for="(img, i) in images"
                 :key="i"
-                class="size-20 shrink-0 snap-start overflow-hidden rounded-xl border-2 transition-all bg-white"
+                class="size-20 shrink-0 snap-start overflow-hidden rounded-xl border-2 transition-all"
+                style="background-color: var(--color-surface)"
                 :class="
                   selectedImage === i
                     ? 'border-brand-500 ring-2 ring-brand-500/20'
@@ -269,13 +275,13 @@ async function submitProductReview(payload) {
             <div class="mb-4">
               <!-- Title -->
               <h1
-                class="text-2xl font-extrabold leading-tight tracking-tight text-[#0F2044] sm:text-3xl"
+                class="theme-title text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl"
               >
                 {{ product.name }}
               </h1>
 
               <!-- Rating + sold -->
-              <div class="mt-3 flex items-center gap-3 text-sm text-slate-500">
+              <div class="theme-copy mt-3 flex items-center gap-3 text-sm">
                 <div
                   class="flex items-center gap-1.5"
                   v-if="product.average_rating"
@@ -291,7 +297,7 @@ async function submitProductReview(payload) {
                     />
                     <StarIcon class="size-4" v-else />
                   </div>
-                  <span class="font-semibold text-slate-700">{{
+                  <span class="font-semibold" style="color: var(--color-text)">{{
                     product.average_rating.toFixed(1)
                   }}</span>
                   <span
@@ -301,10 +307,10 @@ async function submitProductReview(payload) {
                   >
                 </div>
                 <div class="flex items-center gap-1.5" v-else>
-                  <div class="flex text-slate-300">
+                  <div class="flex" style="color: color-mix(in srgb, var(--color-text-muted) 40%, transparent)">
                     <StarIcon class="size-4" v-for="i in 5" :key="i" />
                   </div>
-                  <span class="text-xs text-slate-400">No reviews</span>
+                  <span class="theme-copy text-xs">No reviews</span>
                 </div>
               </div>
             </div>
@@ -318,7 +324,7 @@ async function submitProductReview(payload) {
                   >{{ formattedPrice }}</span
                 >
                 <span
-                  class="text-lg font-medium text-slate-400 line-through"
+                  class="theme-copy text-lg font-medium line-through"
                   v-if="formattedPrice && selectedVariant?.price"
                   >₱{{
                     (parseFloat(selectedVariant.price) * 1.2).toLocaleString(
@@ -329,7 +335,7 @@ async function submitProductReview(payload) {
                 >
                 <span
                   v-if="!formattedPrice"
-                  class="text-lg font-medium text-slate-400"
+                  class="theme-copy text-lg font-medium"
                   >Price unavailable</span
                 >
               </div>
@@ -380,11 +386,11 @@ async function submitProductReview(payload) {
 
             <!-- Variant selector -->
             <div v-if="product.variants?.length > 1" class="mt-5">
-              <p class="mb-2 text-sm font-semibold text-slate-700">
+              <p class="text-sm font-semibold" style="color: var(--color-text)">
                 Option
                 <span
                   v-if="selectedVariant"
-                  class="ml-1 font-normal text-slate-400"
+                  class="theme-copy ml-1 font-normal"
                   >— {{ selectedVariant.name }}</span
                 >
               </p>
@@ -408,24 +414,27 @@ async function submitProductReview(payload) {
 
             <!-- Quantity -->
             <div class="mt-5 flex items-center gap-4">
-              <span class="text-sm font-semibold text-slate-700">Quantity</span>
+              <span class="text-sm font-semibold" style="color: var(--color-text)">Quantity</span>
               <div
-                class="flex items-center overflow-hidden rounded-xl border border-slate-200"
+                class="theme-input flex items-center overflow-hidden rounded-xl"
               >
                 <button
                   type="button"
-                  class="flex size-9 items-center justify-center text-slate-600 transition-colors hover:bg-slate-50"
+                  class="flex size-9 items-center justify-center transition-colors hover:bg-[var(--color-surface)]"
+                  style="color: var(--color-text-muted)"
                   @click="quantity = Math.max(1, quantity - 1)"
                 >
                   <MinusIcon class="size-4" />
                 </button>
                 <span
-                  class="w-12 text-center text-sm font-bold text-slate-800"
+                  class="w-12 text-center text-sm font-bold"
+                  style="color: var(--color-text)"
                   >{{ quantity }}</span
                 >
                 <button
                   type="button"
-                  class="flex size-9 items-center justify-center text-slate-600 transition-colors hover:bg-slate-50"
+                  class="flex size-9 items-center justify-center transition-colors hover:bg-[var(--color-surface)]"
+                  style="color: var(--color-text-muted)"
                   @click="quantity++"
                 >
                   <PlusIcon class="size-4" />
@@ -463,12 +472,12 @@ async function submitProductReview(payload) {
             </p>
 
             <!-- Divider -->
-            <hr class="my-5 border-slate-100" />
+            <hr class="theme-divider-soft my-5" />
 
             <!-- Store card -->
             <div
               v-if="product.store"
-              class="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"
+              class="theme-card flex items-center gap-3 rounded-xl p-3"
             >
               <div
                 class="size-11 shrink-0 overflow-hidden rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm"
@@ -480,11 +489,11 @@ async function submitProductReview(payload) {
                   class="h-full w-full object-cover"
                 />
                 <div v-else class="flex h-full items-center justify-center">
-                  <BuildingStorefrontIcon class="size-5 text-slate-400" />
+                  <BuildingStorefrontIcon class="theme-copy size-5" />
                 </div>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-bold text-[#0F2044]">
+                <p class="theme-title truncate text-sm font-bold">
                   {{ product.store.name }}
                 </p>
                 <div class="mt-0.5 flex items-center gap-1">
@@ -507,38 +516,38 @@ async function submitProductReview(payload) {
 
         <!-- ── Main Section Below: Tabs ── -->
         <div
-          class="mt-8 rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden"
+          class="theme-card mt-8 overflow-hidden rounded-2xl"
         >
-          <div class="flex border-b border-slate-100 overflow-x-auto">
+          <div class="theme-divider-soft flex overflow-x-auto border-b">
             <button
               @click="activeTab = 'specs'"
-              class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
+              class="theme-tab flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
               :class="
                 activeTab === 'specs'
-                  ? 'border-b-2 border-brand-500 text-brand-600'
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                  ? 'theme-tab-active'
+                  : ''
               "
             >
               Detailed Specs
             </button>
             <button
               @click="activeTab = 'reviews'"
-              class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
+              class="theme-tab flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
               :class="
                 activeTab === 'reviews'
-                  ? 'border-b-2 border-brand-500 text-brand-600'
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                  ? 'theme-tab-active'
+                  : ''
               "
             >
               Reviews
             </button>
             <button
               @click="activeTab = 'shipping'"
-              class="flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
+              class="theme-tab flex-1 whitespace-nowrap px-6 py-4 text-sm font-bold transition-colors"
               :class="
                 activeTab === 'shipping'
-                  ? 'border-b-2 border-brand-500 text-brand-600'
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                  ? 'theme-tab-active'
+                  : ''
               "
             >
               Shipping Info
@@ -550,7 +559,7 @@ async function submitProductReview(payload) {
             <div v-show="activeTab === 'specs'">
               <p
                 v-if="product.description"
-                class="whitespace-pre-line text-sm leading-relaxed text-slate-600 mb-8 max-w-3xl"
+                class="theme-copy mb-8 max-w-3xl whitespace-pre-line text-sm leading-relaxed"
               >
                 {{ product.description }}
               </p>
@@ -561,25 +570,25 @@ async function submitProductReview(payload) {
                 "
                 class="max-w-2xl"
               >
-                <h3 class="font-bold text-[#0F2044] mb-4 text-lg">
+                <h3 class="theme-title mb-4 text-lg font-bold">
                   Specifications
                 </h3>
                 <ul class="space-y-3">
                   <li
                     v-for="(value, key) in product.attributes"
                     :key="key"
-                    class="flex justify-between text-sm py-2 border-b border-slate-50 last:border-0"
+                    class="theme-divider-soft flex justify-between border-b py-2 text-sm last:border-0"
                   >
-                    <span class="text-slate-500 capitalize">{{
+                    <span class="theme-copy capitalize">{{
                       String(key).replace(/_/g, " ")
                     }}</span>
-                    <span class="font-medium text-[#0F2044] text-right">{{
+                    <span class="theme-title text-right font-medium">{{
                       value
                     }}</span>
                   </li>
                 </ul>
               </div>
-              <div v-else class="text-sm italic text-slate-400">
+              <div v-else class="theme-copy text-sm italic">
                 No detailed specifications provided.
               </div>
             </div>
@@ -598,12 +607,12 @@ async function submitProductReview(payload) {
 
             <!-- Shipping Tab -->
             <div v-show="activeTab === 'shipping'" class="max-w-2xl">
-              <h3 class="font-bold text-[#0F2044] mb-4 text-lg">
+              <h3 class="theme-title mb-4 text-lg font-bold">
                 Delivery Options
               </h3>
-              <ul class="space-y-4 text-sm text-slate-600">
+              <ul class="theme-copy space-y-4 text-sm">
                 <li class="flex gap-3">
-                  <div class="mt-0.5 text-slate-400">
+                  <div class="theme-copy mt-0.5">
                     <svg
                       class="size-5"
                       fill="none"
@@ -619,10 +628,10 @@ async function submitProductReview(payload) {
                     </svg>
                   </div>
                   <div>
-                    <p class="font-bold text-slate-800">Standard Delivery</p>
+                    <p class="theme-title font-bold">Standard Delivery</p>
                     <p>
                       Get it delivered to
-                      <span class="font-medium text-slate-700">{{
+                      <span class="theme-title font-medium">{{
                         product.store?.city || "Nationwide"
                       }}</span>
                       via NegosyoHub Express.
@@ -633,7 +642,7 @@ async function submitProductReview(payload) {
                   </div>
                 </li>
                 <li class="flex gap-3">
-                  <div class="mt-0.5 text-slate-400">
+                  <div class="theme-copy mt-0.5">
                     <svg
                       class="size-5"
                       fill="none"
@@ -649,7 +658,7 @@ async function submitProductReview(payload) {
                     </svg>
                   </div>
                   <div>
-                    <p class="font-bold text-slate-800">Store Pickup</p>
+                    <p class="theme-title font-bold">Store Pickup</p>
                     <p>
                       Pick up straight from the
                       {{ product.store?.name || "Seller" }} storefront.
@@ -667,10 +676,10 @@ async function submitProductReview(payload) {
     <!-- Sticky Bottom Bar (Mobile) -->
     <div
       v-if="product"
-      class="fixed bottom-0 left-0 right-0 z-50 flex gap-3 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden"
+      class="theme-floating-bar fixed bottom-0 left-0 right-0 z-50 flex gap-3 p-4 pb-safe md:hidden"
     >
       <button
-        class="flex flex-col items-center justify-center px-4 text-slate-500 transition-colors hover:text-brand-600"
+        class="theme-copy flex flex-col items-center justify-center px-4 transition-colors hover:text-brand-600"
       >
         <ChatBubbleLeftRightIcon class="size-6" />
         <span class="text-[10px] font-bold mt-1">Chat</span>
@@ -678,7 +687,7 @@ async function submitProductReview(payload) {
       <button
         @click="addToCart"
         :disabled="cart.loading || !selectedVariantId || !inStock"
-        class="flex-1 rounded-xl border-2 border-brand-500 bg-white py-3 text-sm font-bold text-brand-600 transition-colors hover:bg-brand-50 active:bg-brand-100 disabled:opacity-50"
+        class="btn-secondary flex-1 rounded-xl border-2 border-brand-500 py-3 text-sm font-bold text-brand-600 transition-colors hover:bg-brand-50 active:bg-brand-100 disabled:opacity-50"
       >
         {{ addedToCart ? "✓ Added" : "Add to Cart" }}
       </button>

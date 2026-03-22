@@ -4,6 +4,7 @@ import { createUnhead, headSymbol } from "@unhead/vue";
 import router from "./router";
 import App from "./App.vue";
 import { useCartStore } from "@/stores/cart";
+import "@/composables/useTheme";
 import "./style.css";
 
 const app = createApp(App);
