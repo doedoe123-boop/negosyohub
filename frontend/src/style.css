@@ -263,6 +263,11 @@ button {
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 16%, transparent);
   }
 
+  .theme-input-label {
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+  }
+
   .theme-overlay {
     background-color: var(--color-overlay);
     backdrop-filter: blur(10px);

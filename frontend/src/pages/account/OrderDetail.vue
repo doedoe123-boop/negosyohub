@@ -38,17 +38,27 @@ const steps = [
   { key: "pending", label: "Order Placed" },
   { key: "confirmed", label: "Confirmed" },
   { key: "preparing", label: "Preparing" },
-  { key: "ready", label: "Ready for Pickup" },
+  { key: "shipped", label: "Shipped" },
   { key: "delivered", label: "Delivered" },
 ];
 
-const statusOrder = ["pending", "confirmed", "preparing", "ready", "delivered"];
+const statusOrder = [
+  "pending",
+  "confirmed",
+  "preparing",
+  "shipped",
+  "delivered",
+];
 
 const currentStepIndex = computed(() => {
   const status = order.value?.status;
 
   if (status === "cancelled") {
     return -1;
+  }
+
+  if (status === "ready") {
+    return statusOrder.indexOf("shipped");
   }
 
   return statusOrder.indexOf(status);
@@ -74,17 +84,46 @@ const statusColors = {
   pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
   confirmed: "bg-blue-100 text-blue-700 border-blue-200",
   preparing: "bg-purple-100 text-purple-700 border-purple-200",
+  shipped: "bg-indigo-100 text-indigo-700 border-indigo-200",
   ready: "bg-indigo-100 text-indigo-700 border-indigo-200",
   delivered: "bg-green-100 text-green-700 border-green-200",
   cancelled: "bg-red-100 text-red-700 border-red-200",
 };
 
 const paymentStatusColors = {
+  unpaid: "bg-yellow-100 text-yellow-700",
   pending: "bg-yellow-100 text-yellow-700",
   paid: "bg-green-100 text-green-700",
   failed: "bg-red-100 text-red-600",
   refunded: "theme-badge-neutral",
 };
+
+const paymentStatusLabels = {
+  unpaid: "Unpaid",
+  pending: "Unpaid",
+  paid: "Paid",
+  failed: "Failed",
+  refunded: "Refunded",
+};
+
+const paymentMethodLabels = {
+  paypal: "PayPal",
+  paymongo: "PayMongo",
+  cash_on_delivery: "Cash on Delivery",
+};
+
+const paymentStatusHelper = {
+  unpaid: "Pay upon delivery",
+  pending: "Awaiting payment",
+  paid: "Payment received",
+  failed: "Payment failed",
+  refunded: "Refund issued",
+};
+
+function formatStatusLabel(status) {
+  if (status === "ready") return "shipped";
+  return status;
+}
 
 const productLines = computed(() =>
   (order.value?.lines ?? []).filter((l) => l.type !== "shipping"),
@@ -172,7 +211,7 @@ async function reorder() {
             class="rounded-full border px-3 py-1 text-xs font-semibold capitalize"
             :class="statusColors[order.status] ?? 'theme-badge-neutral'"
           >
-            {{ order.status }}
+            {{ formatStatusLabel(order.status) }}
           </span>
           <span
             v-if="order.payment_status"
@@ -182,7 +221,9 @@ async function reorder() {
               'theme-badge-neutral'
             "
           >
-            Payment: {{ order.payment_status }}
+            Payment: {{
+              paymentStatusLabels[order.payment_status] ?? order.payment_status
+            }}
           </span>
         </div>
       </div>
@@ -423,13 +464,29 @@ async function reorder() {
         </div>
         <div class="theme-copy px-5 py-4 text-sm">
           <div class="flex items-center gap-2">
-            <span class="theme-title font-medium capitalize">{{
-              order.payment_status
-            }}</span>
+            <span class="theme-title font-medium">
+              {{
+                paymentMethodLabels[order.payment_method] ??
+                order.payment_method ??
+                "Payment"
+              }}
+            </span>
+            <span class="theme-copy">•</span>
+            <span class="theme-title font-medium">
+              {{
+                paymentStatusLabels[order.payment_status] ?? order.payment_status
+              }}
+            </span>
             <span v-if="order.paid_at" class="theme-copy text-xs">
               &middot; {{ formatDate(order.paid_at) }}
             </span>
           </div>
+          <p v-if="order.payment_status" class="theme-copy mt-1 text-xs">
+            {{
+              paymentStatusHelper[order.payment_status] ??
+              "Payment status updated."
+            }}
+          </p>
           <p v-if="order.payment_intent_id" class="theme-copy mt-1 text-xs">
             Ref: {{ order.payment_intent_id }}
           </p>

@@ -15,7 +15,10 @@ use App\Observers\RentalAgreementObserver;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Lunar\Admin\Filament\Resources\ChannelResource as LunarChannelResource;
@@ -88,6 +91,20 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LogoutResponse::class, LunarLogoutResponse::class);
 
         Vite::createAssetPathsUsing(static fn (string $path): string => '/'.ltrim($path, '/'));
+
+        RateLimiter::for('checkout-orders', function (Request $request) {
+            $userKey = $request->user()?->id
+                ? 'user:'.$request->user()->id
+                : 'ip:'.$request->ip();
+
+            return Limit::perMinute(12)
+                ->by($userKey.':checkout-orders')
+                ->response(function () {
+                    return response()->json([
+                        'message' => 'Too many checkout attempts. Please wait a moment and try again.',
+                    ], 429);
+                });
+        });
 
         // Register our extended Lunar models so route model binding and all
         // Lunar internals resolve App\Models\Order rather than Lunar\Models\Order.

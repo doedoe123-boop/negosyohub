@@ -4,9 +4,11 @@ namespace App\Http\Requests;
 
 use App\Models\Order;
 use App\Models\Store;
+use App\OrderPaymentMethod;
 use App\StoreStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Lunar\Facades\CartSession;
 
@@ -55,6 +57,10 @@ class PlaceOrderRequest extends FormRequest
     {
         return [
             'store_id' => ['required', 'integer', 'exists:stores,id'],
+            'payment_method' => ['required', 'string', Rule::in(array_map(
+                static fn (OrderPaymentMethod $method): string => $method->value,
+                OrderPaymentMethod::cases()
+            ))],
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -82,6 +88,17 @@ class PlaceOrderRequest extends FormRequest
                         'This store is not currently accepting orders.'
                     );
                 }
+
+                if (
+                    $store
+                    && $this->validated('payment_method') === OrderPaymentMethod::CashOnDelivery->value
+                    && $store->sector !== 'ecommerce'
+                ) {
+                    $validator->errors()->add(
+                        'payment_method',
+                        'Cash on Delivery is only available for e-commerce orders.'
+                    );
+                }
             },
         ];
     }
@@ -95,6 +112,8 @@ class PlaceOrderRequest extends FormRequest
             'store_id.required' => 'A store must be selected for this order.',
             'store_id.exists' => 'The selected store does not exist.',
             'store_id.integer' => 'The store identifier must be valid.',
+            'payment_method.required' => 'Please select a payment method.',
+            'payment_method.in' => 'The selected payment method is not supported.',
         ];
     }
 }

@@ -5,6 +5,7 @@ import { ExclamationTriangleIcon } from "@heroicons/vue/24/solid";
 import { LockClosedIcon, ShieldCheckIcon } from "@heroicons/vue/24/outline";
 import { useCartStore } from "@/stores/cart";
 import { useAuthStore } from "@/stores/auth";
+import { ordersApi } from "@/api/orders";
 import { cartApi } from "@/api/cart";
 import { paypalApi } from "@/api/paypal";
 import { addressesApi } from "@/api/addresses";
@@ -35,6 +36,19 @@ const loading = ref(false);
 const error = ref(null);
 const showLeaveModal = ref(false);
 const appliedCoupon = ref(null);
+const selectedPaymentMethod = ref("paypal");
+const paymentOptions = [
+  {
+    value: "paypal",
+    label: "PayPal",
+    description: "Pay securely online before we place your order.",
+  },
+  {
+    value: "cash_on_delivery",
+    label: "Cash on Delivery",
+    description: "Pay when your order arrives.",
+  },
+];
 
 function onCouponApplied(coupon) {
   appliedCoupon.value = coupon;
@@ -125,17 +139,31 @@ async function placeOrder() {
   loading.value = true;
   error.value = null;
   try {
-    // Step 1: Create PayPal order from current cart
+    if (selectedPaymentMethod.value === "cash_on_delivery") {
+      const { data } = await ordersApi.place({
+        store_id: cart.storeId,
+        payment_method: "cash_on_delivery",
+      });
+
+      cart.reset();
+
+      await router.push({
+        path: "/checkout/success",
+        query: { order: data.order_id },
+      });
+
+      return;
+    }
+
     const { data } = await paypalApi.createOrder();
 
-    if (data.approve_url) {
-      // Save store_id so we can use it after PayPal redirect
-      sessionStorage.setItem("paypal_store_id", cart.storeId);
-      // Redirect customer to PayPal for approval
-      window.location.href = data.approve_url;
-    } else {
+    if (!data.approve_url) {
       error.value = "Failed to initiate PayPal payment. Please try again.";
+      return;
     }
+
+    sessionStorage.setItem("paypal_store_id", cart.storeId);
+    window.location.href = data.approve_url;
   } catch (e) {
     error.value = e.response?.data?.message ?? "Failed to place order.";
   } finally {
@@ -146,7 +174,6 @@ async function placeOrder() {
 
 <template>
   <div v-if="cartReady">
-    <!-- Step progress stepper -->
     <nav aria-label="Checkout steps" class="mb-8 flex items-center gap-0">
       <template
         v-for="(label, idx) in ['Address', 'Shipping', 'Payment']"
@@ -160,7 +187,7 @@ async function placeOrder() {
                 ? 'bg-brand-500 text-white shadow-sm'
                 : ['address', 'shipping', 'payment'].indexOf(step) > idx
                   ? 'bg-brand-100 text-brand-600'
-                  : 'bg-slate-100 text-slate-400'
+                  : 'theme-card-muted theme-copy'
             "
             >{{ idx + 1 }}</span
           >
@@ -168,13 +195,16 @@ async function placeOrder() {
             class="text-sm font-medium transition-colors"
             :class="
               step === ['address', 'shipping', 'payment'][idx]
-                ? 'text-slate-900'
-                : 'text-slate-400'
+                ? 'theme-title'
+                : 'theme-copy'
             "
             >{{ label }}</span
           >
         </div>
-        <div v-if="idx < 2" class="mx-3 h-px flex-1 bg-slate-200" />
+        <div
+          v-if="idx < 2"
+          class="theme-divider-soft mx-3 h-px flex-1 border-t"
+        />
       </template>
     </nav>
 
@@ -183,17 +213,16 @@ async function placeOrder() {
       <div class="space-y-6 lg:col-span-8 xl:col-span-8">
         <p
           v-if="error"
-          class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+          class="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400"
         >
           {{ error }}
         </p>
 
-        <!-- Step: Address -->
         <section
           v-if="step === 'address'"
-          class="rounded-2xl border border-slate-200 bg-white p-6"
+          class="theme-card rounded-2xl p-6"
         >
-          <h2 class="mb-4 text-lg font-bold text-slate-900">
+          <h2 class="theme-title mb-4 text-lg font-bold">
             Delivery Address
           </h2>
           <form
@@ -206,11 +235,11 @@ async function placeOrder() {
                 v-model="address.first_name"
                 required
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-first-name"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 First Name
               </label>
@@ -221,11 +250,11 @@ async function placeOrder() {
                 v-model="address.last_name"
                 required
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-last-name"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 Last Name
               </label>
@@ -236,11 +265,11 @@ async function placeOrder() {
                 v-model="address.line_one"
                 required
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-line-one"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 Address Line
               </label>
@@ -251,11 +280,11 @@ async function placeOrder() {
                 v-model="address.city"
                 required
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-city"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 City
               </label>
@@ -266,11 +295,11 @@ async function placeOrder() {
                 v-model="address.state"
                 required
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-state"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 Province
               </label>
@@ -281,11 +310,11 @@ async function placeOrder() {
                 v-model="address.postcode"
                 required
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-postcode"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 ZIP Code
               </label>
@@ -296,11 +325,11 @@ async function placeOrder() {
                 v-model="address.contact_phone"
                 type="tel"
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-phone"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 Phone
               </label>
@@ -311,11 +340,11 @@ async function placeOrder() {
                 v-model="address.contact_email"
                 type="email"
                 placeholder=" "
-                class="peer block w-full appearance-none rounded-lg border border-slate-200 bg-transparent px-3 pb-2.5 pt-4 text-sm text-slate-900 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                class="theme-input peer block w-full appearance-none rounded-lg px-3 pb-2.5 pt-4 text-sm focus:outline-none"
               />
               <label
                 for="addr-email"
-                class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
+                class="theme-input-label pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform px-1 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
               >
                 Email
               </label>
@@ -323,7 +352,7 @@ async function placeOrder() {
             <div class="col-span-full mt-2 flex gap-3">
               <button
                 type="button"
-                class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                class="btn-secondary rounded-xl px-5 py-3 text-sm font-medium"
                 @click="showLeaveModal = true"
               >
                 Cancel
@@ -342,12 +371,12 @@ async function placeOrder() {
         <!-- Step: Shipping -->
         <section
           v-else-if="step === 'shipping'"
-          class="rounded-2xl border border-slate-200 bg-white p-6"
+          class="theme-card rounded-2xl p-6"
         >
-          <h2 class="mb-4 text-lg font-bold text-slate-900">Shipping Method</h2>
+          <h2 class="theme-title mb-4 text-lg font-bold">Shipping Method</h2>
           <div
             v-if="shippingOptions.length === 0"
-            class="text-sm text-slate-400"
+            class="theme-copy text-sm"
           >
             No shipping options available for your address.
           </div>
@@ -355,9 +384,9 @@ async function placeOrder() {
             <label
               v-for="option in shippingOptions"
               :key="option.id"
-              class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors hover:bg-slate-50"
+              class="theme-card-muted flex cursor-pointer items-center gap-3 rounded-xl p-4 transition-colors hover:bg-[var(--color-surface)]"
               :class="{
-                'border-brand-400 bg-brand-50': selectedShipping === option.id,
+                'border-brand-400 bg-brand-500/10': selectedShipping === option.id,
               }"
             >
               <input
@@ -367,12 +396,12 @@ async function placeOrder() {
                 class="text-brand-500"
               />
               <div class="flex-1">
-                <p class="text-sm font-semibold text-slate-800">
+                <p class="theme-title text-sm font-semibold">
                   {{ option.name }}
                 </p>
-                <p class="text-xs text-slate-500">{{ option.description }}</p>
+                <p class="theme-copy text-xs">{{ option.description }}</p>
               </div>
-              <span class="text-sm font-bold text-slate-900">{{
+              <span class="theme-title text-sm font-bold">{{
                 option.price?.formatted
               }}</span>
             </label>
@@ -380,7 +409,7 @@ async function placeOrder() {
           <div class="mt-4 flex gap-3">
             <button
               type="button"
-              class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              class="btn-secondary rounded-xl px-5 py-3 text-sm font-medium"
               @click="goBack"
             >
               ← Back
@@ -399,16 +428,41 @@ async function placeOrder() {
         <!-- Step: Payment -->
         <section
           v-else-if="step === 'payment'"
-          class="rounded-2xl border border-slate-200 bg-white p-6"
+          class="theme-card rounded-2xl p-6"
         >
-          <h2 class="mb-4 text-lg font-bold text-slate-900">Payment</h2>
-          <p class="mb-6 text-sm text-slate-500">
-            You will be redirected to PayPal to complete your payment securely.
+          <h2 class="theme-title mb-4 text-lg font-bold">Payment</h2>
+          <p class="theme-copy mb-6 text-sm">
+            Choose how you want to pay for this order.
           </p>
+          <div class="mb-6 space-y-3">
+            <label
+              v-for="option in paymentOptions"
+              :key="option.value"
+              class="theme-card-muted flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-colors hover:bg-[var(--color-surface)]"
+              :class="{
+                'border-brand-400 bg-brand-500/10': selectedPaymentMethod === option.value,
+              }"
+            >
+              <input
+                v-model="selectedPaymentMethod"
+                type="radio"
+                :value="option.value"
+                class="mt-0.5 text-brand-500"
+              />
+              <div class="flex-1">
+                <p class="theme-title text-sm font-semibold">
+                  {{ option.label }}
+                </p>
+                <p class="theme-copy text-xs">
+                  {{ option.description }}
+                </p>
+              </div>
+            </label>
+          </div>
           <div class="flex gap-3 mb-6">
             <button
               type="button"
-              class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              class="btn-secondary rounded-xl px-5 py-3 text-sm font-medium"
               @click="goBack"
             >
               ← Back
@@ -416,15 +470,36 @@ async function placeOrder() {
             <button
               type="button"
               :disabled="loading"
-              class="flex-1 rounded-xl bg-[#0551b5] py-3 text-sm font-bold text-white transition-all hover:bg-[#1161CA] active:scale-[0.98] disabled:opacity-50 shadow-md cursor-pointer"
+              class="flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-50 shadow-md cursor-pointer"
+              :class="
+                selectedPaymentMethod === 'paypal'
+                  ? 'bg-[#0551b5] hover:bg-[#1161CA]'
+                  : 'bg-brand-600 hover:bg-brand-700'
+              "
               @click="placeOrder"
             >
-              {{ loading ? "Redirecting…" : "Pay with PayPal" }}
+              {{
+                loading
+                  ? selectedPaymentMethod === "paypal"
+                    ? "Redirecting…"
+                    : "Placing order…"
+                  : selectedPaymentMethod === "paypal"
+                    ? "Pay with PayPal"
+                    : "Place COD Order"
+              }}
             </button>
           </div>
 
+          <p
+            v-if="selectedPaymentMethod === 'cash_on_delivery'"
+            class="mb-5 rounded-xl bg-emerald-500/12 px-4 py-3 text-sm text-emerald-300"
+          >
+            Cash on Delivery is available for this e-commerce order. Pay when
+            your order arrives.
+          </p>
+
           <div
-            class="flex items-center justify-center gap-6 border-t border-slate-100 pt-5 text-sm font-medium text-slate-600"
+            class="theme-copy theme-divider-soft flex items-center justify-center gap-6 border-t pt-5 text-sm font-medium"
           >
             <div class="flex items-center gap-1.5">
               <LockClosedIcon class="h-4 w-4 text-emerald-600" />
@@ -440,32 +515,32 @@ async function placeOrder() {
 
       <!-- Order summary -->
       <aside
-        class="sticky top-6 h-fit w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-4 xl:col-span-4"
+        class="theme-card sticky top-6 h-fit w-full rounded-2xl p-6 lg:col-span-4 xl:col-span-4"
       >
-        <h2 class="mb-4 text-lg font-bold text-slate-900">Order Summary</h2>
-        <ul class="divide-y text-sm">
+        <h2 class="theme-title mb-4 text-lg font-bold">Order Summary</h2>
+        <ul class="divide-y divide-[var(--color-border)] text-sm">
           <li
             v-for="line in cart.cart?.lines"
             :key="line.id"
             class="flex justify-between py-3"
           >
             <span
-              class="text-slate-600 line-clamp-2 flex-1 mr-4 leading-relaxed"
+              class="theme-copy line-clamp-2 mr-4 flex-1 leading-relaxed"
               >{{ line.purchasable?.name }} × {{ line.quantity }}</span
             >
-            <span class="font-semibold text-slate-900">{{
+            <span class="theme-title font-semibold">{{
               line.sub_total?.formatted
             }}</span>
           </li>
         </ul>
-        <div class="mt-4 border-t pt-4">
+        <div class="theme-divider mt-4 border-t pt-4">
           <CouponInput @applied="onCouponApplied" @removed="onCouponRemoved" />
         </div>
         <div
-          class="mt-6 flex items-center justify-between border-t border-slate-200 pt-5"
+          class="theme-divider mt-6 flex items-center justify-between border-t pt-5"
         >
-          <span class="text-base font-semibold text-slate-900">Total</span>
-          <span class="text-2xl font-black tracking-tight text-slate-900">{{
+          <span class="theme-title text-base font-semibold">Total</span>
+          <span class="theme-title text-2xl font-black tracking-tight">{{
             cart.total
           }}</span>
         </div>
@@ -477,28 +552,28 @@ async function placeOrder() {
   <Teleport to="body">
     <div
       v-if="showLeaveModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      class="theme-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
       @click.self="showLeaveModal = false"
     >
       <div
-        class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+        class="theme-modal w-full max-w-sm rounded-2xl p-6"
         @click.stop
       >
         <div class="mb-4 flex items-center gap-3">
           <div
-            class="flex size-10 items-center justify-center rounded-full bg-yellow-100"
+            class="flex size-10 items-center justify-center rounded-full bg-yellow-500/12"
           >
-            <ExclamationTriangleIcon class="size-5 text-yellow-600" />
+            <ExclamationTriangleIcon class="size-5 text-yellow-300" />
           </div>
-          <h3 class="text-lg font-bold text-slate-900">Leave Checkout?</h3>
+          <h3 class="theme-title text-lg font-bold">Leave Checkout?</h3>
         </div>
-        <p class="mb-6 text-sm text-slate-600">
+        <p class="theme-copy mb-6 text-sm">
           Your items will stay in your cart, but any address and shipping
           selections will need to be re-entered.
         </p>
         <div class="flex justify-end gap-3">
           <button
-            class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+            class="btn-secondary rounded-xl px-4 py-2 text-sm font-medium"
             @click="showLeaveModal = false"
           >
             Continue Checkout

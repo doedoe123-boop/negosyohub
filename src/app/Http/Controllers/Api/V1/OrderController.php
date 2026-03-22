@@ -7,6 +7,7 @@ use App\Http\Requests\PlaceOrderRequest;
 use App\Models\Order;
 use App\Models\Store;
 use App\Services\OrderService;
+use App\Services\PaymentManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -24,7 +25,8 @@ use Lunar\Facades\CartSession;
 class OrderController extends Controller
 {
     public function __construct(
-        private OrderService $orderService
+        private OrderService $orderService,
+        private PaymentManager $paymentManager
     ) {}
 
     /**
@@ -131,17 +133,25 @@ class OrderController extends Controller
         // #10 — store resolution lives in the service; controller only passes
         // the validated primitive so the service owns the full domain flow.
         $store = Store::query()->findOrFail($request->validated('store_id'));
+        $paymentMethod = $request->validated('payment_method');
+        $result = $this->paymentManager->initiate($paymentMethod, $cart, $store);
 
-        $order = $this->orderService->createFromCart($cart, $store);
+        if ($result->requiresRedirect()) {
+            return response()->json([
+                'message' => $result->message,
+                'payment_method' => $result->method->value,
+                'approve_url' => $result->redirectUrl,
+                'paypal_order_id' => $result->externalReference,
+            ]);
+        }
 
-        // #4 — clear the cart so retries cannot create duplicate orders.
-        CartSession::manager()->clear();
+        $order = $result->order;
 
         $responseData = [
-            'message' => 'Order placed successfully.',
-            'order_id' => $order->id,
+            'message' => $result->message,
+            'order_id' => $order?->id,
             'order' => $order,
-            'summary' => $this->orderService->summarize($order),
+            'summary' => $order ? $this->orderService->summarize($order) : null,
         ];
 
         // Cache the response against the idempotency key for 24 hours.
@@ -189,14 +199,27 @@ class OrderController extends Controller
     /**
      * Mark an order as ready for pickup / delivery (store owner / admin only).
      */
-    public function markReady(Request $request, Order $order): JsonResponse
+    public function ship(Request $request, Order $order): JsonResponse
     {
-        $this->authorize('markReady', $order);
+        $this->authorize('deliver', $order);
 
-        $order = $this->orderService->markReady($order);
+        $order = $this->orderService->markShipped($order);
 
         return response()->json([
-            'message' => 'Order is ready for pickup.',
+            'message' => 'Order has been marked as shipped.',
+            'order' => $order,
+            'summary' => $this->orderService->summarize($order),
+        ]);
+    }
+
+    public function markPaid(Request $request, Order $order): JsonResponse
+    {
+        $this->authorize('markPaid', $order);
+
+        $order = $this->orderService->markPaid($order);
+
+        return response()->json([
+            'message' => 'Order payment marked as paid.',
             'order' => $order,
             'summary' => $this->orderService->summarize($order),
         ]);

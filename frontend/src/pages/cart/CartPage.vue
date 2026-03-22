@@ -10,42 +10,39 @@ onMounted(() => cart.fetch());
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-    <!-- Heading -->
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-slate-900">Shopping Cart</h1>
-      <p v-if="cart.lineCount > 0" class="mt-1 text-sm text-slate-500">
+      <h1 class="theme-title text-2xl font-bold">Shopping Cart</h1>
+      <p v-if="cart.lineCount > 0" class="theme-copy mt-1 text-sm">
         {{ cart.totalQuantity }} item{{ cart.totalQuantity !== 1 ? "s" : "" }}
         in your cart
       </p>
     </div>
 
-    <!-- Empty state -->
     <div
       v-if="cart.lineCount === 0"
-      class="rounded-2xl border border-dashed border-slate-300 bg-white py-20 text-center dark:bg-slate-900 dark:border-slate-700"
+      class="theme-empty-state rounded-2xl py-20 text-center"
     >
       <div
-        class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-slate-100"
+        class="theme-icon-muted mx-auto mb-4 flex size-14 items-center justify-center rounded-full"
       >
-        <ShoppingBagIcon class="size-7 text-slate-400" />
+        <ShoppingBagIcon class="size-7" />
       </div>
-      <p class="font-medium text-slate-600">Your cart is empty</p>
-      <p class="mt-1 text-sm text-slate-400">
+      <p class="theme-title font-medium">Your cart is empty</p>
+      <p class="theme-copy mt-1 text-sm">
         Browse stores and add items to get started.
       </p>
       <RouterLink
         to="/stores"
-        class="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:from-brand-600 hover:to-brand-700 transition-all"
+        class="btn-brand mt-5 inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-bold transition-all hover:shadow-md"
       >
         Browse stores →
       </RouterLink>
     </div>
 
     <div v-else class="grid gap-5 lg:grid-cols-3">
-      <!-- Line items -->
       <div class="lg:col-span-2">
         <ul
-          class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:divide-slate-700"
+          class="theme-card theme-divider-soft divide-y overflow-hidden rounded-2xl"
         >
           <li
             v-for="line in cart.cart?.lines"
@@ -53,7 +50,7 @@ onMounted(() => cart.fetch());
             class="flex gap-4 p-4"
           >
             <div
-              class="size-20 shrink-0 overflow-hidden rounded-xl bg-slate-100"
+              class="theme-card-muted size-20 shrink-0 overflow-hidden rounded-xl"
             >
               <img
                 :src="line.purchasable?.thumbnail ?? '/placeholder.png'"
@@ -61,42 +58,41 @@ onMounted(() => cart.fetch());
               />
             </div>
             <div class="flex flex-1 flex-col justify-between min-w-0">
-              <p class="font-medium text-slate-800 line-clamp-2">
+              <p class="theme-title line-clamp-2 font-medium">
                 {{ line.purchasable?.name }}
               </p>
               <div class="flex items-center justify-between mt-2">
-                <!-- Qty controls -->
                 <div
-                  class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5 dark:bg-slate-700 dark:border-slate-600"
+                  class="theme-card-muted flex items-center gap-1 rounded-lg p-0.5"
                 >
                   <button
                     type="button"
-                    class="flex size-7 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 disabled:opacity-40 transition-colors"
+                    class="theme-copy flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-40"
                     @click="cart.updateItem(line.id, line.quantity - 1)"
                     :disabled="line.quantity <= 1"
                   >
                     −
                   </button>
                   <span
-                    class="w-6 text-center text-sm font-semibold text-slate-700"
+                    class="theme-title w-6 text-center text-sm font-semibold"
                   >
                     {{ line.quantity }}
                   </span>
                   <button
                     type="button"
-                    class="flex size-7 items-center justify-center rounded-md text-slate-600 hover:bg-white hover:text-slate-900 transition-colors"
+                    class="theme-copy flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
                     @click="cart.updateItem(line.id, line.quantity + 1)"
                   >
                     +
                   </button>
                 </div>
                 <div class="flex items-center gap-3">
-                  <span class="font-bold text-slate-900">{{
+                  <span class="theme-title font-bold">{{
                     line.sub_total?.formatted
                   }}</span>
                   <button
                     type="button"
-                    class="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    class="theme-copy rounded-lg p-1.5 hover:bg-red-500/10 hover:text-red-500"
                     @click="cart.removeItem(line.id)"
                   >
                     <TrashIcon class="size-4" />
@@ -108,32 +104,31 @@ onMounted(() => cart.fetch());
         </ul>
       </div>
 
-      <!-- Order summary -->
       <div class="lg:col-span-1">
         <div
-          class="sticky top-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card sticky top-24 rounded-2xl p-5"
         >
-          <h2 class="mb-4 text-base font-semibold text-slate-900">
+          <h2 class="theme-title mb-4 text-base font-semibold">
             Order summary
           </h2>
-          <div class="space-y-2 text-sm text-slate-600">
+          <div class="theme-copy space-y-2 text-sm">
             <div class="flex justify-between">
               <span>Subtotal</span>
-              <span class="font-medium text-slate-900">{{ cart.total }}</span>
+              <span class="theme-title font-medium">{{ cart.total }}</span>
             </div>
             <div class="flex justify-between">
               <span>Delivery</span>
-              <span class="text-slate-400">Calculated at checkout</span>
+              <span>Calculated at checkout</span>
             </div>
           </div>
-          <div class="my-4 border-t border-slate-100" />
-          <div class="flex justify-between text-base font-bold text-slate-900">
+          <div class="theme-divider-soft my-4 border-t" />
+          <div class="theme-title flex justify-between text-base font-bold">
             <span>Total</span>
             <span>{{ cart.total }}</span>
           </div>
           <RouterLink
             to="/checkout"
-            class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-bold text-white shadow-sm hover:from-brand-600 hover:to-brand-700 hover:shadow-brand-500/25 hover:shadow-md active:scale-[0.98] transition-all"
+            class="btn-brand mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold shadow-sm hover:shadow-md active:scale-[0.98]"
           >
             Proceed to Checkout
             <svg
@@ -150,7 +145,7 @@ onMounted(() => cart.fetch());
               />
             </svg>
           </RouterLink>
-          <p class="mt-3 text-center text-xs text-slate-400">
+          <p class="theme-copy mt-3 text-center text-xs">
             Taxes and delivery calculated at checkout
           </p>
         </div>

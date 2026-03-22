@@ -7,12 +7,9 @@ enum OrderStatus: string
     case Pending = 'pending';
     case Confirmed = 'confirmed';
     case Preparing = 'preparing';
-    case Ready = 'ready';
+    case Shipped = 'shipped';
     case Delivered = 'delivered';
     case Cancelled = 'cancelled';
-    case PaymentFailed = 'payment_failed';
-    case RefundPending = 'refund_pending';
-    case Refunded = 'refunded';
 
     /**
      * Human-readable label for display.
@@ -23,12 +20,9 @@ enum OrderStatus: string
             self::Pending => 'Pending',
             self::Confirmed => 'Confirmed',
             self::Preparing => 'Preparing',
-            self::Ready => 'Ready for Pickup',
+            self::Shipped => 'Shipped',
             self::Delivered => 'Delivered',
             self::Cancelled => 'Cancelled',
-            self::PaymentFailed => 'Payment Failed',
-            self::RefundPending => 'Refund Pending',
-            self::Refunded => 'Refunded',
         };
     }
 
@@ -41,12 +35,9 @@ enum OrderStatus: string
             self::Pending => 'warning',
             self::Confirmed => 'info',
             self::Preparing => 'primary',
-            self::Ready => 'success',
+            self::Shipped => 'success',
             self::Delivered => 'success',
             self::Cancelled => 'danger',
-            self::PaymentFailed => 'danger',
-            self::RefundPending => 'warning',
-            self::Refunded => 'info',
         };
     }
 
@@ -60,7 +51,7 @@ enum OrderStatus: string
      */
     public static function active(): array
     {
-        return [self::Pending, self::Confirmed, self::Preparing, self::Ready];
+        return [self::Pending, self::Confirmed, self::Preparing, self::Shipped];
     }
 
     /**
@@ -74,7 +65,6 @@ enum OrderStatus: string
         return match ($this) {
             self::Pending => in_array($next, [
                 self::Confirmed,
-                self::PaymentFailed,
                 self::Cancelled,
             ], true),
             self::Confirmed => in_array($next, [
@@ -82,18 +72,14 @@ enum OrderStatus: string
                 self::Cancelled,
             ], true),
             self::Preparing => in_array($next, [
-                self::Ready,
+                self::Shipped,
                 self::Cancelled,
             ], true),
-            self::Ready => in_array($next, [
+            self::Shipped => in_array($next, [
                 self::Delivered,
                 self::Cancelled,
             ], true),
-            self::Delivered, self::Cancelled => in_array($next, [
-                self::RefundPending,
-            ], true),
-            self::RefundPending => $next === self::Refunded,
-            self::PaymentFailed, self::Refunded => false,
+            self::Delivered, self::Cancelled => false,
         };
     }
 }

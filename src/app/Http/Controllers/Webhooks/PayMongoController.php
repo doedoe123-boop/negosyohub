@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
  * Step 3 of the two-step payment flow:
  *   1. Frontend POSTs to /api/v1/orders/{order}/intent
  *   2. Frontend collects payment via PayMongo JS SDK
- *   3. PayMongo fires this webhook → order status is transitioned server-side
+ *   3. PayMongo fires this webhook → payment status is updated server-side
  *
  * @see App\Http\Controllers\Api\V1\PaymentController
  * @see https://developers.paymongo.com/docs/webhook-signature-verification
@@ -65,7 +65,7 @@ class PayMongoController extends Controller
     }
 
     /**
-     * Transition the order to Confirmed after a successful payment.
+     * Mark the order as paid after a successful payment.
      */
     private function handlePaymentPaid(?string $paymentIntentId): void
     {
@@ -88,7 +88,7 @@ class PayMongoController extends Controller
         try {
             $this->orderService->markPaymentPaid($order);
         } catch (\Throwable $e) {
-            Log::error('PayMongo webhook: failed to confirm order', [
+            Log::error('PayMongo webhook: failed to mark order paid', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
             ]);
@@ -96,7 +96,7 @@ class PayMongoController extends Controller
     }
 
     /**
-     * Transition the order to PaymentFailed after a failed payment.
+     * Cancel the order after a failed payment.
      */
     private function handlePaymentFailed(?string $paymentIntentId): void
     {
@@ -119,7 +119,7 @@ class PayMongoController extends Controller
         try {
             $this->orderService->markPaymentFailed($order);
         } catch (\Throwable $e) {
-            Log::error('PayMongo webhook: failed to mark order as payment-failed', [
+            Log::error('PayMongo webhook: failed to cancel unpaid order', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
             ]);

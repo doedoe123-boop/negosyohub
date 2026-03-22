@@ -3,11 +3,10 @@ import { RouterView } from "vue-router";
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
-    <!-- Minimal header — no cart/nav links to reduce abandonment -->
-    <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 transition-colors">
+  <div class="theme-page min-h-screen transition-colors">
+    <header class="theme-surface theme-divider border-x-0 border-t-0 px-6 py-4 transition-colors">
       <a href="/" class="text-xl font-bold text-brand-600">NegosyoHub</a>
-      <span class="ml-2 text-sm text-slate-500">Checkout</span>
+      <span class="theme-copy ml-2 text-sm">Checkout</span>
     </header>
 
     <main class="mx-auto max-w-6xl px-4 py-10">

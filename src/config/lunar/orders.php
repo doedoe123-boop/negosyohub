@@ -86,8 +86,8 @@ return [
             'favourite' => true,
         ],
 
-        'ready' => [
-            'label' => 'Ready for Pickup',
+        'shipped' => [
+            'label' => 'Shipped',
             'color' => '#10B981',
             'favourite' => true,
         ],
@@ -101,21 +101,6 @@ return [
         'cancelled' => [
             'label' => 'Cancelled',
             'color' => '#EF4444',
-        ],
-
-        'payment_failed' => [
-            'label' => 'Payment Failed',
-            'color' => '#DC2626',
-        ],
-
-        'refund_pending' => [
-            'label' => 'Refund Pending',
-            'color' => '#F97316',
-        ],
-
-        'refunded' => [
-            'label' => 'Refunded',
-            'color' => '#64748B',
         ],
 
     ],

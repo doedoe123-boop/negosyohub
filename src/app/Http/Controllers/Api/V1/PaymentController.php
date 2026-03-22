@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Store;
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
-use App\PaymentStatus;
 use App\Services\OrderService;
+use App\Services\PaymentManager;
 use App\Services\PayMongoService;
-use App\Services\PayPalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -28,8 +29,8 @@ class PaymentController extends Controller
 {
     public function __construct(
         private PayMongoService $payMongo,
-        private PayPalService $payPal,
-        private OrderService $orderService
+        private OrderService $orderService,
+        private PaymentManager $paymentManager
     ) {}
 
     // ── PayMongo ────────────────────────────────────────────────────────
@@ -64,7 +65,8 @@ class PaymentController extends Controller
 
         $order->update([
             'payment_intent_id' => $intent['id'],
-            'payment_status' => PaymentStatus::Pending->value,
+            'payment_method' => OrderPaymentMethod::PayMongo->value,
+            'payment_status' => OrderPaymentStatus::Unpaid->value,
             'payment_client_key' => $intent['client_key'],
         ]);
 
@@ -93,17 +95,12 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        $result = $this->payPal->createOrder($cart);
-
-        if (! $result['id'] || ! $result['approve_url']) {
-            return response()->json([
-                'message' => 'Failed to create PayPal order. Please try again.',
-            ], 502);
-        }
+        $store = $this->orderService->resolveStoreFromCart($cart);
+        $result = $this->paymentManager->initiate(OrderPaymentMethod::PayPal->value, $cart, $store);
 
         return response()->json([
-            'paypal_order_id' => $result['id'],
-            'approve_url' => $result['approve_url'],
+            'paypal_order_id' => $result->externalReference,
+            'approve_url' => $result->redirectUrl,
         ]);
     }
 
@@ -120,70 +117,18 @@ class PaymentController extends Controller
             'store_id' => ['required', 'integer', 'exists:stores,id'],
         ]);
 
-        $paypalOrderId = $validated['paypal_order_id'];
-
-        // Verify the PayPal order is approved before capturing.
-        $paypalOrder = $this->payPal->getOrder($paypalOrderId);
-        $status = $paypalOrder['status'] ?? null;
-
-        if (! in_array($status, ['APPROVED', 'COMPLETED'], true)) {
-            return response()->json([
-                'message' => 'PayPal order has not been approved by the customer.',
-            ], 422);
-        }
-
-        // Capture payment on PayPal.
-        if ($status === 'APPROVED') {
-            $paypalOrder = $this->payPal->captureOrder($paypalOrderId);
-        }
-
-        if (($paypalOrder['status'] ?? null) !== 'COMPLETED') {
-            return response()->json([
-                'message' => 'PayPal payment capture failed. Please try again.',
-            ], 422);
-        }
-
-        // Create the Lunar order from cart.
-        $cart = CartSession::current();
-
-        if (! $cart) {
-            return response()->json([
-                'message' => 'Cart session expired. Please try again.',
-            ], 422);
-        }
-
         $store = Store::query()->findOrFail($validated['store_id']);
-        $order = $this->orderService->createFromCart($cart, $store);
-
-        // Record PayPal payment details on the order.
-        $captureId = $paypalOrder['purchase_units'][0]['payments']['captures'][0]['id'] ?? $paypalOrderId;
-
-        $order->update([
-            'payment_intent_id' => $paypalOrderId,
-            'payment_status' => PaymentStatus::Paid->value,
-            'paid_at' => now(),
+        $result = $this->paymentManager->complete(OrderPaymentMethod::PayPal->value, [
+            'paypal_order_id' => $validated['paypal_order_id'],
+            'store' => $store,
         ]);
-
-        // Create a Lunar transaction record for the capture.
-        $order->transactions()->create([
-            'success' => true,
-            'type' => 'capture',
-            'driver' => 'paypal',
-            'amount' => $order->total->value,
-            'reference' => $captureId,
-            'status' => 'COMPLETED',
-            'card_type' => 'paypal',
-            'captured_at' => now(),
-        ]);
-
-        // Clear the cart so retries cannot create duplicate orders.
-        CartSession::manager()->clear();
+        $order = $result->order;
 
         return response()->json([
-            'message' => 'Payment captured and order placed successfully.',
-            'order_id' => $order->id,
+            'message' => $result->message,
+            'order_id' => $order?->id,
             'order' => $order,
-            'summary' => $this->orderService->summarize($order),
+            'summary' => $order ? $this->orderService->summarize($order) : null,
         ], 201);
     }
 }

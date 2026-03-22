@@ -163,7 +163,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         });
 
         // Orders — place new (strict throttle: prevents double-click duplicates & abuse)
-        Route::middleware('throttle:5,1')->group(function () {
+        Route::middleware('throttle:checkout-orders')->group(function () {
             Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
             // Payment intent creation shares the same tight throttle as order placement.
             Route::post('/orders/{order}/intent', [PaymentController::class, 'intent'])->name('orders.intent');
@@ -211,8 +211,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('throttle:30,1')->group(function () {
             Route::patch('/orders/{order}/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
             Route::patch('/orders/{order}/prepare', [OrderController::class, 'prepare'])->name('orders.prepare');
-            Route::patch('/orders/{order}/ready', [OrderController::class, 'markReady'])->name('orders.ready');
+            Route::patch('/orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
+            Route::patch('/orders/{order}/ready', [OrderController::class, 'ship'])->name('orders.ready');
             Route::patch('/orders/{order}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
+            Route::patch('/orders/{order}/mark-paid', [OrderController::class, 'markPaid'])->name('orders.mark-paid');
         });
     });
 

@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Models\Order;
 use App\Models\User;
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
 use App\Services\OrderService;
 use Filament\Notifications\Notification;
@@ -56,20 +58,27 @@ class ScopedOrderResource extends LunarOrderResource
                     ->requiresConfirmation()
                     ->visible(fn (Order $record): bool => $record->status === OrderStatus::Confirmed->value)
                     ->action(fn (Order $record) => static::transitionOrder($record, 'markPreparing')),
-                Tables\Actions\Action::make('markReady')
-                    ->label('Ready')
+                Tables\Actions\Action::make('markShipped')
+                    ->label('Shipped')
                     ->icon('heroicon-o-truck')
                     ->color('success')
                     ->requiresConfirmation()
                     ->visible(fn (Order $record): bool => $record->status === OrderStatus::Preparing->value)
-                    ->action(fn (Order $record) => static::transitionOrder($record, 'markReady')),
+                    ->action(fn (Order $record) => static::transitionOrder($record, 'markShipped')),
                 Tables\Actions\Action::make('markDelivered')
                     ->label('Delivered')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::Ready->value)
+                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::Shipped->value)
                     ->action(fn (Order $record) => static::transitionOrder($record, 'markDelivered')),
+                Tables\Actions\Action::make('markPaid')
+                    ->label('Mark as Paid')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record): bool => $record->payment_method === OrderPaymentMethod::CashOnDelivery && $record->payment_status === OrderPaymentStatus::Unpaid)
+                    ->action(fn (Order $record) => static::transitionOrder($record, 'markPaid')),
                 Tables\Actions\Action::make('cancel')
                     ->label('Cancel')
                     ->icon('heroicon-o-x-circle')

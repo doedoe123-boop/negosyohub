@@ -3,8 +3,9 @@
 use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
-use App\PaymentStatus;
 use App\Services\PayMongoService;
 use Lunar\Models\Currency;
 
@@ -76,7 +77,8 @@ describe('POST /api/v1/orders/{order}/intent', function () {
 
         $fresh = $order->fresh();
         expect($fresh->payment_intent_id)->toBe('pi_test_abc123')
-            ->and($fresh->payment_status)->toBe(PaymentStatus::Pending->value);
+            ->and($fresh->payment_status->value)->toBe(OrderPaymentStatus::Unpaid->value)
+            ->and($fresh->payment_method->value)->toBe(OrderPaymentMethod::PayMongo->value);
     });
 
     it('is idempotent — returns existing intent without calling PayMongo again', function () {
