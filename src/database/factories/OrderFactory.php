@@ -5,6 +5,8 @@ namespace Database\Factories;
 use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Lunar\Base\ValueObjects\Cart\TaxBreakdown;
@@ -51,6 +53,9 @@ class OrderFactory extends Factory
             'commission_amount' => $commissionAmount,
             'store_earning' => $storeEarning,
             'platform_earning' => $commissionAmount,
+            'payment_method' => OrderPaymentMethod::PayPal->value,
+            'payment_status' => OrderPaymentStatus::Paid->value,
+            'paid_at' => now(),
         ];
     }
 

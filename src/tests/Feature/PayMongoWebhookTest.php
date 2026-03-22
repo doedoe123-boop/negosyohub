@@ -2,8 +2,8 @@
 
 use App\Models\Order;
 use App\Models\Store;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
-use App\PaymentStatus;
 use Illuminate\Support\Facades\Log;
 use Lunar\Models\Currency;
 
@@ -71,7 +71,7 @@ describe('POST /webhooks/paymongo', function () {
         )->assertUnauthorized();
     });
 
-    it('transitions a Pending order to Confirmed on payment.paid', function () {
+    it('marks a Pending order as paid on payment.paid', function () {
         $order = Order::factory()->for(Store::factory()->create())->create([
             'status' => OrderStatus::Pending->value,
             'payment_intent_id' => 'pi_paid_test',
@@ -91,12 +91,12 @@ describe('POST /webhooks/paymongo', function () {
         )->assertOk();
 
         $fresh = $order->fresh();
-        expect($fresh->status)->toBe(OrderStatus::Confirmed->value)
-            ->and($fresh->payment_status)->toBe(PaymentStatus::Paid->value)
+        expect($fresh->status)->toBe(OrderStatus::Pending->value)
+            ->and($fresh->payment_status->value)->toBe(OrderPaymentStatus::Paid->value)
             ->and($fresh->paid_at)->not->toBeNull();
     });
 
-    it('transitions a Pending order to PaymentFailed on payment.failed', function () {
+    it('cancels a Pending order on payment.failed', function () {
         $order = Order::factory()->for(Store::factory()->create())->create([
             'status' => OrderStatus::Pending->value,
             'payment_intent_id' => 'pi_failed_test',
@@ -116,8 +116,8 @@ describe('POST /webhooks/paymongo', function () {
         )->assertOk();
 
         $fresh = $order->fresh();
-        expect($fresh->status)->toBe(OrderStatus::PaymentFailed->value)
-            ->and($fresh->payment_status)->toBe(PaymentStatus::Failed->value);
+        expect($fresh->status)->toBe(OrderStatus::Cancelled->value)
+            ->and($fresh->payment_status->value)->toBe(OrderPaymentStatus::Unpaid->value);
     });
 
     it('returns 200 for unknown event types (graceful ignore)', function () {

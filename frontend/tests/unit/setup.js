@@ -23,6 +23,7 @@ vi.mock("@heroicons/vue/24/outline", () => {
   return {
     ArrowPathIcon: s,
     Bars3Icon: s,
+    BookmarkIcon: s,
     BuildingStorefrontIcon: s,
     CheckCircleIcon: s,
     ChevronRightIcon: s,

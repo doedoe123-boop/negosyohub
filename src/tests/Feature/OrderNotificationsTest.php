@@ -85,7 +85,7 @@ describe('Order Status Updates — customer notifications', function () {
         });
     });
 
-    it('notifies customer when order is ready', function () {
+    it('notifies customer when order is shipped', function () {
         Notification::fake();
 
         $order = Order::factory()->for($this->store)->create([
@@ -93,10 +93,10 @@ describe('Order Status Updates — customer notifications', function () {
             'status' => OrderStatus::Preparing->value,
         ]);
 
-        $this->service->markReady($order);
+        $this->service->markShipped($order);
 
         Notification::assertSentTo($this->customer, OrderStatusUpdated::class, function (OrderStatusUpdated $n) {
-            return $n->order->status === OrderStatus::Ready->value;
+            return $n->order->status === OrderStatus::Shipped->value;
         });
     });
 
@@ -105,7 +105,7 @@ describe('Order Status Updates — customer notifications', function () {
 
         $order = Order::factory()->for($this->store)->create([
             'user_id' => $this->customer->id,
-            'status' => OrderStatus::Ready->value,
+            'status' => OrderStatus::Shipped->value,
         ]);
 
         $this->service->markDelivered($order);

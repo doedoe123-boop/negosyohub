@@ -3,6 +3,7 @@
 use App\Models\Store;
 use App\Models\User;
 use App\Services\CommissionService;
+use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * @see /skills/order-processing.md
@@ -44,7 +45,10 @@ describe('Order Placement', function () {
         $store = Store::factory()->pending()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
             ->assertJsonValidationErrors(['store_id']);
     });
 
@@ -53,7 +57,10 @@ describe('Order Placement', function () {
         $store = Store::factory()->suspended()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
             ->assertJsonValidationErrors(['store_id']);
     });
 });
@@ -108,5 +115,42 @@ describe('Commission Calculation', function () {
         // 333 * 0.075 = 24.975 → rounds to 25
         expect($result['commission_amount'])->toBe(25);
         expect($result['store_earning'])->toBe(308);
+    });
+});
+
+describe('Checkout rate limiting', function () {
+
+    afterEach(function () {
+        RateLimiter::clear('user:1:checkout-orders');
+        RateLimiter::clear('user:2:checkout-orders');
+    });
+
+    it('rate limits checkout attempts per authenticated user instead of by shared IP', function () {
+        $firstBuyer = User::factory()->create(['id' => 1]);
+        $secondBuyer = User::factory()->create(['id' => 2]);
+        $store = Store::factory()->create();
+
+        for ($attempt = 0; $attempt < 12; $attempt++) {
+            $this->actingAs($firstBuyer)
+                ->postJson('/api/v1/orders', [
+                    'store_id' => $store->id,
+                    'payment_method' => 'cash_on_delivery',
+                ])
+                ->assertStatus(422);
+        }
+
+        $this->actingAs($firstBuyer)
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
+            ->assertStatus(429);
+
+        $this->actingAs($secondBuyer)
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
+            ->assertStatus(422);
     });
 });

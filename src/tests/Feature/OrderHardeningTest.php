@@ -3,6 +3,7 @@
 use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
+use App\OrderPaymentMethod;
 use App\OrderStatus;
 use App\UserRole;
 use Lunar\Models\Currency;
@@ -23,7 +24,10 @@ describe('#3 — null cart guard', function () {
         $store = Store::factory()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => OrderPaymentMethod::CashOnDelivery->value,
+            ])
             ->assertStatus(422)
             ->assertJsonPath('message', 'Your cart is empty. Please add items before placing an order.');
     });
@@ -98,17 +102,13 @@ describe('#8 — OrderStatus state machine', function () {
         expect($from->canTransitionTo($to))->toBeTrue();
     })->with([
         'pending → confirmed' => [OrderStatus::Pending,    OrderStatus::Confirmed],
-        'pending → payment_failed' => [OrderStatus::Pending,    OrderStatus::PaymentFailed],
         'pending → cancelled' => [OrderStatus::Pending,    OrderStatus::Cancelled],
         'confirmed → preparing' => [OrderStatus::Confirmed,  OrderStatus::Preparing],
         'confirmed → cancelled' => [OrderStatus::Confirmed,  OrderStatus::Cancelled],
-        'preparing → ready' => [OrderStatus::Preparing,  OrderStatus::Ready],
+        'preparing → shipped' => [OrderStatus::Preparing,  OrderStatus::Shipped],
         'preparing → cancelled' => [OrderStatus::Preparing,  OrderStatus::Cancelled],
-        'ready → delivered' => [OrderStatus::Ready,      OrderStatus::Delivered],
-        'ready → cancelled' => [OrderStatus::Ready,      OrderStatus::Cancelled],
-        'delivered → refund_pending' => [OrderStatus::Delivered,  OrderStatus::RefundPending],
-        'cancelled → refund_pending' => [OrderStatus::Cancelled,  OrderStatus::RefundPending],
-        'refund_pending → refunded' => [OrderStatus::RefundPending, OrderStatus::Refunded],
+        'shipped → delivered' => [OrderStatus::Shipped,      OrderStatus::Delivered],
+        'shipped → cancelled' => [OrderStatus::Shipped,      OrderStatus::Cancelled],
     ]);
 
     it('blocks invalid / reverse transitions', function (OrderStatus $from, OrderStatus $to) {
@@ -118,18 +118,12 @@ describe('#8 — OrderStatus state machine', function () {
         'confirmed → pending' => [OrderStatus::Confirmed,     OrderStatus::Pending],
         'delivered → confirmed' => [OrderStatus::Delivered,     OrderStatus::Confirmed],
         'cancelled → confirmed' => [OrderStatus::Cancelled,     OrderStatus::Confirmed],
-        'payment_failed → confirmed' => [OrderStatus::PaymentFailed, OrderStatus::Confirmed],
-        'refunded → pending' => [OrderStatus::Refunded,      OrderStatus::Pending],
+        'delivered → cancelled' => [OrderStatus::Delivered, OrderStatus::Cancelled],
     ]);
 
-    it('exposes new terminal statuses in label and color', function () {
-        expect(OrderStatus::PaymentFailed->label())->toBe('Payment Failed');
-        expect(OrderStatus::RefundPending->label())->toBe('Refund Pending');
-        expect(OrderStatus::Refunded->label())->toBe('Refunded');
-
-        expect(OrderStatus::PaymentFailed->color())->toBe('danger');
-        expect(OrderStatus::RefundPending->color())->toBe('warning');
-        expect(OrderStatus::Refunded->color())->toBe('info');
+    it('uses shipped as the outbound fulfilment status', function () {
+        expect(OrderStatus::Shipped->label())->toBe('Shipped');
+        expect(OrderStatus::Shipped->color())->toBe('success');
     });
 
     it('does not include terminal statuses in active()', function () {
@@ -137,9 +131,7 @@ describe('#8 — OrderStatus state machine', function () {
 
         expect($active)->not->toContain(OrderStatus::Delivered)
             ->and($active)->not->toContain(OrderStatus::Cancelled)
-            ->and($active)->not->toContain(OrderStatus::PaymentFailed)
-            ->and($active)->not->toContain(OrderStatus::RefundPending)
-            ->and($active)->not->toContain(OrderStatus::Refunded);
+            ->and($active)->not->toContain(OrderStatus::Delivered);
     });
 
 });
@@ -185,7 +177,7 @@ describe('#9 — store owner order progression', function () {
 
         $this->actingAs($owner)->patchJson("/api/v1/orders/{$order->id}/confirm")->assertOk();
         $this->actingAs($owner)->patchJson("/api/v1/orders/{$order->id}/prepare")->assertOk();
-        $this->actingAs($owner)->patchJson("/api/v1/orders/{$order->id}/ready")->assertOk();
+        $this->actingAs($owner)->patchJson("/api/v1/orders/{$order->id}/ship")->assertOk();
         $this->actingAs($owner)->patchJson("/api/v1/orders/{$order->id}/deliver")->assertOk();
 
         expect($order->fresh()->status)->toBe(OrderStatus::Delivered->value);

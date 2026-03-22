@@ -8,8 +8,9 @@ use App\Models\Store;
 use App\Models\User;
 use App\Notifications\OrderPlacedNotification;
 use App\Notifications\OrderStatusUpdated;
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
-use App\PaymentStatus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class OrderService
      *
      * @throws ValidationException
      */
-    public function createFromCart(Cart $cart, Store $store): Order
+    public function createFromCart(Cart $cart, Store $store, array $attributes = []): Order
     {
         $this->validateCart($cart);
         $this->validateStore($store);
@@ -56,7 +57,7 @@ class OrderService
         }
 
         try {
-            $order = DB::transaction(function () use ($cart, $store): Order {
+            $order = DB::transaction(function () use ($cart, $store, $attributes): Order {
                 $cart = $cart->calculate();
 
                 /** @var Order $order */
@@ -66,6 +67,7 @@ class OrderService
                     'store_id' => $store->id,
                     'status' => OrderStatus::Pending->value,
                     'placed_at' => now(),
+                    ...$attributes,
                 ]);
 
                 // See /skills/commission-calculation.md
@@ -80,6 +82,28 @@ class OrderService
         $this->notifyStoreOwner($order);
 
         return $order;
+    }
+
+    /**
+     * Resolve the store represented by the cart contents.
+     *
+     * @throws ValidationException
+     */
+    public function resolveStoreFromCart(Cart $cart): Store
+    {
+        $storeId = (int) ($cart->meta['store_id'] ?? 0);
+
+        if (! $storeId) {
+            $storeId = (int) ($cart->lines->first()?->purchasable?->product?->attribute_data?->get('store_id')?->getValue() ?? 0);
+        }
+
+        if (! $storeId) {
+            throw ValidationException::withMessages([
+                'cart' => 'Unable to determine which store should fulfill this order.',
+            ]);
+        }
+
+        return Store::query()->findOrFail($storeId);
     }
 
     /**
@@ -271,15 +295,25 @@ class OrderService
      *
      * @throws ValidationException
      */
-    public function markReady(Order $order): Order
+    public function markShipped(Order $order): Order
     {
         $this->assertStatus($order, OrderStatus::Preparing);
-        $order->update(['status' => OrderStatus::Ready->value]);
+        $order->update(['status' => OrderStatus::Shipped->value]);
         $order->refresh();
 
         $this->notifyCustomer($order);
 
         return $order;
+    }
+
+    /**
+     * Backward-compatible alias for older callers.
+     *
+     * @throws ValidationException
+     */
+    public function markReady(Order $order): Order
+    {
+        return $this->markShipped($order);
     }
 
     /**
@@ -289,7 +323,11 @@ class OrderService
      */
     public function markDelivered(Order $order): Order
     {
-        $this->assertStatus($order, OrderStatus::Ready);
+        if (! in_array($order->status, [OrderStatus::Shipped->value], true)) {
+            throw ValidationException::withMessages([
+                'status' => 'Order must be Shipped to perform this action.',
+            ]);
+        }
         $order->update(['status' => OrderStatus::Delivered->value]);
         $order->refresh();
 
@@ -330,11 +368,8 @@ class OrderService
      */
     public function markPaymentPaid(Order $order): Order
     {
-        $this->assertStatus($order, OrderStatus::Pending);
-
         $order->update([
-            'status' => OrderStatus::Confirmed->value,
-            'payment_status' => PaymentStatus::Paid->value,
+            'payment_status' => OrderPaymentStatus::Paid->value,
             'paid_at' => now(),
         ]);
         $order->refresh();
@@ -353,17 +388,64 @@ class OrderService
      */
     public function markPaymentFailed(Order $order): Order
     {
-        $this->assertStatus($order, OrderStatus::Pending);
-
         $order->update([
-            'status' => OrderStatus::PaymentFailed->value,
-            'payment_status' => PaymentStatus::Failed->value,
+            'status' => OrderStatus::Cancelled->value,
+            'payment_status' => OrderPaymentStatus::Unpaid->value,
+            'cancelled_at' => now(),
         ]);
         $order->refresh();
 
         $this->notifyCustomer($order);
 
         return $order;
+    }
+
+    /**
+     * Mark an unpaid COD order as paid.
+     *
+     * @throws ValidationException
+     */
+    public function markPaid(Order $order): Order
+    {
+        if ($order->payment_method !== OrderPaymentMethod::CashOnDelivery) {
+            throw ValidationException::withMessages([
+                'payment_method' => 'Only Cash on Delivery orders can be marked as paid manually.',
+            ]);
+        }
+
+        if ($order->payment_status === OrderPaymentStatus::Paid) {
+            throw ValidationException::withMessages([
+                'payment_status' => 'This order is already marked as paid.',
+            ]);
+        }
+
+        $order->update([
+            'payment_status' => OrderPaymentStatus::Paid->value,
+            'paid_at' => now(),
+        ]);
+
+        $this->recordPaymentCapture(
+            $order->refresh(),
+            driver: OrderPaymentMethod::CashOnDelivery->value,
+            reference: "cod-paid-{$order->id}-".now()->timestamp,
+            status: 'COMPLETED',
+        );
+
+        return $order->refresh();
+    }
+
+    public function recordPaymentCapture(Order $order, string $driver, string $reference, string $status = 'COMPLETED'): void
+    {
+        $order->transactions()->create([
+            'success' => true,
+            'type' => 'capture',
+            'driver' => $driver,
+            'amount' => $order->total->value,
+            'reference' => $reference,
+            'status' => $status,
+            'card_type' => $driver,
+            'captured_at' => now(),
+        ]);
     }
 
     /**

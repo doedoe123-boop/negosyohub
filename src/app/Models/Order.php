@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +23,7 @@ use Spatie\Activitylog\LogOptions;
  * @property int $platform_earning
  * @property ?string $payment_intent_id
  * @property ?string $payment_client_key
+ * @property ?string $payment_method
  * @property ?string $payment_status
  * @property ?Carbon $paid_at
  * @property ?Carbon $cancelled_at
@@ -62,6 +65,8 @@ class Order extends LunarOrder
             'commission_amount' => Price::class,
             'store_earning' => Price::class,
             'platform_earning' => Price::class,
+            'payment_method' => OrderPaymentMethod::class,
+            'payment_status' => OrderPaymentStatus::class,
             'paid_at' => 'datetime',
             'cancelled_at' => 'datetime',
         ]);

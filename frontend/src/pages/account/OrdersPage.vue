@@ -22,9 +22,22 @@ const statusColors = {
   pending: "bg-yellow-100 text-yellow-700",
   confirmed: "bg-blue-100 text-blue-700",
   preparing: "bg-purple-100 text-purple-700",
+  shipped: "bg-indigo-100 text-indigo-700",
   ready: "bg-indigo-100 text-indigo-700",
   delivered: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
+};
+
+const paymentStatusColors = {
+  unpaid: "bg-amber-100 text-amber-700",
+  pending: "bg-amber-100 text-amber-700",
+  paid: "bg-emerald-100 text-emerald-700",
+};
+
+const paymentStatusLabels = {
+  unpaid: "Unpaid",
+  pending: "Unpaid",
+  paid: "Paid",
 };
 </script>
 
@@ -87,6 +100,16 @@ const statusColors = {
               "
             >
               {{ order.status }}
+            </span>
+            <span
+              v-if="order.payment_status"
+              class="hidden rounded-full px-2.5 py-0.5 text-xs font-medium sm:inline-block"
+              :class="
+                paymentStatusColors[order.payment_status] ??
+                'theme-badge-neutral'
+              "
+            >
+              {{ paymentStatusLabels[order.payment_status] ?? order.payment_status }}
             </span>
             <p class="theme-copy hidden text-xs sm:block">
               {{ order.created_at }}

@@ -35,7 +35,10 @@ describe('X-Idempotency-Key', function () {
 
         // store_id must be valid (FormRequest validates it before the controller body runs).
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id], ['X-Idempotency-Key' => $key])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ], ['X-Idempotency-Key' => $key])
             ->assertStatus(201)
             ->assertJsonPath('order_id', 42)
             ->assertJsonPath('message', 'Order placed successfully.');
@@ -49,7 +52,10 @@ describe('X-Idempotency-Key', function () {
         $this->actingAs($user)
             ->postJson(
                 '/api/v1/orders',
-                ['store_id' => $store->id],
+                [
+                    'store_id' => $store->id,
+                    'payment_method' => 'cash_on_delivery',
+                ],
                 ['X-Idempotency-Key' => 'brand-new-key']
             )
             ->assertStatus(422)
@@ -71,7 +77,10 @@ describe('X-Idempotency-Key', function () {
 
         // User B sends the identical key but should not receive user A's cached response.
         $this->actingAs($userB)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id], ['X-Idempotency-Key' => $sharedKey])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ], ['X-Idempotency-Key' => $sharedKey])
             ->assertStatus(422); // cart guard, not 201 from cache
     });
 
@@ -80,7 +89,10 @@ describe('X-Idempotency-Key', function () {
         $store = Store::factory()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
             ->assertStatus(422);
 
         // Nothing should be in the cache for this user.
@@ -122,7 +134,10 @@ describe('Concurrent order lock', function () {
         $heldLock->get();
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
             ->assertStatus(409);
 
         $heldLock->release();
@@ -156,7 +171,10 @@ describe('Concurrent order lock', function () {
         CartSession::shouldReceive('current')->once()->andReturn($fakeCart);
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
             ->assertStatus(500);
 
         // After the failed request the lock must be released — a second request
@@ -164,7 +182,10 @@ describe('Concurrent order lock', function () {
         CartSession::shouldReceive('current')->once()->andReturn(null);
 
         $this->actingAs($user)
-            ->postJson('/api/v1/orders', ['store_id' => $store->id])
+            ->postJson('/api/v1/orders', [
+                'store_id' => $store->id,
+                'payment_method' => 'cash_on_delivery',
+            ])
             ->assertStatus(422);
     });
 

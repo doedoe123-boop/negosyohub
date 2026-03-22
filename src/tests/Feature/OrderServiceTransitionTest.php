@@ -37,19 +37,19 @@ describe('OrderService — Status Transitions', function () {
         expect($updated->status)->toBe(OrderStatus::Preparing->value);
     });
 
-    it('marks a preparing order as ready', function () {
+    it('marks a preparing order as shipped', function () {
         $order = Order::factory()->for($this->store)->create([
             'status' => OrderStatus::Preparing->value,
         ]);
 
-        $updated = $this->service->markReady($order);
+        $updated = $this->service->markShipped($order);
 
-        expect($updated->status)->toBe(OrderStatus::Ready->value);
+        expect($updated->status)->toBe(OrderStatus::Shipped->value);
     });
 
-    it('marks a ready order as delivered', function () {
+    it('marks a shipped order as delivered', function () {
         $order = Order::factory()->for($this->store)->create([
-            'status' => OrderStatus::Ready->value,
+            'status' => OrderStatus::Shipped->value,
         ]);
 
         $updated = $this->service->markDelivered($order);

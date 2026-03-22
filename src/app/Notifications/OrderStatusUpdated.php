@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notification;
  * Notifies the customer when their order status changes.
  *
  * Sent on every status transition after the initial placement:
- * Confirmed → Preparing → Ready → Delivered → Cancelled
+ * Confirmed → Preparing → Shipped → Delivered → Cancelled
  *
  * Channels: mail + database (in-app bell for Phase 5 customer dashboard)
  */
@@ -49,8 +49,8 @@ class OrderStatusUpdated extends Notification implements ShouldQueue
                 fn (MailMessage $m) => $m->line('Sit tight — your order is being prepared soon.')
             )
             ->when(
-                $status === OrderStatus::Ready,
-                fn (MailMessage $m) => $m->line('Head over to pick it up at your earliest convenience.')
+                $status === OrderStatus::Shipped,
+                fn (MailMessage $m) => $m->line('Your package is now on the way.')
             )
             ->when(
                 $status === OrderStatus::Cancelled,
@@ -79,7 +79,7 @@ class OrderStatusUpdated extends Notification implements ShouldQueue
         return match ($status) {
             OrderStatus::Confirmed => "Your order has been confirmed by {$storeName} and will be prepared shortly.",
             OrderStatus::Preparing => "{$storeName} is now preparing your order.",
-            OrderStatus::Ready => "Your order is ready! {$storeName} is waiting for you.",
+            OrderStatus::Shipped => "Your order from {$storeName} is now on the way.",
             OrderStatus::Delivered => 'Your order has been delivered. Enjoy!',
             OrderStatus::Cancelled => "Your order has been cancelled by {$storeName}.",
             default => "Your order status has been updated to: {$status->label()}.",
@@ -91,7 +91,7 @@ class OrderStatusUpdated extends Notification implements ShouldQueue
         return match ($status) {
             OrderStatus::Confirmed => 'heroicon-o-check-circle',
             OrderStatus::Preparing => 'heroicon-o-fire',
-            OrderStatus::Ready => 'heroicon-o-bell',
+            OrderStatus::Shipped => 'heroicon-o-truck',
             OrderStatus::Delivered => 'heroicon-o-truck',
             OrderStatus::Cancelled => 'heroicon-o-x-circle',
             default => 'heroicon-o-information-circle',

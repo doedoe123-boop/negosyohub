@@ -5,6 +5,8 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\OrderResource\Pages;
 use App\Models\Order;
 use App\Models\Store;
+use App\OrderPaymentMethod;
+use App\OrderPaymentStatus;
 use App\OrderStatus;
 use App\Services\OrderService;
 use Filament\Forms\Components\DatePicker;
@@ -38,6 +40,33 @@ class OrderResource extends Resource
                             ->badge()
                             ->formatStateUsing(fn (string $state): string => OrderStatus::tryFrom($state)?->label() ?? ucfirst($state))
                             ->color(fn (string $state): string => OrderStatus::tryFrom($state)?->color() ?? 'gray'),
+                        Infolists\Components\TextEntry::make('payment_method')
+                            ->label('Payment Method')
+                            ->badge()
+                            ->formatStateUsing(function (OrderPaymentMethod|string|null $state): string {
+                                if ($state instanceof OrderPaymentMethod) {
+                                    return $state->label();
+                                }
+
+                                return $state ? (OrderPaymentMethod::tryFrom($state)?->label() ?? ucfirst(str_replace('_', ' ', $state))) : '—';
+                            }),
+                        Infolists\Components\TextEntry::make('payment_status')
+                            ->label('Payment Status')
+                            ->badge()
+                            ->formatStateUsing(function (OrderPaymentStatus|string|null $state): string {
+                                if ($state instanceof OrderPaymentStatus) {
+                                    return $state->label();
+                                }
+
+                                return $state ? (OrderPaymentStatus::tryFrom($state)?->label() ?? ucfirst($state)) : '—';
+                            })
+                            ->color(function (OrderPaymentStatus|string|null $state): string {
+                                if ($state instanceof OrderPaymentStatus) {
+                                    return $state->color();
+                                }
+
+                                return $state ? (OrderPaymentStatus::tryFrom($state)?->color() ?? 'gray') : 'gray';
+                            }),
                         Infolists\Components\TextEntry::make('store.name')
                             ->label('Store')
                             ->default('—'),
@@ -105,6 +134,33 @@ class OrderResource extends Resource
                     ->formatStateUsing(fn (string $state): string => OrderStatus::tryFrom($state)?->label() ?? ucfirst($state))
                     ->color(fn (string $state): string => OrderStatus::tryFrom($state)?->color() ?? 'gray')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('payment_method')
+                    ->label('Payment')
+                    ->badge()
+                    ->formatStateUsing(function (OrderPaymentMethod|string|null $state): string {
+                        if ($state instanceof OrderPaymentMethod) {
+                            return $state->label();
+                        }
+
+                        return $state ? (OrderPaymentMethod::tryFrom($state)?->label() ?? ucfirst(str_replace('_', ' ', $state))) : '—';
+                    }),
+                Tables\Columns\TextColumn::make('payment_status')
+                    ->label('Payment Status')
+                    ->badge()
+                    ->formatStateUsing(function (OrderPaymentStatus|string|null $state): string {
+                        if ($state instanceof OrderPaymentStatus) {
+                            return $state->label();
+                        }
+
+                        return $state ? (OrderPaymentStatus::tryFrom($state)?->label() ?? ucfirst($state)) : '—';
+                    })
+                    ->color(function (OrderPaymentStatus|string|null $state): string {
+                        if ($state instanceof OrderPaymentStatus) {
+                            return $state->color();
+                        }
+
+                        return $state ? (OrderPaymentStatus::tryFrom($state)?->color() ?? 'gray') : 'gray';
+                    }),
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')
                     ->getStateUsing(fn (Order $record): string => '₱'.number_format(($record->total?->value ?? 0) / 100, 2))
@@ -164,23 +220,32 @@ class OrderResource extends Resource
                     ->action(function (Order $record): void {
                         static::transitionOrder($record, 'markPreparing');
                     }),
-                Tables\Actions\Action::make('markReady')
-                    ->label('Ready')
+                Tables\Actions\Action::make('markShipped')
+                    ->label('Shipped')
                     ->icon('heroicon-o-truck')
                     ->color('success')
                     ->requiresConfirmation()
                     ->visible(fn (Order $record): bool => $record->status === OrderStatus::Preparing->value)
                     ->action(function (Order $record): void {
-                        static::transitionOrder($record, 'markReady');
+                        static::transitionOrder($record, 'markShipped');
                     }),
                 Tables\Actions\Action::make('markDelivered')
                     ->label('Delivered')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::Ready->value)
+                    ->visible(fn (Order $record): bool => $record->status === OrderStatus::Shipped->value)
                     ->action(function (Order $record): void {
                         static::transitionOrder($record, 'markDelivered');
+                    }),
+                Tables\Actions\Action::make('markPaid')
+                    ->label('Mark as Paid')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record): bool => $record->payment_method === OrderPaymentMethod::CashOnDelivery && $record->payment_status === OrderPaymentStatus::Unpaid)
+                    ->action(function (Order $record): void {
+                        static::transitionOrder($record, 'markPaid');
                     }),
                 Tables\Actions\Action::make('cancel')
                     ->label('Cancel')

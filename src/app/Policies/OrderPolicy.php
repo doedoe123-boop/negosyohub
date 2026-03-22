@@ -163,4 +163,16 @@ class OrderPolicy
 
         return $user->isStoreOwner() && (int) $order->store?->user_id === $user->id;
     }
+
+    /**
+     * Determine whether the user can mark the order as paid.
+     */
+    public function markPaid(User $user, Order $order): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->isStoreOwner() && (int) $order->store?->user_id === $user->id;
+    }
 }
