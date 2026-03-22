@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\StoreRejected;
 use App\Models\Store;
 use App\Models\User;
+use App\Services\Webhooks\WebhookEventDispatcher;
 use App\StoreStatus;
 use App\UserRole;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -19,6 +20,10 @@ use Illuminate\Support\Facades\Mail;
  */
 class StoreService
 {
+    public function __construct(
+        private WebhookEventDispatcher $webhookEventDispatcher
+    ) {}
+
     /**
      * Register a new store for a user.
      */
@@ -49,8 +54,21 @@ class StoreService
     {
         $store->update(['status' => StoreStatus::Approved]);
         $store->generateLoginToken();
+        $store = $store->refresh();
 
-        return $store->refresh();
+        $this->webhookEventDispatcher->dispatch('store.approved', [
+            'event' => 'store.approved',
+            'occurred_at' => now()->toIso8601String(),
+            'store' => [
+                'id' => $store->id,
+                'name' => $store->name,
+                'slug' => $store->slug,
+                'sector' => $store->sector,
+                'status' => $store->status->value,
+            ],
+        ], $store);
+
+        return $store;
     }
 
     /**
@@ -116,6 +134,16 @@ class StoreService
     {
         $query = Store::query()->where('status', StoreStatus::Approved);
 
+        if (! empty($filters['search']) && $this->usesScout()) {
+            $ids = Store::search($filters['search'])
+                ->take(250)
+                ->get()
+                ->pluck('id')
+                ->all();
+
+            $query->whereIn('id', empty($ids) ? [0] : $ids);
+        }
+
         if (! empty($filters['sector'])) {
             $query->where('sector', $filters['sector']);
         }
@@ -124,7 +152,7 @@ class StoreService
             $query->where('city', $filters['city']);
         }
 
-        if (! empty($filters['search'])) {
+        if (! empty($filters['search']) && ! $this->usesScout()) {
             $like = DB::connection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
             $query->where('name', $like, '%'.$filters['search'].'%');
         }
@@ -145,5 +173,10 @@ class StoreService
         abort_if($store->status !== StoreStatus::Approved, 404);
 
         return $store;
+    }
+
+    private function usesScout(): bool
+    {
+        return config('scout.driver') !== 'null' && method_exists(Store::class, 'search');
     }
 }

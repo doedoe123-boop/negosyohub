@@ -11,6 +11,7 @@ use App\Notifications\OrderStatusUpdated;
 use App\OrderPaymentMethod;
 use App\OrderPaymentStatus;
 use App\OrderStatus;
+use App\Services\Webhooks\WebhookEventDispatcher;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,9 @@ use Lunar\Models\Cart;
 class OrderService
 {
     public function __construct(
-        private CommissionService $commissionService
+        private CommissionService $commissionService,
+        private CheckoutDiscountService $checkoutDiscountService,
+        private WebhookEventDispatcher $webhookEventDispatcher
     ) {}
 
     /**
@@ -70,6 +73,8 @@ class OrderService
                     ...$attributes,
                 ]);
 
+                $order = $this->checkoutDiscountService->applyToOrder($order, $cart, $store);
+
                 // See /skills/commission-calculation.md
                 $this->commissionService->applyToOrder($order);
 
@@ -80,6 +85,7 @@ class OrderService
         }
 
         $this->notifyStoreOwner($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'order.created');
 
         return $order;
     }
@@ -245,7 +251,7 @@ class OrderService
      */
     public function listForUser(User $user, int $perPage = 15)
     {
-        $query = Order::query()->with('store');
+        $query = Order::query()->with(['store', 'latestShipment']);
 
         if ($user->isStoreOwner()) {
             $query->where('store_id', $user->store?->id);
@@ -270,6 +276,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'order.updated');
 
         return $order;
     }
@@ -286,6 +293,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'order.updated');
 
         return $order;
     }
@@ -302,6 +310,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'order.updated');
 
         return $order;
     }
@@ -332,6 +341,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'order.delivered');
 
         return $order;
     }
@@ -355,6 +365,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'order.updated');
 
         return $order;
     }
@@ -375,6 +386,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'payment.paid');
 
         return $order;
     }
@@ -396,6 +408,7 @@ class OrderService
         $order->refresh();
 
         $this->notifyCustomer($order);
+        $this->webhookEventDispatcher->dispatchForOrder($order, 'payment.failed');
 
         return $order;
     }
@@ -430,6 +443,8 @@ class OrderService
             reference: "cod-paid-{$order->id}-".now()->timestamp,
             status: 'COMPLETED',
         );
+
+        $this->webhookEventDispatcher->dispatchForOrder($order->refresh(), 'payment.paid');
 
         return $order->refresh();
     }

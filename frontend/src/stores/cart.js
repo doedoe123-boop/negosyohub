@@ -12,6 +12,16 @@ export const useCartStore = defineStore("cart", () => {
     () => cart.value?.lines?.reduce((sum, line) => sum + line.quantity, 0) ?? 0,
   );
   const total = computed(() => cart.value?.total?.formatted ?? "₱0.00");
+  const originalTotal = computed(
+    () =>
+      cart.value?.original_total?.formatted ??
+      cart.value?.total?.formatted ??
+      "₱0.00",
+  );
+  const discountTotal = computed(
+    () => cart.value?.discount_total?.formatted ?? "₱0.00",
+  );
+  const appliedCoupon = computed(() => cart.value?.applied_coupon ?? null);
   const rawTotal = computed(() => {
     const val = cart.value?.total?.value;
     if (val == null) return 0;
@@ -75,6 +85,16 @@ export const useCartStore = defineStore("cart", () => {
     cart.value = null;
   }
 
+  async function applyCoupon(code) {
+    const { data } = await cartApi.applyCoupon(code);
+    cart.value = data;
+  }
+
+  async function removeCoupon() {
+    const { data } = await cartApi.removeCoupon();
+    cart.value = data;
+  }
+
   function openDrawer() {
     isOpen.value = true;
   }
@@ -96,6 +116,9 @@ export const useCartStore = defineStore("cart", () => {
     lineCount,
     totalQuantity,
     total,
+    originalTotal,
+    discountTotal,
+    appliedCoupon,
     rawTotal,
     storeId,
     fetch,
@@ -103,6 +126,8 @@ export const useCartStore = defineStore("cart", () => {
     updateItem,
     removeItem,
     clear,
+    applyCoupon,
+    removeCoupon,
     openDrawer,
     closeDrawer,
     toggleDrawer,

@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources;
 
+use App\DeliveryStatus;
 use App\Models\Order;
 use App\Models\User;
 use App\OrderPaymentMethod;
 use App\OrderPaymentStatus;
 use App\OrderStatus;
+use App\Services\LogisticsManager;
 use App\Services\OrderService;
+use App\ShipmentProvider;
+use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -44,6 +48,71 @@ class ScopedOrderResource extends LunarOrderResource
     {
         return parent::table($table)
             ->actions([
+                Tables\Actions\Action::make('manageShipment')
+                    ->label('Manage Shipment')
+                    ->icon('heroicon-o-truck')
+                    ->color('gray')
+                    ->form([
+                        Forms\Components\Select::make('provider')
+                            ->options(collect(ShipmentProvider::cases())->mapWithKeys(fn (ShipmentProvider $provider): array => [$provider->value => $provider->label()]))
+                            ->default(ShipmentProvider::Manual->value),
+                        Forms\Components\TextInput::make('external_reference')->maxLength(255),
+                        Forms\Components\TextInput::make('driver_name')->maxLength(255),
+                        Forms\Components\TextInput::make('driver_contact')->maxLength(255),
+                        Forms\Components\TextInput::make('vehicle_type')->maxLength(100),
+                        Forms\Components\TextInput::make('tracking_url')->url(),
+                    ])
+                    ->fillForm(fn (Order $record): array => [
+                        'provider' => $record->latestShipment?->provider?->value ?? ShipmentProvider::Manual->value,
+                        'external_reference' => $record->latestShipment?->external_reference,
+                        'driver_name' => $record->latestShipment?->driver_name,
+                        'driver_contact' => $record->latestShipment?->driver_contact,
+                        'vehicle_type' => $record->latestShipment?->vehicle_type,
+                        'tracking_url' => $record->latestShipment?->tracking_url,
+                    ])
+                    ->action(function (Order $record, array $data): void {
+                        app(LogisticsManager::class)->upsertShipment($record->loadMissing('store', 'addresses'), $data);
+
+                        Notification::make()
+                            ->title('Shipment saved')
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('updateDeliveryStatus')
+                    ->label('Delivery Status')
+                    ->icon('heroicon-o-map')
+                    ->color('info')
+                    ->visible(fn (Order $record): bool => $record->latestShipment !== null)
+                    ->form([
+                        Forms\Components\Select::make('delivery_status')
+                            ->required()
+                            ->options(collect(DeliveryStatus::cases())->mapWithKeys(fn (DeliveryStatus $status): array => [$status->value => $status->label()])),
+                        Forms\Components\TextInput::make('driver_name')->maxLength(255),
+                        Forms\Components\TextInput::make('driver_contact')->maxLength(255),
+                        Forms\Components\TextInput::make('vehicle_type')->maxLength(100),
+                        Forms\Components\TextInput::make('tracking_url')->url(),
+                    ])
+                    ->fillForm(fn (Order $record): array => [
+                        'delivery_status' => $record->latestShipment?->delivery_status?->value,
+                        'driver_name' => $record->latestShipment?->driver_name,
+                        'driver_contact' => $record->latestShipment?->driver_contact,
+                        'vehicle_type' => $record->latestShipment?->vehicle_type,
+                        'tracking_url' => $record->latestShipment?->tracking_url,
+                    ])
+                    ->action(function (Order $record, array $data): void {
+                        $shipment = $record->latestShipment;
+
+                        if (! $shipment) {
+                            return;
+                        }
+
+                        app(LogisticsManager::class)->updateStatus($shipment, DeliveryStatus::from($data['delivery_status']), $data);
+
+                        Notification::make()
+                            ->title('Shipment updated')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('confirm')
                     ->label('Confirm')
                     ->icon('heroicon-o-check')

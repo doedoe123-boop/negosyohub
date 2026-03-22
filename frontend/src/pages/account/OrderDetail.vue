@@ -120,6 +120,34 @@ const paymentStatusHelper = {
   refunded: "Refund issued",
 };
 
+const deliverySteps = [
+  { key: "pending", label: "Preparing" },
+  { key: "awaiting_booking", label: "Awaiting Booking" },
+  { key: "driver_assigned", label: "Ready for Pickup" },
+  { key: "picked_up", label: "Picked Up" },
+  { key: "in_transit", label: "Out for Delivery" },
+  { key: "delivered", label: "Delivered" },
+];
+
+const deliveryStatusOrder = deliverySteps.map((step) => step.key);
+
+const currentDeliveryStepIndex = computed(() => {
+  const status = order.value?.latest_shipment?.delivery_status;
+  return status ? deliveryStatusOrder.indexOf(status) : -1;
+});
+
+function deliveryStepState(index) {
+  if (index < currentDeliveryStepIndex.value) {
+    return "done";
+  }
+
+  if (index === currentDeliveryStepIndex.value) {
+    return "active";
+  }
+
+  return "upcoming";
+}
+
 function formatStatusLabel(status) {
   if (status === "ready") return "shipped";
   return status;
@@ -319,6 +347,91 @@ async function reorder() {
         </div>
       </div>
 
+      <div
+        v-if="order.latest_shipment"
+        class="theme-card mb-4 rounded-2xl p-5"
+      >
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="theme-title text-sm font-bold">Delivery Progress</h2>
+            <p class="theme-copy mt-1 text-xs">
+              {{ order.latest_shipment.customer_delivery_label }}
+            </p>
+          </div>
+          <a
+            v-if="order.latest_shipment.tracking_url"
+            :href="order.latest_shipment.tracking_url"
+            target="_blank"
+            rel="noreferrer"
+            class="text-sm font-semibold text-brand-600 hover:underline"
+          >
+            Track shipment
+          </a>
+        </div>
+        <ol class="flex flex-wrap items-start gap-0">
+          <li
+            v-for="(step, i) in deliverySteps"
+            :key="step.key"
+            class="flex flex-1 flex-col items-center"
+          >
+            <div class="flex w-full items-center">
+              <div
+                v-if="i > 0"
+                class="h-0.5 flex-1"
+                :class="
+                  deliveryStepState(i) === 'done' || deliveryStepState(i) === 'active'
+                    ? 'bg-brand-500'
+                    : 'theme-skeleton'
+                "
+              />
+              <div
+                class="flex size-7 shrink-0 items-center justify-center rounded-full border-2"
+                :class="{
+                  'border-brand-500 bg-brand-500': deliveryStepState(i) === 'done',
+                  'border-brand-500 bg-[var(--color-surface)] ring-4 ring-brand-100':
+                    deliveryStepState(i) === 'active',
+                  'theme-divider bg-[var(--color-surface)]': deliveryStepState(i) === 'upcoming',
+                }"
+              >
+                <CheckCircleIcon
+                  v-if="deliveryStepState(i) === 'done'"
+                  class="size-4 text-white"
+                />
+                <div
+                  v-else-if="deliveryStepState(i) === 'active'"
+                  class="size-2.5 rounded-full bg-brand-500"
+                />
+              </div>
+              <div
+                v-if="i < deliverySteps.length - 1"
+                class="h-0.5 flex-1"
+                :class="deliveryStepState(i) === 'done' ? 'bg-brand-500' : 'theme-skeleton'"
+              />
+            </div>
+            <p class="theme-copy mt-2 text-center text-[11px] font-medium">
+              {{ step.label }}
+            </p>
+          </li>
+        </ol>
+        <div class="theme-divider-soft mt-4 grid gap-3 border-t pt-4 sm:grid-cols-2">
+          <div v-if="order.latest_shipment.driver_name">
+            <p class="theme-copy text-[11px] font-semibold uppercase tracking-wide">Driver</p>
+            <p class="theme-title text-sm font-semibold">
+              {{ order.latest_shipment.driver_name }}
+            </p>
+            <p v-if="order.latest_shipment.driver_contact" class="theme-copy text-xs">
+              {{ order.latest_shipment.driver_contact }}
+            </p>
+          </div>
+          <div v-if="order.latest_shipment.vehicle_type">
+            <p class="theme-copy text-[11px] font-semibold uppercase tracking-wide">Vehicle</p>
+            <p class="theme-title text-sm font-semibold">
+              {{ order.latest_shipment.vehicle_type }}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Line items -->
       <div class="theme-card mb-4 rounded-2xl shadow-sm">
         <div
@@ -410,6 +523,17 @@ async function reorder() {
           >
             <span>Tax</span>
             <span>{{ order.tax_total.formatted }}</span>
+          </div>
+          <div
+            v-if="
+              order.discount_total &&
+              order.discount_total.value &&
+              order.discount_total.value > 0
+            "
+            class="flex justify-between text-emerald-500"
+          >
+            <span>{{ order.meta?.applied_coupon?.code ?? "Discount" }}</span>
+            <span>-{{ order.discount_total.formatted }}</span>
           </div>
           <div
             class="theme-divider-soft theme-title flex justify-between border-t pt-2 font-bold"

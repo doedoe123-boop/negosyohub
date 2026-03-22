@@ -2,12 +2,14 @@
 import { ref } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useAppI18n } from "@/i18n";
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+const { t } = useAppI18n();
 
 const form = ref({ email: "", password: "" });
 const error = ref(null);
@@ -22,7 +24,7 @@ async function submit() {
     const redirect = route.query.redirect ?? "/";
     router.push(redirect);
   } catch (e) {
-    error.value = e.response?.data?.message ?? "Invalid email or password.";
+    error.value = e.response?.data?.message ?? t("auth.login.invalid");
   } finally {
     loading.value = false;
   }
@@ -33,9 +35,9 @@ async function submit() {
   <div>
     <!-- Heading -->
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-slate-900">Welcome back</h1>
+      <h1 class="text-2xl font-bold text-slate-900">{{ t("auth.login.title") }}</h1>
       <p class="mt-1 text-sm text-slate-500">
-        Sign in to your customer account
+        {{ t("auth.login.subtitle") }}
       </p>
     </div>
 
@@ -54,7 +56,7 @@ async function submit() {
           for="login-email"
           class="mb-1.5 block text-sm font-medium text-slate-700"
         >
-          Email address
+          {{ t("auth.fields.email") }}
         </label>
         <input
           id="login-email"
@@ -62,7 +64,7 @@ async function submit() {
           type="email"
           autocomplete="email"
           required
-          placeholder="you@example.com"
+          :placeholder="t('auth.fields.emailPlaceholder')"
           class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
         />
       </div>
@@ -74,13 +76,13 @@ async function submit() {
             for="login-password"
             class="text-sm font-medium text-slate-700"
           >
-            Password
+            {{ t("auth.fields.password") }}
           </label>
           <RouterLink
             to="/forgot-password"
             class="text-xs font-medium text-brand-600 hover:underline"
           >
-            Forgot password?
+            {{ t("auth.login.forgotPassword") }}
           </RouterLink>
         </div>
         <div class="relative">
@@ -90,7 +92,7 @@ async function submit() {
             :type="showPassword ? 'text' : 'password'"
             autocomplete="current-password"
             required
-            placeholder="••••••••"
+            :placeholder="t('auth.fields.passwordPlaceholder')"
             class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-11 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
           <button
@@ -161,20 +163,20 @@ async function submit() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Signing in…
+          {{ t("auth.login.submitting") }}
         </span>
-        <span v-else>Sign In</span>
+        <span v-else>{{ t("auth.login.submit") }}</span>
       </button>
     </form>
 
     <!-- Register link -->
     <p class="mt-6 text-center text-sm text-slate-500">
-      Don't have an account?
+      {{ t("auth.login.noAccount") }}
       <RouterLink
         to="/register"
         class="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
       >
-        Create one
+        {{ t("nav.register") }}
       </RouterLink>
     </p>
 
@@ -187,7 +189,7 @@ async function submit() {
           target="_blank"
           class="font-medium text-slate-500 underline transition-colors hover:text-brand-600"
         >
-          Sign in at the Seller Portal
+          {{ t("auth.login.sellerPortal") }}
         </a>
       </p>
     </div>

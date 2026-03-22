@@ -8,6 +8,7 @@ use App\OrderStatus;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Lunar\Base\Casts\Price;
@@ -88,6 +89,16 @@ class Order extends LunarOrder
     public function payoutLine(): HasOne
     {
         return $this->hasOne(PayoutLine::class);
+    }
+
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    public function latestShipment(): HasOne
+    {
+        return $this->hasOne(Shipment::class)->latestOfMany();
     }
 
     // ── Scopes ─────────────────────────────────────────────────────────

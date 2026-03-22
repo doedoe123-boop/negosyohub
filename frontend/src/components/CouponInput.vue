@@ -1,14 +1,19 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/vue/20/solid";
-import { couponsApi } from "@/api/coupons";
+import { useCartStore } from "@/stores/cart";
 
 const emit = defineEmits(["applied", "removed"]);
+const cart = useCartStore();
 
 const code = ref("");
 const loading = ref(false);
 const applied = ref(null); // holds the validated coupon object
 const errorMsg = ref("");
+
+watchEffect(() => {
+  applied.value = cart.appliedCoupon;
+});
 
 async function applyCoupon() {
   if (!code.value.trim()) return;
@@ -17,9 +22,9 @@ async function applyCoupon() {
   errorMsg.value = "";
 
   try {
-    const { data } = await couponsApi.validate(code.value.trim());
-    applied.value = data;
-    emit("applied", data);
+    await cart.applyCoupon(code.value.trim());
+    applied.value = cart.appliedCoupon;
+    emit("applied", cart.appliedCoupon);
   } catch (e) {
     errorMsg.value =
       e.response?.data?.message ?? "Invalid or expired coupon code.";
@@ -30,10 +35,12 @@ async function applyCoupon() {
 }
 
 function removeCoupon() {
-  applied.value = null;
-  code.value = "";
-  errorMsg.value = "";
-  emit("removed");
+  cart.removeCoupon().finally(() => {
+    applied.value = null;
+    code.value = "";
+    errorMsg.value = "";
+    emit("removed");
+  });
 }
 </script>
 

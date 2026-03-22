@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\FaqController;
 use App\Http\Controllers\Api\V1\FeaturedListingController;
 use App\Http\Controllers\Api\V1\GlobalSearchController;
 use App\Http\Controllers\Api\V1\HomepageStatsController;
+use App\Http\Controllers\Api\V1\LocalizationController;
 use App\Http\Controllers\Api\V1\MoverController;
 use App\Http\Controllers\Api\V1\MovingBookingController;
 use App\Http\Controllers\Api\V1\MovingReviewController;
@@ -58,6 +59,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     // ── Public browse (no auth required) ─────────────────────────────────
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/search', GlobalSearchController::class)->name('search');
+        Route::get('/localization', LocalizationController::class)->name('localization');
         Route::get('/homepage-stats', HomepageStatsController::class)->name('homepage.stats');
         Route::get('/seo/global', [SeoController::class, 'global'])->name('seo.global');
         Route::get('/stores', [StoreController::class, 'index'])->name('stores.index');
@@ -149,6 +151,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/cart/shipping-options', [CartController::class, 'shippingOptions'])->name('cart.shipping-options');
         Route::post('/cart/shipping-option', [CartController::class, 'setShippingOption'])->name('cart.shipping-option');
         Route::post('/cart/address', [CartController::class, 'setAddress'])->name('cart.address');
+        Route::post('/cart/coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
+        Route::delete('/cart/coupon', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 
         // Coupon validation
         Route::post('/coupons/validate', [CouponController::class, 'validate'])->name('coupons.validate');
@@ -215,6 +219,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::patch('/orders/{order}/ready', [OrderController::class, 'ship'])->name('orders.ready');
             Route::patch('/orders/{order}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
             Route::patch('/orders/{order}/mark-paid', [OrderController::class, 'markPaid'])->name('orders.mark-paid');
+            Route::post('/orders/{order}/shipment', [OrderController::class, 'upsertShipment'])->name('orders.shipment.upsert');
+            Route::patch('/orders/{order}/shipments/{shipment}', [OrderController::class, 'updateShipmentStatus'])->name('orders.shipment.status');
         });
     });
 

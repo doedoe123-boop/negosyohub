@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -53,6 +54,7 @@ class Development extends Model implements HasMedia
     use HasFactory;
 
     use InteractsWithMedia;
+    use Searchable;
     use SoftDeletes;
 
     /** @var list<string> */
@@ -190,5 +192,23 @@ class Development extends Model implements HasMedia
                 ->whereIn('status', ['active', 'draft'])
                 ->count(),
         ]);
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->status === 'active' && $this->published_at !== null;
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'developer_name' => $this->developer_name,
+            'city' => $this->city,
+            'province' => $this->province,
+            'development_type' => $this->development_type,
+        ];
     }
 }

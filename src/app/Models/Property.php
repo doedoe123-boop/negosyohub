@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -66,6 +67,7 @@ class Property extends Model implements HasMedia
     use HasFactory;
 
     use InteractsWithMedia;
+    use Searchable;
     use SoftDeletes;
 
     protected $appends = [
@@ -322,5 +324,24 @@ class Property extends Model implements HasMedia
             'status' => PropertyStatus::Active,
             'published_at' => $this->published_at ?? now(),
         ]);
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->status === PropertyStatus::Active && $this->published_at !== null;
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'city' => $this->city,
+            'province' => $this->province,
+            'address_line' => $this->address_line,
+            'listing_type' => $this->listing_type?->value,
+            'property_type' => $this->property_type?->value,
+        ];
     }
 }

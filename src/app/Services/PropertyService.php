@@ -35,7 +35,17 @@ class PropertyService
             ->whereNotNull('published_at')
             ->latest('published_at');
 
-        if (! empty($params['search'])) {
+        if (! empty($params['search']) && $this->usesScout()) {
+            $ids = Property::search($params['search'])
+                ->take(250)
+                ->get()
+                ->pluck('id')
+                ->all();
+
+            $query->whereIn('id', empty($ids) ? [0] : $ids);
+        }
+
+        if (! empty($params['search']) && ! $this->usesScout()) {
             $search = $params['search'];
             $like = DB::connection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
             $query->where(function ($q) use ($search, $like) {
@@ -128,7 +138,17 @@ class PropertyService
             ->whereNotNull('published_at')
             ->latest('published_at');
 
-        if (! empty($params['search'])) {
+        if (! empty($params['search']) && $this->usesScout()) {
+            $ids = Property::search($params['search'])
+                ->take(250)
+                ->get()
+                ->pluck('id')
+                ->all();
+
+            $query->whereIn('id', empty($ids) ? [0] : $ids);
+        }
+
+        if (! empty($params['search']) && ! $this->usesScout()) {
             $search = $params['search'];
             $like = DB::connection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
             $query->where(function ($q) use ($search, $like) {
@@ -234,5 +254,10 @@ class PropertyService
             ->orderBy('event_date')
             ->orderBy('start_time')
             ->get();
+    }
+
+    private function usesScout(): bool
+    {
+        return config('scout.driver') !== 'null' && method_exists(Property::class, 'search');
     }
 }

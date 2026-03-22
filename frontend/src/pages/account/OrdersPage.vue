@@ -2,10 +2,12 @@
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { ordersApi } from "@/api/orders";
+import { useAppI18n } from "@/i18n";
 
 const orders = ref([]);
 const loading = ref(true);
 const error = ref(false);
+const { t } = useAppI18n();
 
 onMounted(async () => {
   try {
@@ -39,12 +41,23 @@ const paymentStatusLabels = {
   pending: "Unpaid",
   paid: "Paid",
 };
+
+const deliveryStatusLabels = {
+  pending: "Preparing",
+  awaiting_booking: "Awaiting Booking",
+  driver_assigned: "Ready for Pickup",
+  picked_up: "Picked Up",
+  in_transit: "Out for Delivery",
+  delivered: "Delivered",
+  failed: "Delivery Failed",
+  cancelled: "Cancelled",
+};
 </script>
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-0">
     <h1 class="theme-title mb-6 text-2xl font-extrabold tracking-tight">
-      My Orders
+      {{ t("orders.myOrders") }}
     </h1>
 
     <div v-if="loading" class="space-y-3">
@@ -62,7 +75,7 @@ const paymentStatusLabels = {
       v-else-if="orders.length === 0"
       class="theme-empty-state rounded-2xl py-12 text-center"
     >
-      <p class="theme-copy font-medium">No orders yet.</p>
+      <p class="theme-copy font-medium">{{ t("orders.noOrders") }}</p>
       <RouterLink
         to="/stores"
         class="mt-3 inline-block text-sm font-medium text-brand-600 hover:underline"
@@ -102,6 +115,12 @@ const paymentStatusLabels = {
               {{ order.status }}
             </span>
             <span
+              v-if="order.latest_shipment?.delivery_status"
+              class="hidden rounded-full px-2.5 py-0.5 text-xs font-medium sm:inline-block theme-badge-neutral"
+            >
+              {{ deliveryStatusLabels[order.latest_shipment.delivery_status] ?? order.latest_shipment.delivery_status }}
+            </span>
+            <span
               v-if="order.payment_status"
               class="hidden rounded-full px-2.5 py-0.5 text-xs font-medium sm:inline-block"
               :class="
@@ -121,7 +140,7 @@ const paymentStatusLabels = {
               :to="`/account/orders/${order.id}`"
               class="btn-secondary rounded-lg px-3 py-1.5 text-xs font-medium text-brand-600 transition-colors"
             >
-              View →
+              {{ t("orders.view") }} →
             </RouterLink>
           </div>
         </div>

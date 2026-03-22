@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Lunar\Models\Collection;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -65,6 +66,7 @@ class Store extends Model
     use HasFactory;
 
     use LogsActivity;
+    use Searchable;
     use SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -467,6 +469,23 @@ class Store extends Model
     public function sectorLabel(): string
     {
         return $this->sectorModel()?->name ?? $this->template()?->label() ?? 'Business';
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->isApproved();
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'description' => strip_tags((string) $this->description),
+            'sector' => $this->sector,
+            'city' => $this->address['city'] ?? null,
+        ];
     }
 
     /**

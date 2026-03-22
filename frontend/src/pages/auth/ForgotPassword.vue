@@ -2,8 +2,10 @@
 import { ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useAppI18n } from "@/i18n";
 
 const auth = useAuthStore();
+const { t } = useAppI18n();
 
 const email = ref("");
 const loading = ref(false);
@@ -21,7 +23,7 @@ async function submit() {
     error.value =
       err?.response?.data?.message ??
       err?.response?.data?.errors?.email?.[0] ??
-      "Something went wrong. Please try again.";
+      t("auth.forgotPassword.error");
   } finally {
     loading.value = false;
   }
@@ -33,10 +35,10 @@ async function submit() {
     <!-- Header -->
     <div class="mb-8 text-center">
       <h1 class="text-2xl font-bold tracking-tight text-slate-800">
-        Forgot your password?
+        {{ t("auth.forgotPassword.title") }}
       </h1>
       <p class="mt-1 text-sm text-slate-500">
-        Enter your email and we'll send you a reset link.
+        {{ t("auth.forgotPassword.subtitle") }}
       </p>
     </div>
 
@@ -45,10 +47,9 @@ async function submit() {
       <div
         class="rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700"
       >
-        <p class="font-medium">Check your inbox</p>
+        <p class="font-medium">{{ t("auth.forgotPassword.checkInbox") }}</p>
         <p class="mt-1 text-green-600">
-          If <strong>{{ email }}</strong> is registered, we've sent a password
-          reset link. Be sure to check your spam folder too.
+          {{ t("auth.forgotPassword.success", { email }) }}
         </p>
       </div>
 
@@ -57,7 +58,7 @@ async function submit() {
           to="/login"
           class="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
-          Back to login
+          {{ t("auth.forgotPassword.backToLogin") }}
         </RouterLink>
       </p>
     </template>
@@ -78,7 +79,7 @@ async function submit() {
           for="fp-email"
           class="text-xs font-semibold uppercase tracking-wide text-slate-500"
         >
-          Email address
+          {{ t("auth.fields.email") }}
         </label>
         <input
           id="fp-email"
@@ -86,7 +87,7 @@ async function submit() {
           type="email"
           autocomplete="email"
           required
-          placeholder="you@example.com"
+          :placeholder="t('auth.fields.emailPlaceholder')"
           class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
         />
       </div>
@@ -113,20 +114,20 @@ async function submit() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Sending…
+          {{ t("auth.forgotPassword.submitting") }}
         </span>
-        <span v-else>Send Reset Link</span>
+        <span v-else>{{ t("auth.forgotPassword.submit") }}</span>
       </button>
 
       <!-- Back to login -->
       <p class="mt-6 text-center text-sm text-slate-500">
-        Remember your password?
+        {{ t("auth.forgotPassword.remembered") }}
         <RouterLink
           to="/login"
           class="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
-          Sign in
-        </RouterLink>
+          {{ t("auth.login.submit") }}
+      </RouterLink>
       </p>
     </form>
   </div>

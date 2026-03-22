@@ -7,8 +7,12 @@ use App\Http\Requests\Api\V1\AddCartLineRequest;
 use App\Http\Requests\Api\V1\SetCartAddressRequest;
 use App\Http\Requests\Api\V1\SetShippingOptionRequest;
 use App\Http\Requests\Api\V1\UpdateCartLineRequest;
+use App\Services\CheckoutDiscountService;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Lunar\DataTypes\ShippingOption;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Cart;
@@ -24,6 +28,11 @@ use Lunar\Models\ProductVariant;
  */
 class CartController extends Controller
 {
+    public function __construct(
+        private OrderService $orderService,
+        private CheckoutDiscountService $checkoutDiscountService
+    ) {}
+
     /**
      * Purchasable-type slug → Eloquent model class.
      *
@@ -113,6 +122,39 @@ class CartController extends Controller
         return response()->json(null);
     }
 
+    public function applyCoupon(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:100'],
+        ]);
+
+        $cart = CartSession::current(calculate: true);
+
+        if (! $cart || $cart->lines->isEmpty()) {
+            throw ValidationException::withMessages([
+                'code' => ['Your cart is empty.'],
+            ]);
+        }
+
+        $store = $this->orderService->resolveStoreFromCart($cart);
+        $cart = $this->checkoutDiscountService->applyToCart($cart, $store, $validated['code']);
+
+        return response()->json($this->cartResource($cart->calculate()));
+    }
+
+    public function removeCoupon(): JsonResponse
+    {
+        $cart = CartSession::current(calculate: true);
+
+        if (! $cart) {
+            return response()->json(null);
+        }
+
+        $cart = $this->checkoutDiscountService->removeFromCart($cart);
+
+        return response()->json($this->cartResource($cart->calculate()));
+    }
+
     /**
      * GET /api/v1/cart/shipping-options
      * Return available shipping options for the current cart.
@@ -185,6 +227,19 @@ class CartController extends Controller
      */
     private function cartResource(Cart $cart): array
     {
+        $store = null;
+        $discountSummary = [
+            'discount_amount' => 0,
+            'total_after_discount' => $cart->total?->value ?? 0,
+            'applied_coupon' => null,
+        ];
+
+        try {
+            $store = $this->orderService->resolveStoreFromCart($cart);
+            $discountSummary = $this->checkoutDiscountService->summarizeCart($cart, $store);
+        } catch (\Throwable) {
+        }
+
         // Eager-load product media on each purchasable without re-loading
         // the lines collection (which would wipe calculated price values).
         $cart->lines->each(fn ($line) => $line->purchasable?->load('product.media'));
@@ -212,7 +267,19 @@ class CartController extends Controller
             'sub_total' => ['formatted' => '₱'.number_format($cart->subTotal?->decimal ?? 0, 2)],
             'shipping_total' => ['formatted' => '₱'.number_format($cart->shippingTotal?->decimal ?? 0, 2)],
             'tax_total' => ['formatted' => '₱'.number_format($cart->taxTotal?->decimal ?? 0, 2)],
-            'total' => ['formatted' => '₱'.number_format($cart->total?->decimal ?? 0, 2)],
+            'discount_total' => [
+                'value' => $discountSummary['discount_amount'],
+                'formatted' => '₱'.number_format($discountSummary['discount_amount'] / 100, 2),
+            ],
+            'total' => [
+                'value' => $discountSummary['total_after_discount'],
+                'formatted' => '₱'.number_format(($discountSummary['total_after_discount'] ?? 0) / 100, 2),
+            ],
+            'original_total' => [
+                'value' => $cart->total?->value ?? 0,
+                'formatted' => '₱'.number_format($cart->total?->decimal ?? 0, 2),
+            ],
+            'applied_coupon' => $discountSummary['applied_coupon'],
         ];
     }
 }

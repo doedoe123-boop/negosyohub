@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DeliveryStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ManageShipmentRequest;
 use App\Http\Requests\PlaceOrderRequest;
+use App\Http\Requests\UpdateShipmentStatusRequest;
 use App\Models\Order;
+use App\Models\Shipment;
 use App\Models\Store;
+use App\Services\LogisticsManager;
 use App\Services\OrderService;
 use App\Services\PaymentManager;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +31,8 @@ class OrderController extends Controller
 {
     public function __construct(
         private OrderService $orderService,
-        private PaymentManager $paymentManager
+        private PaymentManager $paymentManager,
+        private LogisticsManager $logisticsManager
     ) {}
 
     /**
@@ -38,6 +44,9 @@ class OrderController extends Controller
 
         $paginator->getCollection()->transform(function (Order $order) {
             $data = $order->toArray();
+            $data['latest_shipment'] = $order->latestShipment
+                ? $this->logisticsManager->shipmentPayload($order->latestShipment)
+                : null;
 
             return $this->formatOrderPrices($order, $data);
         });
@@ -52,7 +61,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['store', 'lines', 'addresses']);
+        $order->load(['store', 'lines', 'addresses', 'shipments', 'latestShipment']);
 
         // Eager-load product media only for non-shipping lines
         // (shipping lines use ShippingOption which is not an Eloquent model).
@@ -65,6 +74,13 @@ class OrderController extends Controller
 
         $orderData = $order->toArray();
         $orderData = $this->formatOrderPrices($order, $orderData);
+        $orderData['shipments'] = $order->shipments
+            ->map(fn (Shipment $shipment): array => $this->logisticsManager->shipmentPayload($shipment))
+            ->values()
+            ->all();
+        $orderData['latest_shipment'] = $order->latestShipment
+            ? $this->logisticsManager->shipmentPayload($order->latestShipment)
+            : null;
         $orderData['lines'] = $order->lines->map(function ($line) {
             $data = $line->toArray();
             $data['thumbnail'] = $line->relationLoaded('purchasable')
@@ -225,6 +241,35 @@ class OrderController extends Controller
         ]);
     }
 
+    public function upsertShipment(ManageShipmentRequest $request, Order $order): JsonResponse
+    {
+        $this->authorize('update', $order);
+
+        $shipment = $this->logisticsManager->upsertShipment($order->loadMissing('store', 'addresses'), $request->validated());
+
+        return response()->json([
+            'message' => 'Shipment saved.',
+            'shipment' => $this->logisticsManager->shipmentPayload($shipment),
+        ]);
+    }
+
+    public function updateShipmentStatus(UpdateShipmentStatusRequest $request, Order $order, Shipment $shipment): JsonResponse
+    {
+        $this->authorize('update', $order);
+        abort_unless($shipment->order_id === $order->id, 404);
+
+        $updatedShipment = $this->logisticsManager->updateStatus(
+            $shipment,
+            DeliveryStatus::from($request->validated('delivery_status')),
+            $request->validated()
+        );
+
+        return response()->json([
+            'message' => 'Shipment status updated.',
+            'shipment' => $this->logisticsManager->shipmentPayload($updatedShipment),
+        ]);
+    }
+
     /**
      * Mark a ready order as delivered (store owner / admin only).
      */
@@ -271,6 +316,9 @@ class OrderController extends Controller
         $data['shipping_total'] = self::priceToArray($order->shipping_total);
         $data['tax_total'] = self::priceToArray($order->tax_total);
         $data['total'] = self::priceToArray($order->total);
+        $data['payment_method_label'] = $order->payment_method?->label();
+        $data['payment_status_label'] = $order->payment_status?->label();
+        $data['payment_status_helper'] = $order->payment_status?->helperText();
 
         return $data;
     }

@@ -10,10 +10,12 @@ import { cartApi } from "@/api/cart";
 import { paypalApi } from "@/api/paypal";
 import { addressesApi } from "@/api/addresses";
 import CouponInput from "@/components/CouponInput.vue";
+import { useAppI18n } from "@/i18n";
 
 const router = useRouter();
 const cart = useCartStore();
 const auth = useAuthStore();
+const { t } = useAppI18n();
 
 // Guard: redirect to cart if empty
 const cartReady = ref(false);
@@ -52,10 +54,12 @@ const paymentOptions = [
 
 function onCouponApplied(coupon) {
   appliedCoupon.value = coupon;
+  cart.fetch();
 }
 
 function onCouponRemoved() {
   appliedCoupon.value = null;
+  cart.fetch();
 }
 
 function goBack() {
@@ -176,7 +180,7 @@ async function placeOrder() {
   <div v-if="cartReady">
     <nav aria-label="Checkout steps" class="mb-8 flex items-center gap-0">
       <template
-        v-for="(label, idx) in ['Address', 'Shipping', 'Payment']"
+        v-for="(label, idx) in [t('checkout.address'), t('checkout.shipping'), t('checkout.payment')]"
         :key="label"
       >
         <div class="flex items-center gap-2">
@@ -517,7 +521,7 @@ async function placeOrder() {
       <aside
         class="theme-card sticky top-6 h-fit w-full rounded-2xl p-6 lg:col-span-4 xl:col-span-4"
       >
-        <h2 class="theme-title mb-4 text-lg font-bold">Order Summary</h2>
+        <h2 class="theme-title mb-4 text-lg font-bold">{{ t("checkout.orderSummary") }}</h2>
         <ul class="divide-y divide-[var(--color-border)] text-sm">
           <li
             v-for="line in cart.cart?.lines"
@@ -536,10 +540,31 @@ async function placeOrder() {
         <div class="theme-divider mt-4 border-t pt-4">
           <CouponInput @applied="onCouponApplied" @removed="onCouponRemoved" />
         </div>
+        <div class="theme-copy mt-4 space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Subtotal</span>
+            <span class="theme-title font-medium">{{ cart.originalTotal }}</span>
+          </div>
+          <div
+            v-if="cart.appliedCoupon"
+            class="flex justify-between text-emerald-500"
+          >
+            <span>{{ cart.appliedCoupon.code }}</span>
+            <span>-{{ cart.discountTotal }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Shipping</span>
+            <span>{{ cart.cart?.shipping_total?.formatted ?? "Calculated after address" }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Tax</span>
+            <span>{{ cart.cart?.tax_total?.formatted ?? "₱0.00" }}</span>
+          </div>
+        </div>
         <div
           class="theme-divider mt-6 flex items-center justify-between border-t pt-5"
         >
-          <span class="theme-title text-base font-semibold">Total</span>
+          <span class="theme-title text-base font-semibold">{{ t("checkout.total") }}</span>
           <span class="theme-title text-2xl font-black tracking-tight">{{
             cart.total
           }}</span>
@@ -565,7 +590,7 @@ async function placeOrder() {
           >
             <ExclamationTriangleIcon class="size-5 text-yellow-300" />
           </div>
-          <h3 class="theme-title text-lg font-bold">Leave Checkout?</h3>
+          <h3 class="theme-title text-lg font-bold">{{ t("checkout.leaveCheckout") }}</h3>
         </div>
         <p class="theme-copy mb-6 text-sm">
           Your items will stay in your cart, but any address and shipping
@@ -576,7 +601,7 @@ async function placeOrder() {
             class="btn-secondary rounded-xl px-4 py-2 text-sm font-medium"
             @click="showLeaveModal = false"
           >
-            Continue Checkout
+            {{ t("checkout.continueCheckout") }}
           </button>
           <button
             class="rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-brand-700"

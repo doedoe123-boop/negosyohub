@@ -3,6 +3,7 @@
 use App\Http\HttpErrorMessages;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\ResolveLocale;
 use App\Http\Middleware\ResolveStoreFromSubdomain;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        $middleware->web(prepend: [ResolveLocale::class]);
+        $middleware->api(prepend: [ResolveLocale::class]);
 
         // HTTPS enforcement (only active in production)
         $middleware->prepend(ForceHttps::class);

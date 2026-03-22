@@ -2,7 +2,7 @@
 
 > Multi-Sector Marketplace SaaS — Laravel 12 · Lunar PHP 1.3 · Filament v3 · Vue 3 · PostgreSQL
 
-Last updated: **March 9, 2026**
+Last updated: **March 22, 2026**
 
 ---
 
@@ -293,18 +293,18 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 
 ---
 
-## Phase 6 — Operations & Scale (Future)
+## Phase 6 — Operations & Scale (In Progress)
 
 | #   | Feature                                       | Status | Notes                                                            |
 | --- | --------------------------------------------- | ------ | ---------------------------------------------------------------- |
 | 1   | Stripe Connect automatic payouts              | ❌     | PayPal integrated; Stripe not yet added                          |
 | 2   | Delivery/rider assignment system              | ❌     |                                                                  |
-| 3   | Promo codes & marketplace-level discounts     | 🔶     | Coupon model + admin resource exist; not yet applied at checkout |
-| 4   | Analytics dashboards (store owners)           | ✅     | Financial widgets + review dashboards on store panel             |
+| 3   | Promo codes & marketplace-level discounts     | 🔶     | Coupons validate in API + checkout UI, but discounts are not yet applied to cart/order totals |
+| 4   | Analytics dashboards (store owners)           | ✅     | Financial widgets in Lunar + property analytics/review dashboards in sector panels |
 | 5   | Multi-language support                        | ❌     | English only                                                     |
 | 6   | Mobile app (API-first)                        | ❌     | API exists; no native app                                        |
-| 7   | Webhook system for integrations               | ❌     |                                                                  |
-| 8   | Advanced search (Laravel Scout + Meilisearch) | ❌     | Scout installed but not configured with Meilisearch              |
+| 7   | Webhook system for integrations               | 🔶     | PayMongo webhook flow implemented; no generalized integration/webhook framework yet |
+| 8   | Advanced search (Laravel Scout + Meilisearch) | ❌     | Scout/Lunar search config present, but Meilisearch is not configured or enabled |
 
 ---
 

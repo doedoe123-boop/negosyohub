@@ -25,7 +25,17 @@ class DevelopmentController extends Controller
             $query->where('development_type', $request->type);
         }
 
-        if ($request->filled('search')) {
+        if ($request->filled('search') && config('scout.driver') !== 'null' && method_exists(Development::class, 'search')) {
+            $ids = Development::search((string) $request->search)
+                ->take(250)
+                ->get()
+                ->pluck('id')
+                ->all();
+
+            $query->whereIn('id', empty($ids) ? [0] : $ids);
+        }
+
+        if ($request->filled('search') && (config('scout.driver') === 'null' || ! method_exists(Development::class, 'search'))) {
             $query->where(function ($q) use ($request) {
                 $term = '%'.strtolower($request->search).'%';
                 $q->whereRaw('LOWER(name) LIKE ?', [$term])

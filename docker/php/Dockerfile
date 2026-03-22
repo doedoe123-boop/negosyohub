@@ -31,6 +31,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pcntl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Increase PHP memory limit for CLI & FPM
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini
+
+# Increase upload limits for media library
+RUN echo "upload_max_filesize=20M\npost_max_size=25M\nmax_file_uploads=50" > /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

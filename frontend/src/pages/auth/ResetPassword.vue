@@ -2,10 +2,12 @@
 import { ref, computed } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useAppI18n } from "@/i18n";
 
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+const { t } = useAppI18n();
 
 const token = computed(() => route.query.token ?? "");
 const emailFromQuery = computed(() => route.query.email ?? "");
@@ -40,7 +42,7 @@ async function submit() {
     error.value =
       first ??
       err?.response?.data?.message ??
-      "Could not reset your password. The link may have expired.";
+      t("auth.resetPassword.error");
   } finally {
     loading.value = false;
   }
@@ -52,10 +54,10 @@ async function submit() {
     <!-- Header -->
     <div class="mb-8 text-center">
       <h1 class="text-2xl font-bold tracking-tight text-slate-800">
-        Reset your password
+        {{ t("auth.resetPassword.title") }}
       </h1>
       <p class="mt-1 text-sm text-slate-500">
-        Choose a strong new password for your account.
+        {{ t("auth.resetPassword.subtitle") }}
       </p>
     </div>
 
@@ -64,10 +66,9 @@ async function submit() {
       <div
         class="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
       >
-        <p class="font-medium">Invalid reset link</p>
+        <p class="font-medium">{{ t("auth.resetPassword.invalidTitle") }}</p>
         <p class="mt-1 text-red-600">
-          This link is missing required information. Please request a new
-          password reset.
+          {{ t("auth.resetPassword.invalidBody") }}
         </p>
       </div>
 
@@ -76,7 +77,7 @@ async function submit() {
           to="/forgot-password"
           class="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
-          Request a new link
+          {{ t("auth.resetPassword.requestNew") }}
         </RouterLink>
       </p>
     </template>
@@ -93,7 +94,7 @@ async function submit() {
           to="/forgot-password"
           class="ml-1 font-semibold underline hover:text-red-800"
         >
-          Request a new link
+          {{ t("auth.resetPassword.requestNew") }}
         </RouterLink>
       </div>
 
@@ -104,7 +105,7 @@ async function submit() {
             for="rp-password"
             class="text-xs font-semibold uppercase tracking-wide text-slate-500"
           >
-            New password
+            {{ t("auth.fields.newPassword") }}
           </label>
           <div class="relative">
             <input
@@ -113,7 +114,7 @@ async function submit() {
               :type="showPassword ? 'text' : 'password'"
               autocomplete="new-password"
               required
-              placeholder="Min. 8 chars, upper, lower & number"
+              :placeholder="t('auth.fields.newPasswordPlaceholder')"
               class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-11 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
             />
             <button
@@ -167,7 +168,7 @@ async function submit() {
             for="rp-confirm"
             class="text-xs font-semibold uppercase tracking-wide text-slate-500"
           >
-            Confirm new password
+            {{ t("auth.fields.confirmNewPassword") }}
           </label>
           <div class="relative">
             <input
@@ -176,7 +177,7 @@ async function submit() {
               :type="showConfirm ? 'text' : 'password'"
               autocomplete="new-password"
               required
-              placeholder="Repeat your new password"
+              :placeholder="t('auth.fields.confirmNewPasswordPlaceholder')"
               class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-11 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
             />
             <button
@@ -247,9 +248,9 @@ async function submit() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Resetting…
+          {{ t("auth.resetPassword.submitting") }}
         </span>
-        <span v-else>Reset Password</span>
+        <span v-else>{{ t("auth.resetPassword.submit") }}</span>
       </button>
     </form>
   </div>

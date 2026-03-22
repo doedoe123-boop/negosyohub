@@ -17,6 +17,7 @@ use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
@@ -34,6 +35,7 @@ use Lunar\Admin\Filament\Resources\TaxZoneResource as LunarTaxZoneResource;
 use Lunar\Admin\LunarPanelManager;
 use Lunar\Admin\Support\Facades\LunarPanel;
 use Lunar\Facades\ModelManifest;
+use Lunar\Models\Language;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -127,6 +129,20 @@ class AppServiceProvider extends ServiceProvider
 
         // Property inquiry observer: notifies agent on new inquiry, customer on status change
         PropertyInquiry::observe(PropertyInquiryObserver::class);
+
+        Language::saved(function (): void {
+            Cache::forget('localization.active-locales');
+            Cache::forget('localization.default-locale');
+            Cache::forget('localization.active-locales.catalog');
+            Cache::forget('localization.default-locale.catalog');
+        });
+
+        Language::deleted(function (): void {
+            Cache::forget('localization.active-locales');
+            Cache::forget('localization.default-locale');
+            Cache::forget('localization.active-locales.catalog');
+            Cache::forget('localization.default-locale.catalog');
+        });
     }
 
     /**

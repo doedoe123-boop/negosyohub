@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Development;
 use App\Models\Property;
 use App\Models\Sector;
 use App\Models\Store;
@@ -27,7 +28,7 @@ class GlobalSearchService
      * Perform a cross-sector search and return grouped results.
      *
      * @param  array{q?: string, sector?: string, per_section?: int}  $params
-     * @return array{query: string, stores: array, products: array, properties: array}
+     * @return array{query: string, stores: array, products: array, properties: array, developments: array}
      */
     public function search(array $params = []): array
     {
@@ -41,6 +42,7 @@ class GlobalSearchService
                 'stores' => [],
                 'products' => [],
                 'properties' => [],
+                'developments' => [],
             ];
         }
 
@@ -49,6 +51,7 @@ class GlobalSearchService
             'stores' => [],
             'products' => [],
             'properties' => [],
+            'developments' => [],
         ];
 
         // ── Stores ───────────────────────────────────────────────────
@@ -64,6 +67,7 @@ class GlobalSearchService
         // ── Properties (real estate / rental templates) ──────────────
         if (! $sector || $sector === 'all' || $this->sectorSearches($sector, 'properties')) {
             $result['properties'] = $this->searchProperties($query, $perSection);
+            $result['developments'] = $this->searchDevelopments($query, $perSection);
         }
 
         return $result;
@@ -76,6 +80,27 @@ class GlobalSearchService
      */
     private function searchStores(string $query, ?string $sector, int $limit): array
     {
+        if ($this->usesScout(Store::class)) {
+            return Store::search($query)
+                ->take($limit)
+                ->get()
+                ->filter(fn (Store $store): bool => $store->status === StoreStatus::Approved)
+                ->when($sector && $sector !== 'all', function ($stores) use ($sector) {
+                    return $stores->filter(fn (Store $store): bool => $store->sector === $sector);
+                })
+                ->map(fn (Store $store) => [
+                    'id' => $store->id,
+                    'name' => $store->name,
+                    'slug' => $store->slug,
+                    'logo_url' => $store->logo_url,
+                    'sector' => $store->sector,
+                    'city' => $store->address['city'] ?? null,
+                    'description' => $store->description ? Str::limit($store->description, 100) : null,
+                ])
+                ->values()
+                ->toArray();
+        }
+
         $builder = Store::query()
             ->where('status', StoreStatus::Approved);
 
@@ -154,6 +179,30 @@ class GlobalSearchService
      */
     private function searchProperties(string $query, int $limit): array
     {
+        if ($this->usesScout(Property::class)) {
+            return Property::search($query)
+                ->take($limit)
+                ->get()
+                ->filter(fn (Property $property): bool => $property->status === PropertyStatus::Active && $property->published_at !== null)
+                ->map(fn (Property $property) => [
+                    'id' => $property->id,
+                    'title' => $property->title,
+                    'slug' => $property->slug,
+                    'city' => $property->city,
+                    'province' => $property->province,
+                    'listing_type' => $property->listing_type,
+                    'property_type' => $property->property_type,
+                    'price' => $property->price ? (float) $property->price : null,
+                    'price_currency' => $property->price_currency ?? 'PHP',
+                    'price_period' => $property->price_period,
+                    'bedrooms' => $property->bedrooms,
+                    'floor_area' => $property->floor_area ? (float) $property->floor_area : null,
+                    'images' => $property->images ?? [],
+                ])
+                ->values()
+                ->toArray();
+        }
+
         $like = DB::connection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
 
         return Property::query()
@@ -187,6 +236,52 @@ class GlobalSearchService
     }
 
     /**
+     * @return list<array{id: int, name: string, slug: string, city: ?string, province: ?string, developer_name: ?string}>
+     */
+    private function searchDevelopments(string $query, int $limit): array
+    {
+        if ($this->usesScout(Development::class)) {
+            return Development::search($query)
+                ->take($limit)
+                ->get()
+                ->filter(fn (Development $development): bool => $development->status === 'active' && $development->published_at !== null)
+                ->map(fn (Development $development) => [
+                    'id' => $development->id,
+                    'name' => $development->name,
+                    'slug' => $development->slug,
+                    'city' => $development->city,
+                    'province' => $development->province,
+                    'developer_name' => $development->developer_name,
+                ])
+                ->values()
+                ->toArray();
+        }
+
+        $like = DB::connection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
+
+        return Development::query()
+            ->active()
+            ->whereNotNull('published_at')
+            ->where(function ($queryBuilder) use ($query, $like): void {
+                $queryBuilder->where('name', $like, "%{$query}%")
+                    ->orWhere('developer_name', $like, "%{$query}%")
+                    ->orWhere('city', $like, "%{$query}%");
+            })
+            ->limit($limit)
+            ->get()
+            ->map(fn (Development $development) => [
+                'id' => $development->id,
+                'name' => $development->name,
+                'slug' => $development->slug,
+                'city' => $development->city,
+                'province' => $development->province,
+                'developer_name' => $development->developer_name,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    /**
      * Check if a given sector slug's template includes a search category.
      */
     private function sectorSearches(string $sectorSlug, string $category): bool
@@ -195,5 +290,10 @@ class GlobalSearchService
 
         return $sector?->template
             && in_array($category, $sector->template->searchCategories(), true);
+    }
+
+    private function usesScout(string $modelClass): bool
+    {
+        return config('scout.driver') !== 'null' && method_exists($modelClass, 'search');
     }
 }

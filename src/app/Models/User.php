@@ -56,6 +56,7 @@ class User extends Authenticatable implements FilamentUser, LunarUserInterface, 
         'store_id',
         'paymongo_customer_id',
         'notification_preferences',
+        'preferred_locale',
     ];
 
     /**

@@ -4,7 +4,9 @@ use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
 use App\Services\CommissionService;
+use App\Services\CheckoutDiscountService;
 use App\Services\OrderService;
+use App\Services\Webhooks\WebhookEventDispatcher;
 use Illuminate\Support\Facades\Cache;
 use Lunar\Facades\CartSession;
 use Lunar\Models\Cart;
@@ -113,7 +115,11 @@ describe('Concurrent order lock', function () {
         // Bind a partial override of OrderService that skips validation methods
         // so we can isolate the lock check in createFromCart().
         $this->app->bind(OrderService::class, function ($app) {
-            return new class($app->make(CommissionService::class)) extends OrderService
+            return new class(
+                $app->make(CommissionService::class),
+                $app->make(CheckoutDiscountService::class),
+                $app->make(WebhookEventDispatcher::class),
+            ) extends OrderService
             {
                 public function validateCart(Cart $cart): void {}
 
@@ -150,7 +156,11 @@ describe('Concurrent order lock', function () {
         // Override only the DB transaction part to throw so we can
         // verify the lock is released via the finally block.
         $this->app->bind(OrderService::class, function ($app) {
-            return new class($app->make(CommissionService::class)) extends OrderService
+            return new class(
+                $app->make(CommissionService::class),
+                $app->make(CheckoutDiscountService::class),
+                $app->make(WebhookEventDispatcher::class),
+            ) extends OrderService
             {
                 public function validateCart(Cart $cart): void {}
 

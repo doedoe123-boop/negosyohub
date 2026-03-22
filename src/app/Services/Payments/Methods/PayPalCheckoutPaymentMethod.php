@@ -5,6 +5,7 @@ namespace App\Services\Payments\Methods;
 use App\Models\Store;
 use App\OrderPaymentMethod;
 use App\OrderPaymentStatus;
+use App\Services\CheckoutDiscountService;
 use App\Services\OrderService;
 use App\Services\Payments\Contracts\CheckoutPaymentMethod;
 use App\Services\Payments\PaymentResult;
@@ -17,7 +18,8 @@ class PayPalCheckoutPaymentMethod implements CheckoutPaymentMethod
 {
     public function __construct(
         private PayPalService $payPalService,
-        private OrderService $orderService
+        private OrderService $orderService,
+        private CheckoutDiscountService $checkoutDiscountService
     ) {}
 
     public function identifier(): string
@@ -27,7 +29,8 @@ class PayPalCheckoutPaymentMethod implements CheckoutPaymentMethod
 
     public function initiate(Cart $cart, Store $store): PaymentResult
     {
-        $result = $this->payPalService->createOrder($cart);
+        $discountSummary = $this->checkoutDiscountService->summarizeCart($cart, $store);
+        $result = $this->payPalService->createOrder($cart, $discountSummary['total_after_discount']);
 
         if (! ($result['id'] ?? null) || ! ($result['approve_url'] ?? null)) {
             throw ValidationException::withMessages([

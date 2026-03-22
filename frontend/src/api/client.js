@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const LOCALE_STORAGE_KEY = "negosyohub.locale";
+
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
   withCredentials: true, // send cookies for Sanctum SPA auth
@@ -14,9 +16,16 @@ const client = axios.create({
 // ─── Request: inject bearer token if present (mobile / non-cookie flows) ──
 client.interceptors.request.use((config) => {
   const token = sessionStorage.getItem("api_token");
+  const locale = localStorage.getItem(LOCALE_STORAGE_KEY);
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  if (locale) {
+    config.headers["X-Locale"] = locale;
+  }
+
   return config;
 });
 

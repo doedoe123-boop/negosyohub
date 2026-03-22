@@ -20,7 +20,7 @@ class PayPalService
      *
      * @return array{id: string, status: string, approve_url: string|null}
      */
-    public function createOrder(Cart $cart): array
+    public function createOrder(Cart $cart, ?int $amountInCents = null): array
     {
         $cart = $cart->calculate();
 
@@ -34,7 +34,7 @@ class PayPalService
                 [
                     'amount' => [
                         'currency_code' => $cart->currency->code,
-                        'value' => (string) $cart->total->decimal,
+                        'value' => number_format(($amountInCents ?? $cart->total->value) / 100, 2, '.', ''),
                     ],
                     'shipping' => [
                         'type' => 'SHIPPING',

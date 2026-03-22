@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UpdateUserSettingsRequest;
 use App\Http\Resources\Api\V1\UserInquiryResource;
 use App\Models\PropertyInquiry;
 use App\Models\RentalAgreement;
@@ -42,16 +43,10 @@ class UserController extends Controller
     /**
      * Update per-user notification preferences.
      */
-    public function updateSettings(Request $request): JsonResponse
+    public function updateSettings(UpdateUserSettingsRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'notification_preferences' => ['required', 'array'],
-            'notification_preferences.order_updates' => ['boolean'],
-            'notification_preferences.promotions' => ['boolean'],
-        ]);
-
         $user = $request->user();
-        $user->update($validated);
+        $user->update($request->validated());
 
         return response()->json($user->fresh());
     }

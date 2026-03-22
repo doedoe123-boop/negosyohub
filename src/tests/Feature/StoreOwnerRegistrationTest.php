@@ -11,12 +11,24 @@ use App\UserRole;
 use Database\Seeders\SectorSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
+    $testUploadRoot = storage_path('framework/testing/disks/tmp-for-tests-'.Str::random(12));
+
     Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => 'web']);
     Storage::fake('local');
+    config([
+        'filesystems.disks.tmp-for-tests' => [
+            'driver' => 'local',
+            'root' => $testUploadRoot,
+            'throw' => false,
+            'report' => false,
+        ],
+        'livewire.temporary_file_upload.directory' => 'livewire-tmp-'.Str::random(12),
+    ]);
     // Seed sectors so DB-driven sector lookups work in all tests
     (new SectorSeeder)->run();
 });

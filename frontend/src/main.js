@@ -4,16 +4,19 @@ import { createUnhead, headSymbol } from "@unhead/vue";
 import router from "./router";
 import App from "./App.vue";
 import { useCartStore } from "@/stores/cart";
+import { createAppI18n, installAppI18n } from "@/i18n";
 import "@/composables/useTheme";
 import "./style.css";
 
 const app = createApp(App);
 const pinia = createPinia();
 const head = createUnhead();
+const i18n = createAppI18n();
 
 app.use(pinia);
 app.use(router);
 app.provide(headSymbol, head);
+installAppI18n(app, i18n);
 
 // When a 401 fires mid-session (token expired), the API client emits this
 // event. Only redirect to login if the user is on a protected page —

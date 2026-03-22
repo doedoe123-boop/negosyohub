@@ -14,16 +14,27 @@ import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/cart";
 import { useTheme } from "@/composables/useTheme";
 import { searchApi } from "@/api/search";
+import { useAppI18n } from "@/i18n";
 
 const auth = useAuthStore();
 const cart = useCartStore();
 const { isDark, toggleTheme } = useTheme();
+const { locale, setLocale, t } = useAppI18n();
 const route = useRoute();
 const router = useRouter();
 
 async function handleLogout() {
   await auth.logout();
   router.push("/");
+}
+
+async function toggleLocale() {
+  const nextLocale = locale.value === "en" ? "fil" : "en";
+  await setLocale(nextLocale);
+
+  if (auth.isLoggedIn) {
+    await auth.persistPreferredLocale(nextLocale);
+  }
 }
 const mobileOpen = ref(false);
 const storesFlyout = ref(false);
@@ -176,7 +187,7 @@ function isActive(path) {
                 : 'nav-button'
             "
           >
-            Sectors
+            {{ t("nav.sectors") }}
             <svg
               class="size-3.5 transition-transform"
               :class="storesFlyout ? 'rotate-180' : ''"
@@ -240,7 +251,7 @@ function isActive(path) {
           target="_blank"
           class="nav-button flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
         >
-          Sell with us
+          {{ t("nav.sellWithUs") }}
           <svg
             class="size-3 opacity-60"
             fill="none"
@@ -259,6 +270,14 @@ function isActive(path) {
 
       <!-- Right utilities -->
       <div class="flex items-center gap-1.5">
+        <button
+          type="button"
+          class="nav-button rounded-lg px-2.5 py-2 text-xs font-bold uppercase transition-colors"
+          @click="toggleLocale"
+        >
+          {{ locale === "en" ? "FIL" : "EN" }}
+        </button>
+
         <!-- Dark Mode Toggle -->
         <button
           type="button"
@@ -278,7 +297,7 @@ function isActive(path) {
           @click="openSearch"
         >
           <MagnifyingGlassIcon class="size-3.5 shrink-0" />
-          <span class="text-xs">Search…</span>
+          <span class="text-xs">{{ t("nav.search") }}</span>
           <kbd
             class="ml-1 hidden rounded border px-1 py-0.5 text-[10px] lg:inline"
             style="
@@ -322,13 +341,13 @@ function isActive(path) {
             to="/login"
             class="nav-button hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:block"
           >
-            Sign in
+            {{ t("nav.signIn") }}
           </RouterLink>
           <RouterLink
             to="/register"
             class="btn-primary rounded-lg px-4 py-2 text-sm font-bold active:scale-[0.98] transition-all"
           >
-            Register
+            {{ t("nav.register") }}
           </RouterLink>
         </template>
 
@@ -339,7 +358,7 @@ function isActive(path) {
             class="nav-button hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:flex"
           >
             <UserCircleIcon class="size-4.5" />
-            Account
+            {{ t("nav.account") }}
           </RouterLink>
           <button
             type="button"
@@ -349,7 +368,7 @@ function isActive(path) {
             "
             @click="handleLogout"
           >
-            Sign out
+            {{ t("nav.signOut") }}
           </button>
         </template>
 

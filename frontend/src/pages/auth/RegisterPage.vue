@@ -2,9 +2,11 @@
 import { ref, computed } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useAppI18n } from "@/i18n";
 
 const router = useRouter();
 const auth = useAuthStore();
+const { t } = useAppI18n();
 
 const form = ref({
   name: "",
@@ -64,7 +66,7 @@ async function submit() {
     const errors = e.response?.data?.errors;
     error.value = errors
       ? Object.values(errors).flat().join(" ")
-      : (e.response?.data?.message ?? "Registration failed.");
+      : (e.response?.data?.message ?? t("auth.register.failed"));
   } finally {
     loading.value = false;
   }
@@ -75,8 +77,8 @@ async function submit() {
   <div>
     <!-- Heading -->
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-slate-900">Create your account</h1>
-      <p class="mt-1 text-sm text-slate-500">Join NegosyoHub — it's free</p>
+      <h1 class="text-2xl font-bold text-slate-900">{{ t("auth.register.title") }}</h1>
+      <p class="mt-1 text-sm text-slate-500">{{ t("auth.register.subtitle") }}</p>
     </div>
 
     <!-- Error -->
@@ -94,7 +96,7 @@ async function submit() {
           for="register-name"
           class="mb-1.5 block text-sm font-medium text-slate-700"
         >
-          Full name
+          {{ t("auth.fields.name") }}
         </label>
         <input
           id="register-name"
@@ -102,7 +104,7 @@ async function submit() {
           type="text"
           autocomplete="name"
           required
-          placeholder="Juan dela Cruz"
+          :placeholder="t('auth.fields.namePlaceholder')"
           class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
         />
       </div>
@@ -113,7 +115,7 @@ async function submit() {
           for="register-email"
           class="mb-1.5 block text-sm font-medium text-slate-700"
         >
-          Email address
+          {{ t("auth.fields.email") }}
         </label>
         <input
           id="register-email"
@@ -121,7 +123,7 @@ async function submit() {
           type="email"
           autocomplete="email"
           required
-          placeholder="you@example.com"
+          :placeholder="t('auth.fields.emailPlaceholder')"
           class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
         />
       </div>
@@ -132,7 +134,7 @@ async function submit() {
           for="register-password"
           class="mb-1.5 block text-sm font-medium text-slate-700"
         >
-          Password
+          {{ t("auth.fields.password") }}
         </label>
         <div class="relative">
           <input
@@ -141,7 +143,7 @@ async function submit() {
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
             required
-            placeholder="At least 8 characters"
+            :placeholder="t('auth.fields.passwordPlaceholder')"
             class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-11 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
           <button
@@ -206,7 +208,7 @@ async function submit() {
           for="register-password-confirm"
           class="mb-1.5 block text-sm font-medium text-slate-700"
         >
-          Confirm password
+          {{ t("auth.fields.confirmPassword") }}
         </label>
         <div class="relative">
           <input
@@ -215,7 +217,7 @@ async function submit() {
             :type="showConfirm ? 'text' : 'password'"
             autocomplete="new-password"
             required
-            placeholder="Re-enter your password"
+            :placeholder="t('auth.fields.confirmPasswordPlaceholder')"
             class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-11 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
           <button
@@ -284,32 +286,32 @@ async function submit() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Creating account…
+          {{ t("auth.register.submitting") }}
         </span>
-        <span v-else>Create Account</span>
+        <span v-else>{{ t("auth.register.submit") }}</span>
       </button>
     </form>
 
     <!-- Login link -->
     <p class="mt-6 text-center text-sm text-slate-500">
-      Already have an account?
+      {{ t("auth.register.haveAccount") }}
       <RouterLink
         to="/login"
         class="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
       >
-        Sign in
+        {{ t("auth.register.signIn") }}
       </RouterLink>
     </p>
 
     <!-- Seller portal divider -->
     <div class="mt-8 border-t border-slate-100 pt-6 text-center">
       <p class="text-xs text-slate-400">
-        Want to sell or list properties?
+        {{ t("auth.register.sellerPrompt") }}
         <a
           href="http://localhost:8080/register/sector"
           class="font-medium text-slate-500 underline transition-colors hover:text-brand-600"
         >
-          Register as a seller
+          {{ t("auth.register.sellerCta") }}
         </a>
       </p>
     </div>

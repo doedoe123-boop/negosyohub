@@ -1,11 +1,13 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { authApi } from "@/api/auth";
+import { useAppI18n } from "@/i18n";
 import { useCartStore } from "@/stores/cart";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
   const initialized = ref(false);
+  const { setLocale } = useAppI18n();
 
   const isLoggedIn = computed(() => !!user.value);
   const isCustomer = computed(() => user.value?.role === "customer");
@@ -14,6 +16,9 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const { data } = await authApi.me();
       user.value = data;
+      if (data?.preferred_locale) {
+        await setLocale(data.preferred_locale);
+      }
     } catch {
       user.value = null;
     } finally {
@@ -27,6 +32,9 @@ export const useAuthStore = defineStore("auth", () => {
       sessionStorage.setItem("api_token", data.token);
     }
     user.value = data.user;
+    if (data.user?.preferred_locale) {
+      await setLocale(data.user.preferred_locale);
+    }
     return data;
   }
 
@@ -36,6 +44,9 @@ export const useAuthStore = defineStore("auth", () => {
       sessionStorage.setItem("api_token", data.token);
     }
     user.value = data.user;
+    if (data.user?.preferred_locale) {
+      await setLocale(data.user.preferred_locale);
+    }
     return data;
   }
 
@@ -58,8 +69,23 @@ export const useAuthStore = defineStore("auth", () => {
     }
     if (data.user) {
       user.value = data.user;
+      if (data.user.preferred_locale) {
+        await setLocale(data.user.preferred_locale);
+      }
     }
     return data;
+  }
+
+  async function persistPreferredLocale(preferredLocale) {
+    if (!user.value) {
+      return;
+    }
+
+    const { data } = await authApi.updateSettings({
+      preferred_locale: preferredLocale,
+    });
+
+    user.value = data;
   }
 
   return {
@@ -73,5 +99,6 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     forgotPassword,
     resetPassword,
+    persistPreferredLocale,
   };
 });
