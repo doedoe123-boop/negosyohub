@@ -8,6 +8,8 @@ import StoreDetail from "@/pages/store/StoreDetail.vue";
 import DealsPage from "@/pages/DealsPage.vue";
 import MarketInsightsPage from "@/pages/MarketInsightsPage.vue";
 import FaqPage from "@/pages/FaqPage.vue";
+import MoversPage from "@/pages/movers/MoversPage.vue";
+import MoverDetail from "@/pages/movers/MoverDetail.vue";
 
 // ---------------------------------------------------------------------------
 // API mocks
@@ -66,6 +68,21 @@ vi.mock("@/api/featuredListings", () => ({
 vi.mock("@/api/faq", () => ({
   faqApi: {
     list: vi.fn(),
+  },
+}));
+
+vi.mock("@/api/movers", () => ({
+  moversApi: {
+    list: vi.fn(),
+    show: vi.fn(),
+  },
+}));
+
+vi.mock("@/api/movingBookings", () => ({
+  movingBookingsApi: {
+    create: vi.fn(),
+    listMine: vi.fn(),
+    showMine: vi.fn(),
   },
 }));
 
@@ -130,6 +147,8 @@ function storeRouter() {
       { path: "/faq", component: FaqPage },
       { path: "/properties", component: { template: "<div />" } },
       { path: "/movers", component: { template: "<div />" } },
+      { path: "/movers/:slug", component: MoverDetail, name: "movers.show" },
+      { path: "/login", component: { template: "<div />" }, name: "auth.login" },
     ],
   });
 }
@@ -315,6 +334,95 @@ describe("Store detail page", () => {
       title: "Great shop",
       content: "Very smooth order and delivery.",
     });
+  });
+});
+
+describe("Mover detail page", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    setActivePinia(pinia);
+    vi.clearAllMocks();
+  });
+
+  it("pre-fills booking contact fields from the authenticated user", async () => {
+    const { moversApi } = await import("@/api/movers");
+    const { useAuthStore } = await import("@/stores/auth");
+
+    moversApi.show.mockResolvedValue({
+      data: {
+        id: 3,
+        slug: "bayanihan-movers",
+        name: "Bayanihan Movers",
+        city: "Makati City",
+        province: "Metro Manila",
+        moving_add_ons: [],
+      },
+    });
+
+    const auth = useAuthStore();
+    auth.user = {
+      id: 7,
+      name: "Demo Customer",
+      phone: "09171234567",
+      role: "customer",
+    };
+
+    const router = storeRouter();
+    await router.push("/movers/bayanihan-movers");
+
+    const wrapper = mount(MoverDetail, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    const inputs = wrapper.findAll("input");
+    expect(inputs[0].element.value).toBe("Demo Customer");
+    expect(inputs[1].element.value).toBe("09171234567");
+  });
+});
+
+describe("Movers page", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    setActivePinia(pinia);
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("renders movers returned from the API without forcing a city filter", async () => {
+    const { moversApi } = await import("@/api/movers");
+    moversApi.list.mockResolvedValue({
+      data: {
+        data: [
+          {
+            id: 1,
+            slug: "bayanihan-movers",
+            name: "Bayanihan Movers",
+            city: "Makati City",
+            province: "Metro Manila",
+            description: "Trusted condo and household relocation team.",
+          },
+        ],
+        meta: {},
+      },
+    });
+
+    const router = storeRouter();
+    await router.push("/movers");
+
+    const wrapper = mount(MoversPage, { global: { plugins: [pinia, router] } });
+    await flushPromises();
+
+    expect(moversApi.list).toHaveBeenCalledWith({ city: "", province: "", page: 1, per_page: 12 });
+    expect(wrapper.text()).toContain("Bayanihan Movers");
+    expect(wrapper.text()).toContain("Makati City");
   });
 });
 

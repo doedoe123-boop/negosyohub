@@ -21,15 +21,20 @@ vi.spyOn(console, "error").mockImplementation(() => {});
 vi.mock("@heroicons/vue/24/outline", () => {
   const s = { template: "<svg />" };
   return {
+    ArrowLeftIcon: s,
+    ArrowRightIcon: s,
     ArrowPathIcon: s,
     Bars3Icon: s,
     BookmarkIcon: s,
     BuildingStorefrontIcon: s,
     CheckCircleIcon: s,
+    CalendarIcon: s,
+    CalendarDaysIcon: s,
     ChevronRightIcon: s,
     ClockIcon: s,
     Cog6ToothIcon: s,
     CreditCardIcon: s,
+    CurrencyDollarIcon: s,
     GlobeAltIcon: s,
     ChartBarIcon: s,
     HomeIcon: s,
@@ -50,6 +55,7 @@ vi.mock("@heroicons/vue/24/outline", () => {
     TagIcon: s,
     TrashIcon: s,
     TruckIcon: s,
+    UserIcon: s,
     UserGroupIcon: s,
     UserCircleIcon: s,
     XMarkIcon: s,

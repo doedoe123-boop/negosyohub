@@ -50,15 +50,12 @@ watch(
 );
 
 onMounted(() => {
-  if (!filters.value.city && cityStore.activeCity) {
-    filters.value.city = cityStore.activeCity;
-  }
   fetchMovers();
 });
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+  <div class="theme-page min-h-screen">
     <!-- Header -->
     <div
       class="relative overflow-hidden py-14 text-white"
@@ -125,12 +122,12 @@ onMounted(() => {
 
     <!-- Filters -->
     <div
-      class="border-b border-slate-100 bg-white shadow-sm dark:bg-slate-900 dark:border-slate-800"
+      class="theme-divider-soft theme-page-section border-b shadow-sm"
     >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 py-4">
         <form class="flex flex-wrap gap-3" @submit.prevent="applyFilters">
           <div
-            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all dark:bg-slate-800 dark:border-slate-700"
+            class="theme-card-muted flex items-center gap-2 rounded-xl px-3 py-2 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all"
           >
             <MagnifyingGlassIcon class="h-4 w-4 text-slate-400 shrink-0" />
             <input
@@ -138,7 +135,7 @@ onMounted(() => {
               type="text"
               placeholder="City..."
               autocomplete="off"
-              class="w-36 bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none focus:outline-none"
+              class="theme-title w-36 bg-transparent text-sm placeholder-slate-400 outline-none focus:outline-none"
             />
           </div>
           <input
@@ -146,7 +143,7 @@ onMounted(() => {
             type="text"
             placeholder="Province..."
             autocomplete="off"
-            class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 placeholder-slate-400 outline-none focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+            class="theme-card-muted theme-title rounded-xl px-3 py-2 text-sm placeholder-slate-400 outline-none focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all"
           />
           <button
             type="submit"
@@ -167,27 +164,27 @@ onMounted(() => {
         <div
           v-for="i in 6"
           :key="i"
-          class="h-48 animate-pulse rounded-2xl bg-slate-100"
+          class="theme-skeleton h-48 animate-pulse rounded-2xl"
         ></div>
       </div>
 
       <div
         v-else-if="movers.length === 0"
-        class="rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center dark:bg-slate-900 dark:border-slate-700"
+        class="theme-empty-state rounded-2xl py-20 text-center"
       >
         <TruckIcon class="mx-auto mb-4 h-16 w-16 text-slate-300" />
-        <p class="text-lg font-medium text-slate-600">
+        <p class="theme-title text-lg font-medium">
           No moving companies found
         </p>
-        <p class="mt-1 text-sm text-slate-400">
+        <p class="theme-copy mt-1 text-sm">
           Try adjusting your search filters
         </p>
         <p
           v-if="cityStore.activeCity && filters.city"
-          class="mt-3 text-sm text-slate-400"
+          class="theme-copy mt-3 text-sm"
         >
           No movers available in
-          <strong class="text-slate-600">{{ cityStore.activeCity }}</strong
+          <strong class="theme-title">{{ cityStore.activeCity }}</strong
           >.
           <button
             class="ml-1 text-emerald-600 underline underline-offset-2"
@@ -207,7 +204,7 @@ onMounted(() => {
           v-for="mover in movers"
           :key="mover.id"
           :to="{ name: 'movers.show', params: { slug: mover.slug } }"
-          class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all dark:bg-slate-800 dark:border-slate-700"
+          class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl"
         >
           <div class="p-5">
             <div class="flex items-start gap-4">
@@ -218,17 +215,17 @@ onMounted(() => {
               </div>
               <div class="min-w-0">
                 <h3
-                  class="truncate font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors"
+                  class="theme-title truncate font-semibold group-hover:text-emerald-600 transition-colors"
                 >
                   {{ mover.name }}
                 </h3>
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="theme-copy mt-1 text-sm">
                   {{ mover.city
                   }}<span v-if="mover.province">, {{ mover.province }}</span>
                 </p>
                 <p
                   v-if="mover.description"
-                  class="mt-2 line-clamp-2 text-sm text-slate-600"
+                  class="theme-copy mt-2 line-clamp-2 text-sm"
                 >
                   {{ mover.description }}
                 </p>
@@ -236,7 +233,7 @@ onMounted(() => {
             </div>
           </div>
           <div
-            class="mt-auto flex items-center justify-between border-t border-slate-100 px-5 py-3"
+            class="theme-divider-soft mt-auto flex items-center justify-between border-t px-5 py-3"
           >
             <span
               class="text-sm font-semibold text-emerald-600 group-hover:text-emerald-500"

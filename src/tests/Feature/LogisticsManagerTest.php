@@ -44,6 +44,21 @@ it('creates a shipment and dispatches a shipment created webhook payload', funct
         ->and($shipment->pickup_address)->toBe('123 Seller Street');
 });
 
+it('uses the in-app tracking route for demo tracking hosts', function () {
+    $order = Order::factory()->create();
+    $shipment = Shipment::factory()->create([
+        'order_id' => $order->id,
+        'tracking_url' => 'https://tracking.negosyohub.test/DEMO-COD-TECHNEST',
+    ]);
+
+    $dispatcher = Mockery::mock(WebhookEventDispatcher::class);
+    $manager = new LogisticsManager($dispatcher);
+
+    $payload = $manager->shipmentPayload($shipment);
+
+    expect($payload['tracking_url'])->toBe("/account/orders/{$order->id}/tracking");
+});
+
 it('updates shipment delivery status timestamps and dispatches an update webhook payload', function () {
     $order = Order::factory()->create();
     $shipment = Shipment::factory()->create([

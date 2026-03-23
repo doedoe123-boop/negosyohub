@@ -19,7 +19,7 @@ class MovingBookingService
     /**
      * Browse approved moving company stores.
      *
-     * @param  array{search?: string, city?: string, per_page?: int}  $params
+     * @param  array{search?: string, city?: string, province?: string, per_page?: int}  $params
      */
     public function browseMovers(array $params = []): LengthAwarePaginator
     {
@@ -37,7 +37,11 @@ class MovingBookingService
         }
 
         if (! empty($params['city'])) {
-            $query->where('city', $params['city']);
+            $query->where('address->city', $params['city']);
+        }
+
+        if (! empty($params['province'])) {
+            $query->where('address->province', $params['province']);
         }
 
         $perPage = min((int) ($params['per_page'] ?? 15), 50);

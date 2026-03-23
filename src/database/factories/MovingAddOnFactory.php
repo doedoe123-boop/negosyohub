@@ -17,7 +17,7 @@ class MovingAddOnFactory extends Factory
     public function definition(): array
     {
         return [
-            'store_id' => Store::factory(),
+            'store_id' => Store::factory()->movingService(),
             'name' => fake()->randomElement([
                 'Packing Materials',
                 'Assembly/Disassembly Service',
@@ -37,5 +37,17 @@ class MovingAddOnFactory extends Factory
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => ['is_active' => false]);
+    }
+
+    public function premium(): static
+    {
+        return $this->state(fn (): array => [
+            'name' => fake()->randomElement([
+                'Full Packing Crew',
+                'Climate-Controlled Truck Upgrade',
+                'Appliance Crating Service',
+            ]),
+            'price' => fake()->numberBetween(150000, 650000),
+        ]);
     }
 }

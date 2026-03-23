@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   TruckIcon,
@@ -70,6 +70,20 @@ function formatPrice(centavos) {
   });
 }
 
+function hydrateFormFromUser(user) {
+  if (!user) {
+    return;
+  }
+
+  if (!form.value.contact_name?.trim() && user.name) {
+    form.value.contact_name = user.name;
+  }
+
+  if (!form.value.contact_phone?.trim() && user.phone) {
+    form.value.contact_phone = user.phone;
+  }
+}
+
 async function submitBooking() {
   if (!auth.isLoggedIn) {
     router.push({ name: "auth.login", query: { redirect: route.fullPath } });
@@ -99,6 +113,8 @@ async function submitBooking() {
 }
 
 onMounted(async () => {
+  hydrateFormFromUser(auth.user);
+
   try {
     const res = await moversApi.show(route.params.slug);
     mover.value = res.data.data ?? res.data;
@@ -108,14 +124,22 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+watch(
+  () => auth.user,
+  (user) => {
+    hydrateFormFromUser(user);
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50">
+  <div class="theme-page min-h-screen">
     <div v-if="loading" class="flex items-center justify-center py-32">
        <div class="flex flex-col items-center gap-4">
           <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-600 border-t-transparent shadow-sm"></div>
-          <p class="text-sm font-medium text-slate-500 animate-pulse">Loading mover details...</p>
+          <p class="theme-copy animate-pulse text-sm font-medium">Loading mover details...</p>
        </div>
     </div>
 
@@ -173,15 +197,15 @@ onMounted(async () => {
           
           <!-- Services Sidebar / List -->
           <div class="lg:col-span-5 space-y-6">
-            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="theme-card rounded-3xl p-6 shadow-sm">
                <div class="mb-6">
-                  <h2 class="text-lg font-bold text-slate-900">Custom Services</h2>
-                  <p class="text-xs text-slate-500">Pick the services you need for your move.</p>
+                  <h2 class="theme-title text-lg font-bold">Custom Services</h2>
+                  <p class="theme-copy text-xs">Pick the services you need for your move.</p>
                </div>
 
-              <div v-if="activeAddOns.length === 0" class="flex flex-col items-center justify-center py-8 text-center text-slate-400">
-                <div class="mb-3 flex size-12 items-center justify-center rounded-full bg-slate-50">
-                  <DocumentTextIcon class="size-6 text-slate-300" />
+              <div v-if="activeAddOns.length === 0" class="theme-copy flex flex-col items-center justify-center py-8 text-center">
+                <div class="theme-card-muted mb-3 flex size-12 items-center justify-center rounded-full">
+                  <DocumentTextIcon class="theme-copy size-6 opacity-60" />
                 </div>
                 <p class="text-sm">Standard moving service included.</p>
               </div>
@@ -193,24 +217,24 @@ onMounted(async () => {
                   @click="toggleAddOn(addon.id)"
                   class="group flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-all"
                   :class="selectedAddOns.includes(addon.id)
-                      ? 'border-brand-500 bg-brand-50 shadow-sm ring-1 ring-brand-500/20'
-                      : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50'"
+                      ? 'border-brand-500 bg-brand-50/10 shadow-sm ring-1 ring-brand-500/20'
+                      : 'theme-divider-soft hover:border-[var(--color-border-strong)] theme-card-muted'"
                 >
                   <div class="mt-0.5 relative">
                     <div class="size-5 rounded-full border-2 transition-colors" 
-                      :class="selectedAddOns.includes(addon.id) ? 'border-brand-600 bg-brand-600' : 'border-slate-300 bg-white group-hover:border-slate-400'"
+                      :class="selectedAddOns.includes(addon.id) ? 'border-brand-600 bg-brand-600' : 'border-[var(--color-border-strong)] bg-[var(--color-surface)] group-hover:border-[var(--color-text-muted)]'"
                     ></div>
                     <CheckCircleIcon v-if="selectedAddOns.includes(addon.id)" class="absolute inset-0 size-5 text-white" />
                   </div>
                   
                   <div class="flex-1 min-w-0">
-                    <p class="font-bold text-slate-900 transition-colors" :class="selectedAddOns.includes(addon.id) ? 'text-brand-700' : ''">
+                    <p class="theme-title font-bold transition-colors" :class="selectedAddOns.includes(addon.id) ? 'text-brand-600 dark:text-brand-400' : ''">
                       {{ addon.name }}
                     </p>
-                    <p v-if="addon.description" class="mt-0.5 text-xs text-slate-500 leading-normal">{{ addon.description }}</p>
+                    <p v-if="addon.description" class="theme-copy mt-0.5 text-xs leading-normal">{{ addon.description }}</p>
                   </div>
                   
-                  <span class="text-sm font-black text-slate-700 tabular-nums">{{ formatPrice(addon.price) }}</span>
+                  <span class="theme-title text-sm font-black tabular-nums">{{ formatPrice(addon.price) }}</span>
                 </div>
               </div>
 
@@ -224,12 +248,12 @@ onMounted(async () => {
             </div>
 
             <!-- Trust Badge -->
-            <div class="rounded-3xl bg-indigo-50 p-6 border border-indigo-100">
-              <h3 class="flex items-center gap-2 text-sm font-bold text-indigo-900">
+            <div class="theme-card rounded-3xl border border-indigo-500/20 bg-indigo-500/10 p-6">
+              <h3 class="flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-200">
                 <StarIcon class="size-4 text-indigo-600" />
                 Trusted Professional
               </h3>
-              <p class="mt-2 text-xs text-indigo-700 leading-relaxed">
+              <p class="mt-2 text-xs leading-relaxed text-indigo-600 dark:text-indigo-200/80">
                 All providers on NegosyoHub are vetted for reliability and high service standards.
               </p>
             </div>
@@ -237,10 +261,10 @@ onMounted(async () => {
 
           <!-- Booking Form Area -->
           <div class="lg:col-span-7">
-            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div class="mb-8 border-b border-slate-100 pb-6">
-                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Book Moving Service</h2>
-                <p class="mt-1 text-sm text-slate-500">Provide your move details to receive a final confirmation.</p>
+            <div class="theme-card rounded-3xl p-8 shadow-sm">
+              <div class="theme-divider-soft mb-8 border-b pb-6">
+                <h2 class="theme-title text-2xl font-black tracking-tight">Book Moving Service</h2>
+                <p class="theme-copy mt-1 text-sm">Provide your move details to receive a final confirmation.</p>
               </div>
 
               <div
@@ -253,8 +277,8 @@ onMounted(async () => {
                     <CheckCircleIcon class="size-12" />
                   </div>
                 </div>
-                <h3 class="text-2xl font-black text-slate-900">Request Sent!</h3>
-                <p class="mt-2 max-w-sm text-slate-500">
+                <h3 class="theme-title text-2xl font-black">Request Sent!</h3>
+                <p class="theme-copy mt-2 max-w-sm">
                   {{ mover.name }} will review your details and confirm the schedule shortly.
                 </p>
                 <div class="mt-10 flex flex-wrap justify-center gap-4">
@@ -264,7 +288,7 @@ onMounted(async () => {
                   >
                     Manage My Bookings
                   </RouterLink>
-                  <button @click="bookingSuccess = false; form = { ...form }" class="text-sm font-bold text-slate-500 hover:text-slate-900 underline underline-offset-4">
+                  <button @click="bookingSuccess = false; form = { ...form }" class="theme-copy text-sm font-bold underline underline-offset-4 hover:text-[var(--color-text)]">
                     Book another move
                   </button>
                 </div>
@@ -276,56 +300,56 @@ onMounted(async () => {
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Contact Name</label>
+                  <label class="theme-copy mb-2 block text-xs font-bold uppercase tracking-widest">Contact Name</label>
                   <div class="relative">
-                    <UserIcon class="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                    <input v-model="form.contact_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" />
+                    <UserIcon class="theme-copy absolute left-3.5 top-1/2 size-4 -translate-y-1/2" />
+                    <input v-model="form.contact_name" required class="theme-input w-full rounded-2xl py-3 pl-10 pr-4 text-sm" />
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Phone Number</label>
+                  <label class="theme-copy mb-2 block text-xs font-bold uppercase tracking-widest">Phone Number</label>
                   <div class="relative">
-                    <PhoneIcon class="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                    <input v-model="form.contact_phone" required type="tel" placeholder="09XX XXX XXXX" class="w-full rounded-2xl border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" />
+                    <PhoneIcon class="theme-copy absolute left-3.5 top-1/2 size-4 -translate-y-1/2" />
+                    <input v-model="form.contact_phone" required type="tel" placeholder="09XX XXX XXXX" class="theme-input w-full rounded-2xl py-3 pl-10 pr-4 text-sm" />
                   </div>
                 </div>
 
-                <div class="col-span-full pt-4 font-bold text-slate-900 text-sm">Location Details</div>
+                <div class="theme-title col-span-full pt-4 text-sm font-bold">Location Details</div>
 
                 <div class="space-y-4">
                   <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 ml-1">Pickup Address</label>
-                    <input v-model="form.pickup_address" required class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" placeholder="Bldg/Street/Barangay" />
+                    <label class="theme-copy mb-1.5 ml-1 block text-[10px] font-bold uppercase tracking-widest">Pickup Address</label>
+                    <input v-model="form.pickup_address" required class="theme-input w-full rounded-2xl px-4 py-3 text-sm" placeholder="Bldg/Street/Barangay" />
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 ml-1">Pickup City</label>
-                    <input v-model="form.pickup_city" required class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" placeholder="E.g. Makati City" />
+                    <label class="theme-copy mb-1.5 ml-1 block text-[10px] font-bold uppercase tracking-widest">Pickup City</label>
+                    <input v-model="form.pickup_city" required class="theme-input w-full rounded-2xl px-4 py-3 text-sm" placeholder="E.g. Makati City" />
                   </div>
                 </div>
 
                 <div class="space-y-4">
                   <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 ml-1">Delivery Address</label>
-                    <input v-model="form.delivery_address" required class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" placeholder="Bldg/Street/Barangay" />
+                    <label class="theme-copy mb-1.5 ml-1 block text-[10px] font-bold uppercase tracking-widest">Delivery Address</label>
+                    <input v-model="form.delivery_address" required class="theme-input w-full rounded-2xl px-4 py-3 text-sm" placeholder="Bldg/Street/Barangay" />
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 ml-1">Delivery City</label>
-                    <input v-model="form.delivery_city" required class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" placeholder="E.g. Quezon City" />
+                    <label class="theme-copy mb-1.5 ml-1 block text-[10px] font-bold uppercase tracking-widest">Delivery City</label>
+                    <input v-model="form.delivery_city" required class="theme-input w-full rounded-2xl px-4 py-3 text-sm" placeholder="E.g. Quezon City" />
                   </div>
                 </div>
 
                 <div class="col-span-full">
-                  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Preferred Schedule</label>
+                  <label class="theme-copy mb-2 block text-xs font-bold uppercase tracking-widest">Preferred Schedule</label>
                   <div class="relative">
-                    <CalendarDaysIcon class="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                    <input v-model="form.scheduled_at" required type="datetime-local" class="w-full rounded-2xl border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all shadow-inner" />
+                    <CalendarDaysIcon class="theme-copy absolute left-3.5 top-1/2 size-4 -translate-y-1/2" />
+                    <input v-model="form.scheduled_at" required type="datetime-local" class="theme-input w-full rounded-2xl py-3 pl-10 pr-4 text-sm" />
                   </div>
                 </div>
 
                 <div class="col-span-full">
-                  <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Special Instructions</label>
-                  <textarea v-model="form.notes" rows="3" class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-brand-500 focus:bg-white focus:ring-brand-500 transition-all" placeholder="Any fragile items? Heavy furniture? Elevator access?"></textarea>
+                  <label class="theme-copy mb-2 block text-xs font-bold uppercase tracking-widest">Special Instructions</label>
+                  <textarea v-model="form.notes" rows="3" class="theme-input w-full rounded-2xl px-4 py-3 text-sm" placeholder="Any fragile items? Heavy furniture? Elevator access?"></textarea>
                 </div>
 
                 <div class="col-span-full pt-4">
@@ -339,7 +363,7 @@ onMounted(async () => {
                        {{ bookingLoading ? 'Processing Request...' : 'Confirm Move Request' }}
                     </span>
                   </button>
-                  <p v-if="!auth.isLoggedIn" class="mt-4 text-center text-xs text-slate-400 italic">
+                  <p v-if="!auth.isLoggedIn" class="theme-copy mt-4 text-center text-xs italic">
                     You'll be directed to login before completing your booking.
                   </p>
                 </div>

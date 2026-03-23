@@ -23,6 +23,7 @@ class ShipmentFactory extends Factory
         return [
             'order_id' => Order::factory(),
             'provider' => ShipmentProvider::Manual,
+            'external_reference' => 'TRK-'.fake()->unique()->numerify('######'),
             'delivery_status' => DeliveryStatus::Pending,
             'driver_name' => fake()->name(),
             'driver_contact' => fake()->phoneNumber(),
@@ -31,5 +32,24 @@ class ShipmentFactory extends Factory
             'pickup_address' => fake()->streetAddress(),
             'dropoff_address' => fake()->streetAddress(),
         ];
+    }
+
+    public function inTransit(): static
+    {
+        return $this->state(fn (): array => [
+            'delivery_status' => DeliveryStatus::InTransit,
+            'booked_at' => now()->subDay(),
+            'picked_up_at' => now()->subHours(6),
+        ]);
+    }
+
+    public function delivered(): static
+    {
+        return $this->state(fn (): array => [
+            'delivery_status' => DeliveryStatus::Delivered,
+            'booked_at' => now()->subDays(2),
+            'picked_up_at' => now()->subDay(),
+            'delivered_at' => now()->subHours(2),
+        ]);
     }
 }

@@ -119,7 +119,7 @@ class Store extends Model
     ];
 
     /** @var list<string> */
-    protected $appends = ['logo_url', 'banner_url', 'agent_photo_url', 'agent_name', 'sector_template', 'sector_label', 'sector_theme'];
+    protected $appends = ['logo_url', 'banner_url', 'agent_photo_url', 'agent_name', 'sector_template', 'sector_label', 'sector_theme', 'city', 'province'];
 
     /**
      * @return array<string, string>
@@ -434,6 +434,16 @@ class Store extends Model
     public function getSectorThemeAttribute(): ?string
     {
         return $this->template()?->themeGradient();
+    }
+
+    public function getCityAttribute(): ?string
+    {
+        return $this->address['city'] ?? null;
+    }
+
+    public function getProvinceAttribute(): ?string
+    {
+        return $this->address['province'] ?? null;
     }
 
     /**

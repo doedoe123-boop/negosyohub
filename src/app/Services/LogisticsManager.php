@@ -104,7 +104,7 @@ class LogisticsManager
             'driver_name' => $shipment->driver_name,
             'driver_contact' => $shipment->driver_contact,
             'vehicle_type' => $shipment->vehicle_type,
-            'tracking_url' => $shipment->tracking_url,
+            'tracking_url' => $this->resolveTrackingUrl($shipment),
             'pickup_address' => $shipment->pickup_address,
             'dropoff_address' => $shipment->dropoff_address,
             'booked_at' => $shipment->booked_at,
@@ -137,5 +137,22 @@ class LogisticsManager
             $address->state,
             $address->postcode,
         ])->filter()->implode(', ');
+    }
+
+    private function resolveTrackingUrl(Shipment $shipment): ?string
+    {
+        $trackingUrl = $shipment->tracking_url;
+
+        if (! $trackingUrl) {
+            return "/account/orders/{$shipment->order_id}/tracking";
+        }
+
+        $host = parse_url($trackingUrl, PHP_URL_HOST);
+
+        if ($host === 'tracking.negosyohub.test') {
+            return "/account/orders/{$shipment->order_id}/tracking";
+        }
+
+        return $trackingUrl;
     }
 }
