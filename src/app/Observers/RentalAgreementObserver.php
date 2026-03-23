@@ -38,7 +38,7 @@ class RentalAgreementObserver
     public function updated(RentalAgreement $agreement): void
     {
         // Check if the tenant just signed the agreement
-        if ($agreement->isDirty('status') && $agreement->status === 'signed') {
+        if ($agreement->wasChanged('status') && $agreement->status === 'signed') {
             // Mark property as rented
             if ($agreement->property) {
                 $agreement->property->update(['status' => PropertyStatus::Rented]);
@@ -72,7 +72,7 @@ class RentalAgreementObserver
         }
 
         // Check if the tenant just asked a question (status changed to negotiating)
-        if ($agreement->isDirty('status') && $agreement->status === 'negotiating') {
+        if ($agreement->wasChanged('status') && $agreement->status === 'negotiating') {
             $landlord = $agreement->store?->owner;
             if ($landlord) {
                 try {
@@ -88,7 +88,7 @@ class RentalAgreementObserver
         }
 
         // Check if the landlord just replied to questions
-        if ($agreement->isDirty('landlord_response') && ! empty($agreement->landlord_response)) {
+        if ($agreement->wasChanged('landlord_response') && ! empty($agreement->landlord_response)) {
             try {
                 Notification::route('mail', $agreement->tenant_email)
                     ->notify(new LandlordAgreementResponseNotification($agreement));

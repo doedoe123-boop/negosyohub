@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 import {
   LifebuoyIcon,
   PlusIcon,
@@ -14,6 +15,7 @@ import {
 } from "@heroicons/vue/24/outline";
 import { supportApi } from "@/api/support";
 
+const route = useRoute();
 const tickets = ref([]);
 const loading = ref(true);
 const error = ref(false);
@@ -25,7 +27,8 @@ const form = ref({
   category: "general",
   sector: "",
   priority: "medium",
-  message: ""
+  message: "",
+  store_id: null,
 });
 
 const sectors = [
@@ -113,13 +116,59 @@ async function submitTicket() {
   try {
     await supportApi.create(form.value);
     showCreateModal.value = false;
-    form.value = { subject: "", category: "general", priority: "medium", message: "" };
+    form.value = {
+      subject: "",
+      category: "general",
+      sector: "",
+      priority: "medium",
+      message: "",
+      store_id: null,
+    };
     await loadTickets();
   } catch (err) {
     alert("Failed to submit ticket. Please try again.");
   } finally {
     submitting.value = false;
   }
+}
+
+function hydrateFormFromQuery() {
+  const {
+    subject,
+    category,
+    sector,
+    priority,
+    message,
+    store_id: storeId,
+    open,
+  } = route.query;
+
+  const hasPrefill = [subject, category, sector, priority, message, storeId].some(
+    (value) => value !== undefined && value !== null && `${value}`.length > 0,
+  );
+
+  if (!hasPrefill && open !== "1") {
+    return;
+  }
+
+  form.value = {
+    subject: typeof subject === "string" ? subject : form.value.subject,
+    category: typeof category === "string" ? category : form.value.category,
+    sector: typeof sector === "string" ? sector : form.value.sector,
+    priority: typeof priority === "string" ? priority : form.value.priority,
+    message: typeof message === "string" ? message : form.value.message,
+    store_id: (() => {
+      if (typeof storeId !== "string" || storeId === "") {
+        return form.value.store_id;
+      }
+
+      const parsedStoreId = Number(storeId);
+
+      return Number.isNaN(parsedStoreId) ? form.value.store_id : parsedStoreId;
+    })(),
+  };
+
+  showCreateModal.value = true;
 }
 
 function formatDate(dt) {
@@ -132,6 +181,7 @@ function formatDate(dt) {
 
 onMounted(() => {
   loadTickets();
+  hydrateFormFromQuery();
 });
 </script>
 

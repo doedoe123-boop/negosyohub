@@ -38,7 +38,7 @@ class MovingBookingController extends Controller
     {
         $this->authorize('create', MovingBooking::class);
 
-        $booking = $this->service->createBooking($request->validated());
+        $booking = $this->service->createBooking($request->user(), $request->validated());
 
         return response()->json($booking, 201);
     }

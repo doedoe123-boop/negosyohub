@@ -55,6 +55,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property ?array $house_rules
  * @property ?array $utility_inclusions
  * @property ?array $safety_features
+ * @property bool $is_verified_landlord
+ * @property bool $is_suspicious_listing
  * @property ?string $video_url
  * @property ?string $virtual_tour_url
  * @property bool $is_featured
@@ -113,6 +115,8 @@ class Property extends Model implements HasMedia
         'house_rules',
         'utility_inclusions',
         'safety_features',
+        'is_verified_landlord',
+        'is_suspicious_listing',
         'video_url',
         'virtual_tour_url',
         'is_featured',
@@ -143,6 +147,8 @@ class Property extends Model implements HasMedia
             'house_rules' => 'array',
             'utility_inclusions' => 'array',
             'safety_features' => 'array',
+            'is_verified_landlord' => 'boolean',
+            'is_suspicious_listing' => 'boolean',
             'is_featured' => 'boolean',
             'published_at' => 'datetime',
             'views_count' => 'integer',
@@ -283,6 +289,38 @@ class Property extends Model implements HasMedia
             $this->city,
             $this->province,
         ])->filter()->implode(', ');
+    }
+
+    public function verifiedLandlordSignal(): bool
+    {
+        return $this->is_verified_landlord
+            || (
+                $this->store?->isPaupahan()
+                && $this->store?->isApproved()
+                && $this->store?->setup_completed_at !== null
+                && $this->store?->owner?->hasVerifiedEmail()
+            );
+    }
+
+    public function suspiciousListingSignal(): bool
+    {
+        if ($this->is_suspicious_listing) {
+            return true;
+        }
+
+        if (! $this->store?->isPaupahan()) {
+            return false;
+        }
+
+        $missingTrustSignals = collect([
+            blank($this->description),
+            count($this->images ?? []) < 2,
+            blank($this->address_line),
+            blank($this->store?->phone),
+            blank($this->store?->owner?->email_verified_at),
+        ])->filter()->count();
+
+        return $missingTrustSignals >= 3;
     }
 
     /**

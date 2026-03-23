@@ -126,11 +126,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="theme-page mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
     <!-- Back Button -->
     <button
       @click="router.push({ name: 'account.moving' })"
-      class="group mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-brand-600"
+      class="theme-copy group mb-6 inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:text-brand-600"
     >
       <ArrowLeftIcon
         class="size-4 transition-transform group-hover:-translate-x-1"
@@ -142,13 +142,14 @@ onMounted(async () => {
     <div v-if="loading" class="space-y-6">
       <div
         class="h-20 animate-pulse rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+        
       />
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div
-          class="lg:col-span-2 h-96 animate-pulse rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+          class="theme-card lg:col-span-2 h-96 animate-pulse rounded-3xl"
         />
         <div
-          class="h-96 animate-pulse rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+          class="theme-card h-96 animate-pulse rounded-3xl"
         />
       </div>
     </div>
@@ -157,13 +158,13 @@ onMounted(async () => {
     <template v-else-if="booking">
       <!-- Top Title Bar -->
       <div
-        class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white p-6 rounded-3xl shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+        class="theme-card mb-8 flex flex-col gap-4 rounded-3xl p-6 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+          <h1 class="theme-title text-2xl font-extrabold tracking-tight">
             Booking <span class="text-brand-600">#{{ booking.id }}</span>
           </h1>
-          <p class="mt-1 text-sm text-slate-500">
+          <p class="theme-copy mt-1 text-sm">
             Created on {{ new Date(booking.created_at).toLocaleDateString() }}
           </p>
         </div>
@@ -198,10 +199,10 @@ onMounted(async () => {
         <div class="lg:col-span-2 space-y-6">
           <!-- Main Details Card -->
           <div
-            class="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+            class="theme-card rounded-3xl p-8"
           >
             <h2
-              class="mb-6 flex items-center gap-2 text-lg font-bold text-slate-900"
+              class="theme-title mb-6 flex items-center gap-2 text-lg font-bold"
             >
               <TruckIcon class="size-5 text-brand-600" />
               Service Information
@@ -211,19 +212,19 @@ onMounted(async () => {
               <div class="space-y-4">
                 <div>
                   <label
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    class="theme-copy text-[10px] font-bold uppercase tracking-widest"
                     >Moving Company</label
                   >
-                  <p class="font-bold text-slate-900">
+                  <p class="theme-title font-bold">
                     {{ booking.store?.name }}
                   </p>
                 </div>
                 <div>
                   <label
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    class="theme-copy text-[10px] font-bold uppercase tracking-widest"
                     >Scheduled Date</label
                   >
-                  <div class="flex items-center gap-2 font-bold text-slate-900">
+                  <div class="theme-title flex items-center gap-2 font-bold">
                     <CalendarIcon class="size-4 text-brand-600" />
                     {{ formatDate(booking.scheduled_at) }}
                   </div>
@@ -232,37 +233,37 @@ onMounted(async () => {
 
               <div>
                 <label
-                  class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                  class="theme-copy text-[10px] font-bold uppercase tracking-widest"
                   >Total Estimate</label
                 >
                 <p class="text-2xl font-black text-brand-600">
                   {{ formatPrice(booking.total_price) }}
                 </p>
-                <p class="text-[10px] text-slate-400 italic mt-1">
+                <p class="theme-copy mt-1 text-[10px] italic">
                   Includes base price and selected add-ons
                 </p>
               </div>
             </div>
 
             <div
-              class="mt-8 pt-8 border-t border-slate-100 grid gap-8 sm:grid-cols-2"
+              class="theme-divider-soft mt-8 grid gap-8 border-t pt-8 sm:grid-cols-2"
             >
               <div class="space-y-4">
                 <div class="flex items-start gap-4">
                   <div
-                    class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-brand-600 ring-1 ring-slate-100"
+                    class="theme-card-muted flex size-10 shrink-0 items-center justify-center rounded-xl text-brand-600"
                   >
                     <MapPinIcon class="size-5" />
                   </div>
                   <div>
                     <label
-                      class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                      class="theme-copy text-[10px] font-bold uppercase tracking-widest"
                       >Pickup Location</label
                     >
-                    <p class="text-sm font-semibold text-slate-800">
+                    <p class="theme-title text-sm font-semibold">
                       {{ booking.pickup_address }}
                     </p>
-                    <p class="text-xs text-slate-500">
+                    <p class="theme-copy text-xs">
                       {{ booking.pickup_city }}
                     </p>
                   </div>
@@ -272,19 +273,19 @@ onMounted(async () => {
               <div class="space-y-4">
                 <div class="flex items-start gap-4">
                   <div
-                    class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-indigo-600 ring-1 ring-slate-100"
+                    class="theme-card-muted flex size-10 shrink-0 items-center justify-center rounded-xl text-indigo-600"
                   >
                     <MapPinIcon class="size-5" />
                   </div>
                   <div>
                     <label
-                      class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                      class="theme-copy text-[10px] font-bold uppercase tracking-widest"
                       >Delivery Destination</label
                     >
-                    <p class="text-sm font-semibold text-slate-800">
+                    <p class="theme-title text-sm font-semibold">
                       {{ booking.delivery_address }}
                     </p>
-                    <p class="text-xs text-slate-500">
+                    <p class="theme-copy text-xs">
                       {{ booking.delivery_city }}
                     </p>
                   </div>
@@ -312,10 +313,10 @@ onMounted(async () => {
           <!-- Reviews Integrated Card -->
           <div
             v-if="canReview || booking.review"
-            class="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+            class="theme-card rounded-3xl p-8"
           >
             <h2
-              class="mb-6 flex items-center gap-2 text-lg font-bold text-slate-900"
+              class="theme-title mb-6 flex items-center gap-2 text-lg font-bold"
             >
               <StarIcon class="size-5 text-amber-400" />
               Service Feedback
@@ -323,7 +324,7 @@ onMounted(async () => {
 
             <div
               v-if="reviewSuccess || booking.review"
-              class="rounded-2xl bg-slate-50 p-6 border border-slate-100"
+              class="theme-card-muted rounded-2xl p-6"
             >
               <div class="flex items-center gap-1 mb-3">
                 <StarIconSolid
@@ -336,11 +337,11 @@ onMounted(async () => {
                       : 'text-slate-200'
                   "
                 />
-                <span class="ml-2 text-sm font-bold text-slate-900"
+                <span class="theme-title ml-2 text-sm font-bold"
                   >{{ booking.review?.rating }}/5</span
                 >
               </div>
-              <p class="text-sm text-slate-600 italic">
+              <p class="theme-copy text-sm italic">
                 "{{ booking.review?.comment || "No comment provided." }}"
               </p>
               <div
@@ -353,7 +354,7 @@ onMounted(async () => {
             </div>
 
             <form v-else @submit.prevent="submitReview" class="space-y-6">
-              <p class="text-sm text-slate-500">
+              <p class="theme-copy text-sm">
                 How would you rate your experience with
                 {{ booking.store?.name }}?
               </p>
@@ -379,13 +380,13 @@ onMounted(async () => {
               </div>
               <div>
                 <label
-                  class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2"
+                  class="theme-copy mb-2 block text-xs font-bold uppercase tracking-widest"
                   >Detailed Feedback</label
                 >
                 <textarea
                   v-model="reviewForm.comment"
                   rows="3"
-                  class="w-full rounded-2xl border-slate-200 bg-slate-50 py-3 px-4 text-sm shadow-inner transition-colors focus:border-brand-500 focus:bg-white focus:ring-brand-500"
+                  class="theme-input w-full rounded-2xl py-3 px-4 text-sm shadow-inner transition-colors focus:border-brand-500 focus:bg-white focus:ring-brand-500"
                   placeholder="Tell others about the service, punctuality, and care of items..."
                 ></textarea>
               </div>
@@ -408,10 +409,10 @@ onMounted(async () => {
         <div class="space-y-6">
           <!-- Final Bill Card -->
           <div
-            class="sticky top-8 rounded-3xl bg-slate-900 p-6 text-white shadow-xl ring-1 ring-slate-800"
+            class="theme-card sticky top-8 rounded-3xl p-6 shadow-xl"
           >
             <h2
-              class="mb-6 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400"
+              class="theme-copy mb-6 flex items-center gap-2 text-sm font-bold uppercase tracking-widest"
             >
               <CurrencyDollarIcon class="size-4 text-brand-400" />
               Pricing Breakdown
@@ -419,8 +420,8 @@ onMounted(async () => {
 
             <div class="space-y-4">
               <div class="flex justify-between text-sm">
-                <span class="text-slate-400">Base Moving Rate</span>
-                <span class="font-bold font-mono">{{
+                <span class="theme-copy">Base Moving Rate</span>
+                <span class="theme-title font-bold font-mono">{{
                   formatPrice(booking.base_price)
                 }}</span>
               </div>
@@ -429,20 +430,20 @@ onMounted(async () => {
                 v-if="booking.add_ons_total > 0"
                 class="flex justify-between text-sm"
               >
-                <span class="text-slate-400">Service Add-ons</span>
-                <span class="font-bold font-mono"
+                <span class="theme-copy">Service Add-ons</span>
+                <span class="theme-title font-bold font-mono"
                   >+{{ formatPrice(booking.add_ons_total) }}</span
                 >
               </div>
 
-              <div class="border-t border-slate-700/50 pt-4 mt-4">
+              <div class="theme-divider-soft mt-4 border-t pt-4">
                 <div class="flex items-end justify-between">
                   <span
                     class="text-xs font-bold uppercase tracking-widest text-brand-400"
                     >Total Due</span
                   >
                   <span
-                    class="text-2xl font-black font-mono leading-none tracking-tight"
+                    class="theme-title text-2xl font-black font-mono leading-none tracking-tight"
                     >{{ formatPrice(booking.total_price) }}</span
                   >
                 </div>
@@ -452,7 +453,7 @@ onMounted(async () => {
             <!-- Selected Add-ons Pill List -->
             <div v-if="booking.add_ons?.length > 0" class="mt-8 space-y-3">
               <p
-                class="text-[10px] font-bold uppercase tracking-widest text-slate-500"
+                class="theme-copy text-[10px] font-bold uppercase tracking-widest"
               >
                 Selected Services
               </p>
@@ -460,7 +461,7 @@ onMounted(async () => {
                 <span
                   v-for="addon in booking.add_ons"
                   :key="addon.id"
-                  class="inline-flex items-center rounded-lg bg-slate-800 px-2 py-1 text-[10px] font-medium text-slate-300 ring-1 ring-slate-700"
+                  class="theme-badge-neutral inline-flex items-center rounded-lg px-2 py-1 text-[10px] font-medium"
                 >
                   {{ addon.name }}
                 </span>
@@ -470,12 +471,12 @@ onMounted(async () => {
 
           <!-- Helper Box -->
           <div
-            class="rounded-3xl bg-indigo-50 p-6 border border-indigo-100 shadow-sm ring-1 ring-indigo-200"
+            class="theme-card-muted rounded-3xl p-6 shadow-sm"
           >
-            <h3 class="text-sm font-bold text-indigo-900">
+            <h3 class="theme-title text-sm font-bold">
               Need help with your move?
             </h3>
-            <p class="mt-2 text-xs text-indigo-700 leading-relaxed">
+            <p class="theme-copy mt-2 text-xs leading-relaxed">
               Contact the mover directly through the platform or our support
               team if you experience any issues.
             </p>

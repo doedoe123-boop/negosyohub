@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Property;
 use App\Models\RentalAgreement;
-use App\Models\Store;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -13,14 +12,31 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class RentalAgreementFactory extends Factory
 {
+    public function configure(): static
+    {
+        return $this->afterMaking(function (RentalAgreement $agreement): void {
+            if ($agreement->property && ! $agreement->store_id) {
+                $agreement->store_id = $agreement->property->store_id;
+            }
+        })->afterCreating(function (RentalAgreement $agreement): void {
+            if ($agreement->property && $agreement->store_id !== $agreement->property->store_id) {
+                $agreement->updateQuietly([
+                    'store_id' => $agreement->property->store_id,
+                ]);
+            }
+        });
+    }
+
     /**
      * @return array<string, mixed>
      */
     public function definition(): array
     {
+        $property = Property::factory()->forRent();
+
         return [
-            'property_id' => Property::factory(),
-            'store_id' => Store::factory(),
+            'property_id' => $property,
+            'store_id' => null,
             'tenant_user_id' => null,
             'tenant_name' => fake()->name(),
             'tenant_email' => fake()->safeEmail(),
@@ -44,6 +60,14 @@ class RentalAgreementFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'tenant_user_id' => User::factory(),
+        ]);
+    }
+
+    public function signed(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => 'signed',
+            'signed_at' => now()->subDays(3),
         ]);
     }
 }

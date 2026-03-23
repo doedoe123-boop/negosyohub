@@ -184,6 +184,11 @@ const routes = [
             component: () => import("@/pages/account/OrderDetail.vue"),
           },
           {
+            path: "orders/:id/tracking",
+            name: "account.orders.tracking",
+            component: () => import("@/pages/account/ShipmentTrackingPage.vue"),
+          },
+          {
             path: "inquiries",
             name: "account.inquiries",
             component: () => import("@/pages/account/InquiriesPage.vue"),

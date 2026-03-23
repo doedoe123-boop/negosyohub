@@ -166,6 +166,34 @@ const shippingAddress = computed(() => {
   return addrs.find((a) => a.type === "shipping") ?? addrs[0] ?? null;
 });
 
+const internalTrackingPath = computed(() => {
+  const trackingUrl = order.value?.latest_shipment?.tracking_url;
+
+  if (!order.value?.latest_shipment) {
+    return null;
+  }
+
+  if (trackingUrl && !trackingUrl.startsWith("/") && !trackingUrl.includes("tracking.negosyohub.test")) {
+    return null;
+  }
+
+  return `/account/orders/${order.value.id}/tracking`;
+});
+
+const externalTrackingUrl = computed(() => {
+  const trackingUrl = order.value?.latest_shipment?.tracking_url;
+
+  if (!trackingUrl || trackingUrl.startsWith("/")) {
+    return null;
+  }
+
+  if (trackingUrl.includes("tracking.negosyohub.test")) {
+    return null;
+  }
+
+  return trackingUrl;
+});
+
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -358,9 +386,16 @@ async function reorder() {
               {{ order.latest_shipment.customer_delivery_label }}
             </p>
           </div>
+          <RouterLink
+            v-if="internalTrackingPath"
+            :to="internalTrackingPath"
+            class="text-sm font-semibold text-brand-600 hover:underline"
+          >
+            Track shipment
+          </RouterLink>
           <a
-            v-if="order.latest_shipment.tracking_url"
-            :href="order.latest_shipment.tracking_url"
+            v-else-if="externalTrackingUrl"
+            :href="externalTrackingUrl"
             target="_blank"
             rel="noreferrer"
             class="text-sm font-semibold text-brand-600 hover:underline"

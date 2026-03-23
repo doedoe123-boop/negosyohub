@@ -189,25 +189,25 @@ class MediaSeederHelper
         string $collection = 'images',
         int $count = 3,
     ): void {
+        if ($model->getMedia($collection)->count() >= $count) {
+            return;
+        }
+
         $ids = self::PHOTO_IDS[$keyword] ?? self::PHOTO_IDS['general'];
         $ids = array_slice($ids, 0, min($count, count($ids)));
 
         foreach ($ids as $i => $photoId) {
-            $cachedPath = self::cachedImagePath($photoId);
-
-            if (! Storage::disk('local')->exists($cachedPath)) {
-                self::downloadToCache($photoId, $cachedPath);
-            }
-
+            $cachedPath = self::resolveSeedImagePath($keyword, $photoId, $i + 1);
             $absolutePath = Storage::disk('local')->path($cachedPath);
 
             if (! file_exists($absolutePath)) {
-                continue;
+                $cachedPath = self::ensurePlaceholder($keyword, $i + 1);
+                $absolutePath = Storage::disk('local')->path($cachedPath);
             }
 
             $model->addMedia($absolutePath)
                 ->preservingOriginal()
-                ->usingFileName("{$keyword}-".($i + 1).'.jpg')
+                ->usingFileName("{$keyword}-".($i + 1).'.'.pathinfo($absolutePath, PATHINFO_EXTENSION))
                 ->toMediaCollection($collection);
         }
     }
@@ -247,7 +247,7 @@ class MediaSeederHelper
         $url = "https://images.unsplash.com/{$photoId}?w=900&q=80&auto=format&fit=crop";
 
         try {
-            $response = Http::timeout(30)->get($url);
+            $response = Http::timeout(5)->get($url);
 
             if ($response->successful()) {
                 Storage::disk('local')->put($relativePath, $response->body());
@@ -255,5 +255,74 @@ class MediaSeederHelper
         } catch (\Throwable) {
             // Silently skip — seeder continues without the image.
         }
+    }
+
+    private static function resolveSeedImagePath(string $keyword, string $photoId, int $index): string
+    {
+        if (app()->environment('testing')) {
+            return self::ensurePlaceholder($keyword, $index);
+        }
+
+        $cachedPath = self::cachedImagePath($photoId);
+
+        if (! Storage::disk('local')->exists($cachedPath)) {
+            self::downloadToCache($photoId, $cachedPath);
+        }
+
+        if (! Storage::disk('local')->exists($cachedPath)) {
+            return self::ensurePlaceholder($keyword, $index);
+        }
+
+        return $cachedPath;
+    }
+
+    private static function ensurePlaceholder(string $keyword, int $index): string
+    {
+        $relativePath = 'seeder-images/placeholders/'.$keyword.'-'.$index.'.svg';
+
+        if (! Storage::disk('local')->exists($relativePath)) {
+            $palette = self::placeholderPalette($keyword);
+            $label = str($keyword)->replace('_', ' ')->title()->value();
+            $svg = <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="{$label}">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{$palette['start']}" />
+      <stop offset="100%" stop-color="{$palette['end']}" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)" rx="36" />
+  <circle cx="1040" cy="160" r="120" fill="rgba(255,255,255,0.08)" />
+  <circle cx="190" cy="660" r="180" fill="rgba(255,255,255,0.06)" />
+  <text x="80" y="360" font-family="Arial, Helvetica, sans-serif" font-size="86" font-weight="700" fill="#ffffff">{$label}</text>
+  <text x="82" y="435" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="rgba(255,255,255,0.82)">NegosyoHub demo media</text>
+  <text x="82" y="485" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="rgba(255,255,255,0.72)">Image {$index}</text>
+</svg>
+SVG;
+
+            Storage::disk('local')->put($relativePath, $svg);
+        }
+
+        return $relativePath;
+    }
+
+    /**
+     * @return array{start: string, end: string}
+     */
+    private static function placeholderPalette(string $keyword): array
+    {
+        return match ($keyword) {
+            'electronics' => ['start' => '#102446', 'end' => '#2563eb'],
+            'clothing' => ['start' => '#4b1d36', 'end' => '#db2777'],
+            'home_living' => ['start' => '#164e3f', 'end' => '#0f766e'],
+            'food' => ['start' => '#92400e', 'end' => '#f97316'],
+            'health_beauty' => ['start' => '#7c2d12', 'end' => '#fb7185'],
+            'sports' => ['start' => '#14532d', 'end' => '#22c55e'],
+            'books' => ['start' => '#312e81', 'end' => '#6366f1'],
+            'condo', 'commercial' => ['start' => '#111827', 'end' => '#334155'],
+            'lot', 'warehouse' => ['start' => '#365314', 'end' => '#65a30d'],
+            'movers' => ['start' => '#4c1d95', 'end' => '#7c3aed'],
+            default => ['start' => '#0f172a', 'end' => '#1d4ed8'],
+        };
     }
 }

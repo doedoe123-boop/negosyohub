@@ -13,6 +13,7 @@ import PaymentMethodsPage from "@/pages/account/PaymentMethodsPage.vue";
 import SettingsPage from "@/pages/account/SettingsPage.vue";
 import OrdersPage from "@/pages/account/OrdersPage.vue";
 import OrderDetail from "@/pages/account/OrderDetail.vue";
+import HelpPage from "@/pages/account/HelpPage.vue";
 
 // ---------------------------------------------------------------------------
 // API mocks
@@ -66,6 +67,10 @@ vi.mock("@/api/movingBookings", () => ({
 
 vi.mock("@/api/notifications", () => ({
   notificationsApi: { list: vi.fn(), markRead: vi.fn(), markAllRead: vi.fn() },
+}));
+
+vi.mock("@/api/support", () => ({
+  supportApi: { list: vi.fn(), show: vi.fn(), create: vi.fn() },
 }));
 
 vi.mock("@/api/cart", () => ({
@@ -1529,5 +1534,42 @@ describe("Account Dashboard — quick links", () => {
 
     expect(wrapper.text()).toContain("Moving Bookings");
     expect(wrapper.text()).toContain("Booking #42");
+  });
+});
+
+describe("HelpPage query prefill", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    vi.clearAllMocks();
+  });
+
+  it("opens the support modal with rental safety report details from the query string", async () => {
+    seedAuth(pinia);
+    const { supportApi } = await import("@/api/support");
+    supportApi.list.mockResolvedValue({ data: { data: [] } });
+
+    const routePath =
+      "/account?open=1&sector=paupahan&category=landlord_issue&priority=high&store_id=8&subject=Report%20rental%20listing&message=Please%20review%20this%20listing";
+
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/account", component: HelpPage }],
+    });
+    await router.push(routePath);
+    await router.isReady();
+
+    const wrapper = mount(HelpPage, {
+      global: { plugins: [pinia, router] },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Open Support Ticket");
+    const inputs = wrapper.findAll("input");
+    expect(inputs[0].element.value).toBe("Report rental listing");
+    expect(wrapper.find("textarea").element.value).toBe(
+      "Please review this listing",
+    );
   });
 });

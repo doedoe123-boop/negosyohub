@@ -74,4 +74,13 @@ class UserFactory extends Factory
             'role' => UserRole::Staff,
         ]);
     }
+
+    public function demo(string $email, string $name, UserRole $role = UserRole::Customer): static
+    {
+        return $this->state(fn (): array => [
+            'name' => $name,
+            'email' => $email,
+            'role' => $role,
+        ]);
+    }
 }

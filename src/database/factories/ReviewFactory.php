@@ -15,6 +15,24 @@ class ReviewFactory extends Factory
     protected $model = Review::class;
 
     /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Review $review): void {
+            if (! $review->reviewable_type) {
+                $review->reviewable_type = Store::class;
+            }
+        })->afterCreating(function (Review $review): void {
+            if ($review->reviewable_type === Store::class && ! $review->reviewable_id) {
+                $review->updateQuietly([
+                    'reviewable_id' => $review->store_id,
+                ]);
+            }
+        });
+    }
+
+    /**
      * @var list<string>
      */
     private array $reviewTitles = [

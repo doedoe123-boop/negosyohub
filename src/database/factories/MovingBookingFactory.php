@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\MovingBooking;
+use App\Models\RentalAgreement;
 use App\Models\Store;
 use App\Models\User;
 use App\MovingBookingStatus;
@@ -24,7 +25,7 @@ class MovingBookingFactory extends Factory
         $basePrice = fake()->numberBetween(200000, 2000000); // 2000–20000 PHP
 
         return [
-            'store_id' => Store::factory(),
+            'store_id' => Store::factory()->movingService(),
             'customer_user_id' => User::factory(),
             'rental_agreement_id' => null,
             'status' => MovingBookingStatus::Pending,
@@ -56,6 +57,13 @@ class MovingBookingFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => MovingBookingStatus::Completed,
             'payment_status' => PaymentStatus::Paid,
+        ]);
+    }
+
+    public function linkedToRental(): static
+    {
+        return $this->state(fn (): array => [
+            'rental_agreement_id' => RentalAgreement::factory()->withTenantUser(),
         ]);
     }
 }

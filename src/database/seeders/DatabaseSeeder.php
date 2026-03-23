@@ -22,32 +22,19 @@ class DatabaseSeeder extends Seeder
 
         $this->seedRolesAndPermissions();
 
-        // Platform-level roles & permissions (admin panel staff management)
         $this->call(PlatformRolesAndPermissionsSeeder::class);
 
-        $admin = User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@marketplace.test',
-            'role' => UserRole::Admin,
-        ]);
-        $admin->assignRole(['admin', 'super_admin']);
-
-        User::factory()->create([
-            'name' => 'Test Customer',
-            'email' => 'customer@example.com',
-            'role' => UserRole::Customer,
-        ]);
-
         $this->call([
-            StoreSeeder::class,
-            PayoutSeeder::class,
-            LunarCatalogSeeder::class,
-            LegalPageSeeder::class,
             SectorSeeder::class,
-            ProductSeeder::class,
-            PropertyListingSeeder::class,
-            ShippingSeeder::class,
-            CategorySeeder::class,
+            UserSeeder::class,
+            StoreSeeder::class,
+            EcommerceSeeder::class,
+            RealtySeeder::class,
+            RentalSeeder::class,
+            MovingServiceSeeder::class,
+            LogisticsSeeder::class,
+            PayoutSeeder::class,
+            LegalPageSeeder::class,
             FaqSeeder::class,
         ]);
 

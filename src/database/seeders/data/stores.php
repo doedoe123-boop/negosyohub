@@ -3,9 +3,11 @@
 /**
  * Seed data for StoreSeeder.
  *
- * Returns a two-key array:
+ * Returns a multi-sector array:
  *   'ecommerce'   – 10 e-commerce stores (sector: Ecommerce)
  *   'real_estate' – 10 real-estate stores (sector: RealEstate)
+ *   'rental'      – demo rental/landlord stores (sector: Paupahan)
+ *   'moving_service' – demo moving providers (sector: Lipat Bahay)
  *
  * Slugs are stable — ProductSeeder and PropertyListingSeeder resolve
  * stores by slug, so never rename them here.
@@ -281,6 +283,79 @@ return [
             'default_loan_term_years' => 20,
             'default_down_payment_percent' => 20,
             'address' => ['line_one' => 'P. Burgos Street, Poblacion', 'city' => 'Batangas City', 'postcode' => '4200'],
+        ],
+    ],
+
+    // ── Rental / Paupahan stores ──────────────────────────────────────────────
+
+    'rental' => [
+        [
+            'name' => 'UrbanNest Rentals',
+            'slug' => 'urbannest-rentals',
+            'email' => 'owner@urbannest-rentals.test',
+            'tagline' => 'Managed apartments for long-stay city living.',
+            'description' => 'UrbanNest Rentals manages furnished apartments and compact family units in business districts across Metro Manila, tailored for young professionals and relocating families.',
+            'phone' => '+63 2 8801 1122',
+            'website' => 'https://urbannestrentals.ph',
+            'agent_bio' => 'Leah Ramos oversees professionally managed rental units with fast tenant screening and move-in assistance.',
+            'address' => ['line_one' => '30 Shaw Boulevard', 'city' => 'Mandaluyong City', 'postcode' => '1550'],
+        ],
+        [
+            'name' => 'HarborStay Homes',
+            'slug' => 'harborstay-homes',
+            'email' => 'owner@harborstay-homes.test',
+            'tagline' => 'Flexible monthly rentals near ports, malls, and business hubs.',
+            'description' => 'HarborStay Homes offers ready-for-occupancy rental condos and apartment units for commuters, OFW families, and tenants looking for accessible transport links in Metro Manila.',
+            'phone' => '+63 2 8722 3400',
+            'website' => 'https://harborstayhomes.ph',
+            'agent_bio' => 'Marco Velasco focuses on tenant-ready rentals with transparent deposit and utility terms.',
+            'address' => ['line_one' => '78 Roxas Boulevard', 'city' => 'Pasay City', 'postcode' => '1300'],
+        ],
+        [
+            'name' => 'Cebu LeaseLine',
+            'slug' => 'cebu-leaseline',
+            'email' => 'owner@cebu-leaseline.test',
+            'tagline' => 'Condo and apartment rentals for urban Cebu living.',
+            'description' => 'Cebu LeaseLine curates long-term rental units near Cebu IT Park, Cebu Business Park, and key university districts, with landlord support and move-in coordination.',
+            'phone' => '+63 32 410 2233',
+            'website' => 'https://cebuleaseline.ph',
+            'agent_bio' => 'Jessa Lim specializes in managed rental inventory for professionals and students in Cebu City.',
+            'address' => ['line_one' => 'Apas Road, Lahug', 'city' => 'Cebu City', 'postcode' => '6000'],
+        ],
+    ],
+
+    // ── Moving service stores ────────────────────────────────────────────────
+
+    'moving_service' => [
+        [
+            'name' => 'Bayanihan Movers',
+            'slug' => 'bayanihan-movers',
+            'email' => 'owner@bayanihan-movers.test',
+            'tagline' => 'Trusted household moving for condos, homes, and offices.',
+            'description' => 'Bayanihan Movers handles full-service household relocation with trained loaders, careful appliance handling, and same-day Metro Manila coverage.',
+            'phone' => '+63 2 8812 4400',
+            'website' => 'https://bayanihanmovers.ph',
+            'address' => ['line_one' => '85 Pioneer Street', 'city' => 'Mandaluyong City', 'postcode' => '1554'],
+        ],
+        [
+            'name' => 'Lipat Express PH',
+            'slug' => 'lipat-express-ph',
+            'email' => 'owner@lipat-express-ph.test',
+            'tagline' => 'Fast city-to-city moving with careful packing support.',
+            'description' => 'Lipat Express PH specializes in apartment and townhouse relocation between Metro Manila, Cavite, Laguna, and nearby growth cities.',
+            'phone' => '+63 49 544 7788',
+            'website' => 'https://lipatexpress.ph',
+            'address' => ['line_one' => 'South Luzon Expressway Service Road', 'city' => 'Biñan City', 'postcode' => '4024'],
+        ],
+        [
+            'name' => 'VisMin Relocation Co.',
+            'slug' => 'vismin-relocation-co',
+            'email' => 'owner@vismin-relocation-co.test',
+            'tagline' => 'Professional relocation crews for Cebu and Davao moves.',
+            'description' => 'VisMin Relocation Co. serves household and small-office moves in Cebu City, Mandaue, Davao, and nearby provinces with optional packing and setup crews.',
+            'phone' => '+63 82 301 8877',
+            'website' => 'https://visminrelocation.ph',
+            'address' => ['line_one' => 'Quimpo Boulevard', 'city' => 'Davao City', 'postcode' => '8000'],
         ],
     ],
 

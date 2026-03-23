@@ -17,9 +17,9 @@ use Lunar\Models\ProductType;
 use Lunar\Models\Tag;
 
 /**
- * Seeds global Lunar catalog configuration:
- * product types, attribute groups, attributes, collection groups,
- * collections, brands, product options, and tags.
+ * Seeds global Lunar catalog configuration for the marketplace:
+ * product types, attribute groups, collections, brands, product options,
+ * and tags that match the seeded storefront catalog.
  *
  * These are platform-wide — not scoped to a specific store.
  */
@@ -133,9 +133,17 @@ class LunarCatalogSeeder extends Seeder
 
         // === Product Types ===
         $productTypes = [
-            'Food' => [$detailsGroup, $pricingGroup],
+            'Electronics' => [$detailsGroup, $pricingGroup],
+            'Clothing' => [$detailsGroup, $pricingGroup],
+            'Home & Living' => [$detailsGroup, $pricingGroup],
+            'Food & Grocery' => [$detailsGroup, $pricingGroup],
+            'Health & Beauty' => [$detailsGroup, $pricingGroup],
+            'Sports & Fitness' => [$detailsGroup, $pricingGroup],
+            'Books & Stationery' => [$detailsGroup, $pricingGroup],
+            'Toys & Hobbies' => [$detailsGroup, $pricingGroup],
+            'Automotive' => [$detailsGroup, $pricingGroup],
+            'Pets & Accessories' => [$detailsGroup, $pricingGroup],
             'Beverage' => [$detailsGroup, $pricingGroup],
-            'Combo Meal' => [$detailsGroup, $pricingGroup],
         ];
 
         foreach ($productTypes as $name => $groups) {
@@ -155,32 +163,34 @@ class LunarCatalogSeeder extends Seeder
     private function seedCollectionGroups(): void
     {
         $groups = [
-            'menu-categories' => [
-                'name' => 'Menu Categories',
+            'marketplace-categories' => [
+                'name' => 'Marketplace Categories',
                 'collections' => [
-                    'Appetizers',
-                    'Main Course',
-                    'Desserts',
-                    'Beverages',
-                    'Sides',
-                    'Combo Meals',
+                    'Electronics',
+                    'Fashion',
+                    'Food',
+                    'Home & Living',
+                    'Beauty',
+                    'Sports',
+                    'Books',
+                    'Pets',
                 ],
             ],
-            'dietary' => [
-                'name' => 'Dietary',
-                'collections' => [
-                    'Vegetarian',
-                    'Vegan',
-                    'Halal',
-                    'Gluten-Free',
-                ],
-            ],
-            'featured' => [
-                'name' => 'Featured',
+            'shopping-highlights' => [
+                'name' => 'Shopping Highlights',
                 'collections' => [
                     'Best Sellers',
                     'New Arrivals',
-                    'Special Offers',
+                    'Everyday Essentials',
+                    'Gift Picks',
+                ],
+            ],
+            'storefront-curation' => [
+                'name' => 'Storefront Curation',
+                'collections' => [
+                    'Local Favorites',
+                    'Eco-Friendly',
+                    'Premium Picks',
                 ],
             ],
         ];
@@ -211,16 +221,19 @@ class LunarCatalogSeeder extends Seeder
     }
 
     /**
-     * Seed restaurant-related brands.
+     * Seed marketplace-friendly demo brands.
      */
     private function seedBrands(): void
     {
         $brands = [
-            'House Special',
-            'Premium',
-            'Classic',
-            'Street Food',
-            'Local Favorite',
+            'TechNest Essentials',
+            'FreshBasket Select',
+            'StyleForward Studio',
+            'GreenHome Living',
+            'SportzHub Performance',
+            'CosmetiQ Care',
+            'ToyWorld Kids',
+            'AutoGear Road',
         ];
 
         foreach ($brands as $brand) {
@@ -229,7 +242,7 @@ class LunarCatalogSeeder extends Seeder
     }
 
     /**
-     * Seed product options (size, spice level, etc.).
+     * Seed shared product options used by marketplace demo products.
      */
     private function seedProductOptions(): void
     {
@@ -238,17 +251,17 @@ class LunarCatalogSeeder extends Seeder
                 'label' => 'Size',
                 'values' => ['Small', 'Medium', 'Large', 'Extra Large'],
             ],
-            'spice-level' => [
-                'label' => 'Spice Level',
-                'values' => ['Mild', 'Medium', 'Hot', 'Extra Hot'],
+            'color' => [
+                'label' => 'Color',
+                'values' => ['Black', 'White', 'Navy', 'Beige', 'Olive'],
             ],
-            'add-ons' => [
-                'label' => 'Add-ons',
-                'values' => ['Extra Rice', 'Extra Sauce', 'Extra Cheese', 'Egg'],
+            'storage' => [
+                'label' => 'Storage',
+                'values' => ['128GB', '256GB', '512GB', '1TB'],
             ],
-            'sugar-level' => [
-                'label' => 'Sugar Level',
-                'values' => ['No Sugar', '25%', '50%', '75%', '100%'],
+            'pack-size' => [
+                'label' => 'Pack Size',
+                'values' => ['Single', '2-Pack', '4-Pack', 'Family Pack'],
             ],
         ];
 
@@ -279,23 +292,22 @@ class LunarCatalogSeeder extends Seeder
     }
 
     /**
-     * Seed common tags for food marketplace products.
+     * Seed common tags for demo merchandising and storefront chips.
      */
     private function seedTags(): void
     {
         $tags = [
             'bestseller',
-            'new',
-            'spicy',
-            'vegetarian',
-            'vegan',
-            'halal',
-            'gluten-free',
+            'new-arrival',
+            'giftable',
+            'eco-friendly',
+            'essentials',
+            'premium',
+            'budget-pick',
             'promo',
-            'limited-edition',
-            'chef-special',
-            'family-size',
-            'value-meal',
+            'limited-stock',
+            'top-rated',
+            'local-made',
         ];
 
         foreach ($tags as $tag) {

@@ -90,18 +90,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+  <div class="theme-page mx-auto max-w-3xl px-4 py-8 sm:px-6">
     <!-- Header Area -->
     <div
       class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div>
         <h1
-          class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl"
+          class="theme-title text-2xl font-extrabold tracking-tight sm:text-3xl"
         >
           My Moving Bookings
         </h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <p class="theme-copy mt-1 text-sm">
           Track and manage your upcoming and past Lipat Bahay moves.
         </p>
       </div>
@@ -116,17 +116,17 @@ onMounted(() => {
 
     <!-- Skeleton Loader -->
     <div v-if="loading" class="space-y-4">
-      <div
-        v-for="i in 3"
-        :key="i"
-        class="h-32 animate-pulse rounded-2xl bg-white ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
-      />
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="theme-card h-32 animate-pulse rounded-2xl"
+        />
     </div>
 
     <!-- Error State -->
     <div
       v-else-if="error"
-      class="rounded-2xl border border-rose-100 bg-rose-50 p-8 text-center"
+      class="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700"
     >
       <div
         class="mx-auto flex size-12 items-center justify-center rounded-full bg-rose-100"
@@ -150,7 +150,7 @@ onMounted(() => {
     <!-- Empty State -->
     <div
       v-else-if="bookings.length === 0"
-      class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white py-16 px-6 text-center shadow-sm dark:bg-slate-900 dark:border-slate-700"
+      class="theme-empty-state flex flex-col items-center justify-center rounded-3xl py-16 px-6 text-center"
     >
       <div class="relative mb-6">
         <div
@@ -162,10 +162,10 @@ onMounted(() => {
           <TruckIcon class="size-10" />
         </div>
       </div>
-      <h3 class="text-xl font-bold text-slate-900 tracking-tight">
+      <h3 class="theme-title text-xl font-bold tracking-tight">
         Ready for your next move?
       </h3>
-      <p class="mx-auto mt-2 max-w-xs text-sm text-slate-500">
+      <p class="theme-copy mx-auto mt-2 max-w-xs text-sm">
         You don't have any bookings yet. Browse our trusted network of moving
         professionals.
       </p>
@@ -186,23 +186,23 @@ onMounted(() => {
         v-for="booking in bookings"
         :key="booking.id"
         :to="{ name: 'account.moving.show', params: { id: booking.id } }"
-        class="group relative block overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-brand-200 hover:shadow-md active:scale-[0.995] dark:bg-slate-800 dark:border-slate-700"
+        class="theme-card theme-card-hover group relative block overflow-hidden rounded-2xl p-5 active:scale-[0.995]"
       >
         <!-- Status Badge -->
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <div
-              class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-400 ring-1 ring-slate-100 shadow-sm group-hover:bg-brand-50 group-hover:text-brand-600 group-hover:ring-brand-100 transition-colors"
+              class="theme-card-muted flex size-12 shrink-0 items-center justify-center rounded-xl shadow-sm group-hover:bg-brand-50 group-hover:text-brand-600 group-hover:ring-brand-100 transition-colors"
             >
               <TruckIcon class="size-6" />
             </div>
             <div class="min-w-0">
               <h3
-                class="truncate text-base font-bold text-slate-900 group-hover:text-brand-700 transition-colors"
+                class="theme-title truncate text-base font-bold group-hover:text-brand-700 transition-colors"
               >
                 {{ booking.store?.name ?? "Moving Company" }}
               </h3>
-              <div class="flex items-center gap-1.5 text-xs text-slate-500">
+              <div class="theme-copy flex items-center gap-1.5 text-xs">
                 <CalendarIcon class="size-3.5" />
                 {{ formatDate(booking.scheduled_at) }}
               </div>
@@ -225,7 +225,7 @@ onMounted(() => {
               ></span>
               {{ statusConfig[booking.status]?.label ?? booking.status }}
             </span>
-            <p class="text-sm font-extrabold text-slate-900">
+            <p class="theme-title text-sm font-extrabold">
               {{ formatPrice(booking.total_price) }}
             </p>
           </div>
@@ -233,32 +233,32 @@ onMounted(() => {
 
         <!-- Route Info -->
         <div
-          class="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-100"
+          class="theme-card-muted mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl p-4"
         >
           <div class="min-w-0">
             <p
-              class="text-[10px] uppercase tracking-widest font-bold text-slate-400"
+              class="theme-copy text-[10px] uppercase tracking-widest font-bold"
             >
               Pickup
             </p>
-            <p class="mt-0.5 truncate text-sm font-semibold text-slate-700">
+            <p class="theme-title mt-0.5 truncate text-sm font-semibold">
               {{ booking.pickup_city }}
             </p>
           </div>
 
           <div
-            class="flex size-8 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200"
+            class="theme-card flex size-8 items-center justify-center rounded-full shadow-sm"
           >
             <ArrowRightIcon class="size-4 text-brand-600" />
           </div>
 
           <div class="min-w-0 text-right">
             <p
-              class="text-[10px] uppercase tracking-widest font-bold text-slate-400"
+              class="theme-copy text-[10px] uppercase tracking-widest font-bold"
             >
               Delivery
             </p>
-            <p class="mt-0.5 truncate text-sm font-semibold text-slate-700">
+            <p class="theme-title mt-0.5 truncate text-sm font-semibold">
               {{ booking.delivery_city }}
             </p>
           </div>

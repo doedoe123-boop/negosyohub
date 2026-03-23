@@ -88,4 +88,13 @@ class OrderFactory extends Factory
             'status' => OrderStatus::Confirmed->value,
         ]);
     }
+
+    public function cashOnDelivery(): static
+    {
+        return $this->state(fn (): array => [
+            'payment_method' => OrderPaymentMethod::CashOnDelivery->value,
+            'payment_status' => OrderPaymentStatus::Unpaid->value,
+            'paid_at' => null,
+        ]);
+    }
 }
