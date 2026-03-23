@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\MovingBooking;
 use App\Models\Property;
 use App\Models\PropertyInquiry;
 use App\Models\RentalAgreement;
@@ -23,6 +24,37 @@ class PropertyDetailResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $user = $request->user('sanctum');
+        $userInquiry = null;
+        $rentalAgreement = null;
+        $movingBooking = null;
+
+        if ($user !== null) {
+            $userInquiry = PropertyInquiry::query()
+                ->where('property_id', $this->id)
+                ->where('user_id', $user->id)
+                ->latest('id')
+                ->first();
+
+            $rentalAgreement = RentalAgreement::query()
+                ->where('property_id', $this->id)
+                ->where('tenant_user_id', $user->id)
+                ->whereIn('status', ['pending', 'negotiating', 'signed', 'active'])
+                ->latest('id')
+                ->first();
+
+            if ($rentalAgreement !== null) {
+                $movingBooking = MovingBooking::query()
+                    ->where('rental_agreement_id', $rentalAgreement->id)
+                    ->where('customer_user_id', $user->id)
+                    ->latest('id')
+                    ->first();
+            }
+        }
+
+        $landlordCreatedAt = $this->store?->owner?->created_at;
+        $landlordAccountAgeDays = $landlordCreatedAt?->diffInDays(now());
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -86,6 +118,19 @@ class PropertyDetailResource extends JsonResource
             'house_rules' => $this->house_rules,
             'utility_inclusions' => $this->utility_inclusions,
             'safety_features' => $this->safety_features,
+            'is_verified_landlord' => $this->verifiedLandlordSignal(),
+            'is_suspicious_listing' => $this->suspiciousListingSignal(),
+            'trust_signals' => [
+                'landlord_account_age_days' => $landlordAccountAgeDays,
+                'landlord_account_age_label' => $landlordAccountAgeDays === null
+                    ? null
+                    : ($landlordAccountAgeDays >= 365
+                        ? floor($landlordAccountAgeDays / 365).' year'.(floor($landlordAccountAgeDays / 365) === 1 ? '' : 's')
+                        : $landlordAccountAgeDays.' day'.($landlordAccountAgeDays === 1 ? '' : 's')),
+                'warning_banner' => $this->store?->isPaupahan()
+                    ? 'Do not send money outside the platform. Schedule viewings and confirm rental terms here before moving in.'
+                    : null,
+            ],
 
             // Flags & stats
             'is_featured' => $this->is_featured,
@@ -128,35 +173,36 @@ class PropertyDetailResource extends JsonResource
                 'agent_bio' => $this->store->agent_bio,
                 'phone' => $this->store->phone,
                 'sector_template' => $this->store->sector_template,
+                'created_at' => $this->store->created_at?->toIso8601String(),
             ]),
 
             // Inquiry awareness (authenticated users only)
             'has_inquired' => $this->when(
-                $request->user('sanctum') !== null,
-                fn () => PropertyInquiry::query()
-                    ->where('property_id', $this->id)
-                    ->where('user_id', $request->user('sanctum')->id)
-                    ->exists(),
+                $user !== null,
+                fn () => $userInquiry !== null,
             ),
 
             // Rental agreement awareness (authenticated users only)
             'has_rented' => $this->when(
-                $request->user('sanctum') !== null,
-                fn () => RentalAgreement::query()
-                    ->where('property_id', $this->id)
-                    ->where('tenant_user_id', $request->user('sanctum')->id)
-                    ->whereIn('status', ['pending', 'negotiating', 'signed', 'active'])
-                    ->exists(),
+                $user !== null,
+                fn () => $rentalAgreement !== null,
             ),
 
-            // Rental agreement awareness (authenticated users only)
-            'has_rented' => $this->when(
-                $request->user('sanctum') !== null,
-                fn () => RentalAgreement::query()
-                    ->where('property_id', $this->id)
-                    ->where('tenant_user_id', $request->user('sanctum')->id)
-                    ->whereIn('status', ['pending', 'negotiating', 'signed', 'active'])
-                    ->exists(),
+            'rental_journey' => $this->when(
+                $user !== null && $this->store?->isPaupahan(),
+                fn () => [
+                    'inquiry_submitted' => $userInquiry !== null,
+                    'inquiry_status' => $userInquiry?->status?->value,
+                    'inquiry_status_label' => $userInquiry?->status?->label(),
+                    'viewing_scheduled_at' => $userInquiry?->viewing_date?->toIso8601String(),
+                    'agreement_id' => $rentalAgreement?->id,
+                    'agreement_status' => $rentalAgreement?->status,
+                    'agreement_signed_at' => $rentalAgreement?->signed_at?->toIso8601String(),
+                    'move_in_date' => $rentalAgreement?->move_in_date?->toDateString(),
+                    'moving_booking_id' => $movingBooking?->id,
+                    'moving_booking_status' => $movingBooking?->status?->value,
+                    'ready_for_move_in' => $rentalAgreement !== null,
+                ],
             ),
 
             // SEO

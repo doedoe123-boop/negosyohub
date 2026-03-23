@@ -249,6 +249,144 @@ const sanitizedDescription = computed(() =>
   sanitizeHtml(property.value?.description ?? ""),
 );
 
+const trustHighlights = computed(() => {
+  if (!property.value || !isRental.value) {
+    return [];
+  }
+
+  const signals = [];
+
+  if (property.value.is_verified_landlord) {
+    signals.push({
+      label: "Verified landlord",
+      tone: "emerald",
+      copy: "Identity and account setup have been reviewed on-platform.",
+    });
+  }
+
+  if (property.value.trust_signals?.landlord_account_age_label) {
+    signals.push({
+      label: "Account age",
+      tone: "sky",
+      copy: `${property.value.trust_signals.landlord_account_age_label} on NegosyoHub`,
+    });
+  }
+
+  if (property.value.is_suspicious_listing) {
+    signals.push({
+      label: "Needs extra review",
+      tone: "amber",
+      copy: "This listing is missing some trust signals. Use the platform flow and report anything unusual.",
+    });
+  }
+
+  return signals;
+});
+
+const rentalJourney = computed(() => property.value?.rental_journey ?? null);
+
+const rentalJourneySteps = computed(() => {
+  const journey = rentalJourney.value;
+
+  return [
+    {
+      key: "inquiry",
+      label: "Inquiry",
+      done: Boolean(journey?.inquiry_submitted),
+      active: !journey?.inquiry_submitted,
+      description: journey?.inquiry_submitted
+        ? "Your interest is on record inside the platform."
+        : "Start here by sending your inquiry through NegosyoHub.",
+    },
+    {
+      key: "viewing",
+      label: "Viewing",
+      done: Boolean(journey?.viewing_scheduled_at),
+      active:
+        Boolean(journey?.inquiry_submitted) && !journey?.viewing_scheduled_at,
+      description: journey?.viewing_scheduled_at
+        ? `Viewing scheduled for ${new Date(
+            journey.viewing_scheduled_at,
+          ).toLocaleDateString("en-PH", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}.`
+        : "Schedule and confirm the viewing before any payment is discussed.",
+    },
+    {
+      key: "agreement",
+      label: "Agreement",
+      done: Boolean(journey?.agreement_id),
+      active:
+        Boolean(journey?.viewing_scheduled_at) && !journey?.agreement_id,
+      description: journey?.agreement_id
+        ? `Agreement status: ${journey.agreement_status ?? "pending"}.`
+        : "Review and confirm the rental agreement before moving in.",
+    },
+    {
+      key: "move-in",
+      label: "Move-In Prep",
+      done: Boolean(journey?.moving_booking_id),
+      active: Boolean(journey?.agreement_id) && !journey?.moving_booking_id,
+      description: journey?.moving_booking_id
+        ? "Your move-in preparation is already underway."
+        : "After the agreement, arrange movers and utilities from the platform.",
+    },
+  ];
+});
+
+const reportListingLink = computed(() => ({
+  path: "/account/help",
+  query: {
+    open: "1",
+    sector: "paupahan",
+    category: "landlord_issue",
+    priority: property.value?.is_suspicious_listing ? "urgent" : "high",
+    store_id: property.value?.store?.id ? String(property.value.store.id) : "",
+    subject: `Report rental listing: ${property.value?.title ?? "Property"}`,
+    message:
+      "I want to report a suspicious request or safety concern related to this rental listing. Please review this case before any off-platform payment is made.",
+  },
+}));
+
+const reportListingRedirect = computed(() => {
+  const search = new URLSearchParams(
+    Object.entries(reportListingLink.value.query).reduce((carry, [key, value]) => {
+      if (value !== null && value !== undefined && value !== "") {
+        carry[key] = value;
+      }
+
+      return carry;
+    }, {}),
+  ).toString();
+
+  return search
+    ? `${reportListingLink.value.path}?${search}`
+    : reportListingLink.value.path;
+});
+
+const reportListingDestination = computed(() =>
+  auth.isLoggedIn
+    ? reportListingLink.value
+    : { name: "auth.login", query: { redirect: reportListingRedirect.value } },
+);
+
+const moveInAssistantLink = computed(() => ({
+  path: "/movers",
+  query: {
+    rental_id: rentalJourney.value?.agreement_id
+      ? String(rentalJourney.value.agreement_id)
+      : "",
+    city: property.value?.city ?? "",
+    delivery_city: property.value?.city ?? "",
+    delivery_address: fullAddress.value ?? "",
+    scheduled_at: rentalJourney.value?.move_in_date
+      ? `${rentalJourney.value.move_in_date}T09:00`
+      : "",
+  },
+}));
+
 async function submitInquiry() {
   inquiryError.value = null;
   inquirySubmitting.value = true;
@@ -1427,6 +1565,104 @@ async function submitPropertyReview(payload) {
 
               <!-- Inquiry Section -->
               <div class="flex flex-col gap-4">
+                <div
+                  v-if="isRental"
+                  class="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4"
+                >
+                  <div class="flex items-start gap-3">
+                    <ShieldCheckIcon class="mt-0.5 size-5 shrink-0 text-amber-400" />
+                    <div>
+                      <p class="theme-title text-sm font-bold">
+                        Do not send money outside the platform
+                      </p>
+                      <p class="theme-copy mt-1 text-xs leading-relaxed">
+                        {{
+                          property.trust_signals?.warning_banner ??
+                          "Keep inquiries, agreement confirmation, and move-in coordination inside NegosyoHub."
+                        }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  v-if="isRental"
+                  class="theme-card-muted rounded-2xl p-4"
+                >
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="theme-title text-sm font-bold">Rental Trust Signals</p>
+                    <RouterLink
+                      :to="reportListingDestination"
+                      class="theme-copy text-xs font-semibold underline underline-offset-2 hover:text-[var(--color-text)]"
+                    >
+                      Report listing
+                    </RouterLink>
+                  </div>
+
+                  <div class="space-y-2">
+                    <div
+                      v-for="signal in trustHighlights"
+                      :key="signal.label"
+                      class="rounded-xl border px-3 py-2"
+                      :class="signal.tone === 'emerald'
+                        ? 'border-emerald-500/20 bg-emerald-500/10'
+                        : signal.tone === 'sky'
+                          ? 'border-sky-500/20 bg-sky-500/10'
+                          : 'border-amber-500/20 bg-amber-500/10'"
+                    >
+                      <p class="theme-title text-xs font-semibold">
+                        {{ signal.label }}
+                      </p>
+                      <p class="theme-copy mt-1 text-[11px] leading-relaxed">
+                        {{ signal.copy }}
+                      </p>
+                    </div>
+
+                    <p
+                      v-if="trustHighlights.length === 0"
+                      class="theme-copy text-xs leading-relaxed"
+                    >
+                      Use the guided inquiry, viewing, agreement, and move-in
+                      flow so every step remains trackable and reviewable.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  v-if="isRental"
+                  class="theme-card-muted rounded-2xl p-4"
+                >
+                  <p class="theme-title text-sm font-bold">Safe Move-In Journey</p>
+                  <div class="mt-3 space-y-2">
+                    <div
+                      v-for="step in rentalJourneySteps"
+                      :key="step.key"
+                      class="rounded-xl border px-3 py-2.5"
+                      :class="step.done
+                        ? 'border-emerald-500/20 bg-emerald-500/10'
+                        : step.active
+                          ? 'border-brand-500/20 bg-brand-500/10'
+                          : 'theme-divider-soft bg-transparent'"
+                    >
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="theme-title text-xs font-semibold">
+                          {{ step.label }}
+                        </p>
+                        <span
+                          class="theme-copy text-[10px] font-bold uppercase tracking-wide"
+                        >
+                          {{
+                            step.done ? "done" : step.active ? "next" : "later"
+                          }}
+                        </span>
+                      </div>
+                      <p class="theme-copy mt-1 text-[11px] leading-relaxed">
+                        {{ step.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Success (shared by both flows) -->
                 <div
                   v-if="inquirySuccess"
@@ -1467,6 +1703,12 @@ async function submitPropertyReview(payload) {
                     class="mt-2 w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
                   >
                     View Agreement
+                  </RouterLink>
+                  <RouterLink
+                    :to="moveInAssistantLink"
+                    class="btn-secondary w-full rounded-xl px-4 py-2.5 text-sm font-semibold"
+                  >
+                    Ready to move in? Book Movers
                   </RouterLink>
                 </div>
 

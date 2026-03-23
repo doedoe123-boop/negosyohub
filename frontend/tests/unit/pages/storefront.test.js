@@ -384,6 +384,51 @@ describe("Mover detail page", () => {
     expect(inputs[0].element.value).toBe("Demo Customer");
     expect(inputs[1].element.value).toBe("09171234567");
   });
+
+  it("pre-fills rental move-in destination details from the route query", async () => {
+    const { moversApi } = await import("@/api/movers");
+
+    moversApi.show.mockResolvedValue({
+      data: {
+        id: 4,
+        slug: "lipat-express-ph",
+        name: "Lipat Express PH",
+        city: "Pasig City",
+        province: "Metro Manila",
+        moving_add_ons: [],
+      },
+    });
+
+    const router = storeRouter();
+    await router.push({
+      name: "movers.show",
+      params: { slug: "lipat-express-ph" },
+      query: {
+        rental_id: "12",
+        delivery_address: "Tower A, Pioneer Residences, Mandaluyong City",
+        delivery_city: "Mandaluyong City",
+        scheduled_at: "2026-04-10T09:00",
+      },
+    });
+
+    const wrapper = mount(MoverDetail, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    const inputs = wrapper.findAll("input");
+    expect(inputs[4].element.value).toBe(
+      "Tower A, Pioneer Residences, Mandaluyong City",
+    );
+    expect(inputs[5].element.value).toBe("Mandaluyong City");
+    expect(inputs[6].element.value).toBe("2026-04-10T09:00");
+    expect(wrapper.find("textarea").element.value).toContain(
+      "Move-in booking linked to your rental agreement.",
+    );
+  });
 });
 
 describe("Movers page", () => {

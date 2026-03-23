@@ -107,11 +107,15 @@ class UserController extends Controller
                 'title' => $a->property?->title,
                 'slug' => $a->property?->slug,
                 'city' => $a->property?->city,
+                'full_address' => $a->property?->fullLocation(),
+                'address_line' => $a->property?->address_line,
                 'featured_image' => $a->property?->images[0] ?? null,
             ],
             'store' => [
+                'id' => $a->store?->id,
                 'name' => $a->store?->name,
                 'slug' => $a->store?->slug,
+                'phone' => $a->store?->phone,
             ],
         ]);
     }

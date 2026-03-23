@@ -30,7 +30,10 @@ vi.mock("@heroicons/vue/24/outline", () => {
     CheckCircleIcon: s,
     CalendarIcon: s,
     CalendarDaysIcon: s,
+    ChatBubbleLeftIcon: s,
+    ChatBubbleLeftRightIcon: s,
     ChevronRightIcon: s,
+    ClipboardDocumentCheckIcon: s,
     ClockIcon: s,
     Cog6ToothIcon: s,
     CreditCardIcon: s,
@@ -60,6 +63,7 @@ vi.mock("@heroicons/vue/24/outline", () => {
     UserCircleIcon: s,
     XMarkIcon: s,
     ExclamationTriangleIcon: s,
+    ExclamationCircleIcon: s,
     FireIcon: s,
     // Added for dashboard / inquiry / notification features
     BellIcon: s,

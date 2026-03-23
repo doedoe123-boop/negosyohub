@@ -31,14 +31,18 @@ const bookingError = ref("");
 const selectedAddOns = ref([]);
 
 const form = ref({
-  pickup_address: "",
-  delivery_address: "",
+  pickup_address: typeof route.query.pickup_address === "string" ? route.query.pickup_address : "",
+  delivery_address:
+    typeof route.query.delivery_address === "string" ? route.query.delivery_address : "",
   pickup_city: "",
-  delivery_city: "",
-  scheduled_at: "",
+  delivery_city: typeof route.query.delivery_city === "string" ? route.query.delivery_city : "",
+  scheduled_at: typeof route.query.scheduled_at === "string" ? route.query.scheduled_at : "",
   contact_name: auth.user?.name ?? "",
   contact_phone: "",
-  notes: "",
+  notes:
+    typeof route.query.rental_id === "string"
+      ? "Move-in booking linked to your rental agreement."
+      : "",
   rental_agreement_id: route.query.rental_id
     ? Number(route.query.rental_id)
     : null,

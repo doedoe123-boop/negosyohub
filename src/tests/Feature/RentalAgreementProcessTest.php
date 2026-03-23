@@ -71,6 +71,7 @@ test('tenant asking questions notifies landlord', function () {
     Notification::fake();
 
     $agreement = RentalAgreement::factory()->create([
+        'property_id' => $this->property->id,
         'store_id' => $this->store->id,
         'status' => 'pending',
     ]);
@@ -87,6 +88,8 @@ test('landlord responding to questions notifies tenant', function () {
     Notification::fake();
 
     $agreement = RentalAgreement::factory()->create([
+        'property_id' => $this->property->id,
+        'store_id' => $this->store->id,
         'tenant_email' => 'tenant@example.com',
         'status' => 'negotiating',
         'tenant_questions' => 'Can I have a pet?',

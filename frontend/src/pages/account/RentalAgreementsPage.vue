@@ -3,10 +3,12 @@ import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import {
   HomeModernIcon,
-  ChevronRightIcon,
   DocumentTextIcon,
   CheckCircleIcon,
   ChatBubbleLeftRightIcon,
+  TruckIcon,
+  ShieldCheckIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/vue/24/outline";
 import { agreementsApi } from "@/api/agreements";
 
@@ -71,6 +73,72 @@ function formatMoney(amount) {
     style: "currency",
     currency: "PHP",
   }).format(amount / 100);
+}
+
+function agreementJourney(agreement) {
+  const status = agreement.status;
+
+  return [
+    {
+      key: "inquiry",
+      label: "Inquiry",
+      done: true,
+      description: "You expressed interest in this rental.",
+    },
+    {
+      key: "agreement",
+      label: "Agreement",
+      done: ["signed", "active"].includes(status),
+      active: ["pending", "negotiating"].includes(status),
+      description:
+        status === "negotiating"
+          ? "Questions are being reviewed by the landlord."
+          : status === "pending"
+            ? "Review the rental agreement before signing."
+            : "Rental agreement confirmed.",
+    },
+    {
+      key: "move_in",
+      label: "Move-In Prep",
+      done: false,
+      active: ["signed", "active"].includes(status),
+      description:
+        ["signed", "active"].includes(status)
+          ? "Prepare your transfer, utilities, and moving schedule."
+          : "Available after agreement confirmation.",
+    },
+  ];
+}
+
+function moversLink(agreement) {
+  return {
+    path: "/movers",
+    query: {
+      rental_id: String(agreement.id),
+      city: agreement.property?.city ?? "",
+      delivery_city: agreement.property?.city ?? "",
+      delivery_address: agreement.property?.full_address ?? agreement.property?.address_line ?? "",
+      scheduled_at: agreement.move_in_date
+        ? `${agreement.move_in_date}T09:00`
+        : "",
+    },
+  };
+}
+
+function reportLink(agreement) {
+  return {
+    path: "/account/help",
+    query: {
+      open: "1",
+      sector: "paupahan",
+      category: "landlord_issue",
+      priority: "high",
+      store_id: agreement.store?.id ? String(agreement.store.id) : "",
+      subject: `Report rental issue: ${agreement.property?.title ?? "Property listing"}`,
+      message:
+        "I want to report a safety concern or suspicious request related to this rental listing/agreement. Please review this case before any payment is made.",
+    },
+  };
 }
 </script>
 
@@ -154,6 +222,9 @@ function formatMoney(amount) {
                   · {{ agreement.property.city }}
                 </span>
               </p>
+              <p v-if="agreement.property?.full_address" class="theme-copy mt-1 text-xs">
+                {{ agreement.property.full_address }}
+              </p>
             </div>
           </div>
 
@@ -226,6 +297,92 @@ function formatMoney(amount) {
              <strong>Response from Landlord:</strong>
              <p class="mt-1">"{{ agreement.landlord_response }}"</p>
            </div>
+        </div>
+
+        <div class="theme-card-muted theme-divider-soft rounded-b-2xl border-t p-5">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p class="theme-title text-sm font-bold">Safe Move-In Journey</p>
+              <p class="theme-copy mt-1 text-xs">
+                Stay inside the platform from agreement review to moving day.
+              </p>
+            </div>
+            <ShieldCheckIcon class="size-5 text-emerald-500" />
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-3">
+            <div
+              v-for="step in agreementJourney(agreement)"
+              :key="step.key"
+              class="rounded-2xl border p-3"
+              :class="step.done
+                ? 'border-emerald-500/30 bg-emerald-500/10'
+                : step.active
+                  ? 'border-brand-500/30 bg-brand-500/10'
+                  : 'theme-divider-soft theme-card'"
+            >
+              <p class="theme-title text-sm font-semibold">{{ step.label }}</p>
+              <p class="theme-copy mt-1 text-xs leading-relaxed">
+                {{ step.description }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-if="agreement.status === 'signed' || agreement.status === 'active'"
+            class="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]"
+          >
+            <div class="rounded-2xl border border-brand-500/20 bg-brand-500/10 p-4">
+              <div class="flex items-start gap-3">
+                <TruckIcon class="mt-0.5 size-5 text-brand-500" />
+                <div>
+                  <p class="theme-title text-sm font-bold">Ready to move in?</p>
+                  <p class="theme-copy mt-1 text-sm leading-relaxed">
+                    We can prefill your destination from this rental agreement so
+                    you can book a Lipat Bahay move faster and stay on-platform.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex flex-wrap gap-3">
+                <RouterLink
+                  :to="moversLink(agreement)"
+                  class="btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold"
+                >
+                  <TruckIcon class="size-4" />
+                  Book a Moving Service
+                </RouterLink>
+                <RouterLink
+                  to="/deals"
+                  class="btn-secondary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
+                >
+                  <ClipboardDocumentCheckIcon class="size-4" />
+                  Browse Move-In Essentials
+                </RouterLink>
+              </div>
+            </div>
+
+            <div class="theme-card rounded-2xl border-dashed p-4">
+              <p class="theme-title text-sm font-bold">Move-In Checklist</p>
+              <ul class="theme-copy mt-3 space-y-2 text-xs leading-relaxed">
+                <li>Activate utilities and internet before move-in day.</li>
+                <li>Confirm building access, parking, and elevator schedule.</li>
+                <li>Keep all payments and proof of agreement inside the platform.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-3">
+            <RouterLink
+              :to="reportLink(agreement)"
+              class="theme-copy inline-flex items-center gap-2 text-xs font-semibold underline underline-offset-2 hover:text-[var(--color-text)]"
+            >
+              Report a suspicious landlord request
+            </RouterLink>
+            <span class="theme-copy text-xs">
+              Never send deposits or reservation fees outside NegosyoHub.
+            </span>
+          </div>
         </div>
       </li>
     </ul>

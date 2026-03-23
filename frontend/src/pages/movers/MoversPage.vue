@@ -203,7 +203,7 @@ onMounted(() => {
         <RouterLink
           v-for="mover in movers"
           :key="mover.id"
-          :to="{ name: 'movers.show', params: { slug: mover.slug } }"
+          :to="{ name: 'movers.show', params: { slug: mover.slug }, query: route.query }"
           class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl"
         >
           <div class="p-5">
