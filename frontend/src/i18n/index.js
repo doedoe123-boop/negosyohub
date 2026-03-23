@@ -1,4 +1,4 @@
-import { inject, reactive, ref } from "vue";
+import { hasInjectionContext, inject, reactive, ref } from "vue";
 import { localizationApi } from "@/api/localization";
 
 const I18N_KEY = Symbol("negosyohub.i18n");
@@ -293,5 +293,9 @@ export function installAppI18n(app, i18n) {
 export function useAppI18n() {
   fallbackI18n ??= createAppI18n();
 
-  return inject(I18N_KEY, fallbackI18n);
+  if (!hasInjectionContext()) {
+    return fallbackI18n;
+  }
+
+  return inject(I18N_KEY, fallbackI18n) ?? fallbackI18n;
 }

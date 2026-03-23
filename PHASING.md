@@ -2,7 +2,7 @@
 
 > Multi-Sector Marketplace SaaS — Laravel 12 · Lunar PHP 1.3 · Filament v3 · Vue 3 · PostgreSQL
 
-Last updated: **March 22, 2026**
+Last updated: **March 23, 2026**
 
 ---
 
@@ -197,7 +197,7 @@ Close all backend gaps so admin & store panels are production-ready before any s
 | 20  | **Missing model scopes**          | Medium   | ✅     | `scopeForStore()`, `scopePending()` on Order model                          |
 | 21  | **Missing model relationships**   | Medium   | ✅     | `User::orders()`, `User::loginHistory()`, `User::supportTickets()` in place |
 | 22  | **Missing factories**             | Low      | ✅     | OrderFactory, PayoutFactory, LoginHistoryFactory all created                |
-| 23  | **Comprehensive test coverage**   | Medium   | ✅     | 387 tests, 847 assertions — all passing                                     |
+| 23  | **Comprehensive test coverage**   | Medium   | ✅     | 446 tests, 997 assertions — all passing                                     |
 
 ### 4E — Nice-to-Have Enhancements
 
@@ -230,11 +230,11 @@ Close all backend gaps so admin & store panels are production-ready before any s
 
 ---
 
-## Phase 5 — Customer Storefront (Vue 3 SPA) 🔶 ~85% COMPLETE
+## Phase 5 — Customer Storefront (Vue 3 SPA) 🔶 ~90% COMPLETE
 
 Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 
-### 5A — E-Commerce Storefront ✅ COMPLETE
+### 5A — E-Commerce Storefront 🔶 MOSTLY COMPLETE
 
 | #   | Feature                        | Status | Notes                                                                            |
 | --- | ------------------------------ | ------ | -------------------------------------------------------------------------------- |
@@ -248,10 +248,10 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 | 8   | Payment integration (PayPal)   | ✅     | PayPal via `paypalApi.createOrder()` / `captureOrder()`, sandbox + live          |
 | 9   | Order confirmation page        | ✅     | `CheckoutSuccess.vue` — captures PayPal order, displays order ID + next steps    |
 | 10  | Customer order history         | ✅     | `OrdersPage.vue` + `OrderDetail.vue` — list orders, view details, track status   |
-| 11  | Customer review submission     | ❌     | Display only — no submission UI for product/store reviews yet                    |
+| 11  | Customer review submission     | 🔶     | Product review submission is live in `ProductDetail.vue`; store review submission UI is still missing |
 | 12  | Customer account/profile pages | ✅     | Profile, addresses, payment methods, change password, settings, account deletion |
-| 13  | Deals & offers page            | ❌     | Not yet implemented                                                              |
-| 14  | Market insights page           | ❌     | Not yet implemented                                                              |
+| 13  | Deals & offers page            | 🔶     | Blade marketing page exists at `/deals`, but it is not integrated into the Vue SPA storefront |
+| 14  | Market insights page           | 🔶     | Blade marketing page exists at `/insights`, but it is not integrated into the Vue SPA storefront |
 
 ### 5B — Real Estate Storefront ✅ COMPLETE
 
@@ -297,14 +297,15 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 
 | #   | Feature                                       | Status | Notes                                                            |
 | --- | --------------------------------------------- | ------ | ---------------------------------------------------------------- |
-| 1   | Stripe Connect automatic payouts              | ❌     | PayPal integrated; Stripe not yet added                          |
-| 2   | Delivery/rider assignment system              | ❌     |                                                                  |
-| 3   | Promo codes & marketplace-level discounts     | 🔶     | Coupons validate in API + checkout UI, but discounts are not yet applied to cart/order totals |
-| 4   | Analytics dashboards (store owners)           | ✅     | Financial widgets in Lunar + property analytics/review dashboards in sector panels |
-| 5   | Multi-language support                        | ❌     | English only                                                     |
-| 6   | Mobile app (API-first)                        | ❌     | API exists; no native app                                        |
-| 7   | Webhook system for integrations               | 🔶     | PayMongo webhook flow implemented; no generalized integration/webhook framework yet |
-| 8   | Advanced search (Laravel Scout + Meilisearch) | ❌     | Scout/Lunar search config present, but Meilisearch is not configured or enabled |
+| 1   | Stripe Connect automatic payouts              | ❌     | Not implemented; payout generation exists, but there is no Stripe Connect integration |
+| 2   | Multi-method payments (PayPal + COD)          | ✅     | `PaymentManager` supports PayPal and Cash on Delivery with separate `payment_method` and `payment_status` |
+| 3   | Delivery/rider assignment system              | 🔶     | `Shipment` model, `LogisticsManager`, delivery statuses, admin/store shipment management, and customer delivery progress UI exist; no live Lalamove/provider booking yet |
+| 4   | Promo codes & marketplace-level discounts     | ✅     | Coupons validate and apply to cart/order totals, checkout summaries, and PayPal amount calculation across global/sector/store scope |
+| 5   | Analytics dashboards (store owners)           | ✅     | Financial widgets in Lunar + property analytics/review dashboards in sector panels |
+| 6   | Multi-language support                        | 🔶     | Laravel lang files + DB translation overrides + admin translation management + frontend i18n foundation exist, but translation coverage is not yet full-app |
+| 7   | Mobile app (API-first)                        | 🔶     | Broad customer API surface, JSON resources, locale-aware requests, and structured pagination exist; no dedicated mobile client or fully standardized response envelope |
+| 8   | Webhook system for integrations               | 🔶     | Inbound PayMongo webhook plus outbound webhook endpoints/deliveries/jobs are implemented, but there is no admin UI for endpoint management yet |
+| 9   | Advanced search (Laravel Scout + Meilisearch) | 🔶     | Scout-ready searchable models and fallback search services exist, but Meilisearch is not provisioned/enabled in runtime config |
 
 ---
 
@@ -328,9 +329,9 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 
 | Metric          | Count           |
 | --------------- | --------------- |
-| **Total Tests** | 387             |
-| **Assertions**  | 847             |
-| **Duration**    | ~19s (parallel) |
+| **Total Tests** | 446             |
+| **Assertions**  | 997             |
+| **Duration**    | ~50s            |
 | **Status**      | ✅ ALL PASSING  |
 
 ---
@@ -344,14 +345,14 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 │  Admin    │  Store/Lunar │  Realty    │  LipatBahay       │
 │  Panel    │  Panel       │  Panel     │  Panel            │
 │  ✅ P2    │  ✅ P3       │  ✅ P3     │  ✅ P3            │
-│  27 res   │  5 resources │  6 res     │  3 resources      │
+│  25 res   │  5 resources │  6 res     │  3 resources      │
 │  11 wdgt  │              │            │                   │
 ├───────────┴──────────────┴────────────┴───────────────────┤
-│  Storefront (Vue 3 SPA) — Phase 5 🔶 ~85%               │
-│  E-Commerce ✅ · Realty 🔶 · Moving ✅ · Account ✅     │
+│  Storefront (Vue 3 SPA) — Phase 5 🔶 ~90%               │
+│  E-Commerce 🔶 · Realty ✅ · Moving ✅ · Account ✅     │
 ├───────────────────────────────────────────────────────────┤
 │  Backend Hardening — Phase 4 ✅ 100%                     │
-│  12 services · 32 models · 23 enums · 387 tests          │
+│  20 services · 38 models · 23 enums · 446 tests          │
 ├───────────────────────────────────────────────────────────┤
 │  CI/CD & DevOps — Phase 7 ✅                             │
 │  GitHub Actions · Docker scanning · Security patching     │

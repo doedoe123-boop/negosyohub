@@ -10,6 +10,8 @@ vi.mock("@/api/cart", () => ({
     updateItem: vi.fn(),
     removeItem: vi.fn(),
     clear: vi.fn(),
+    applyCoupon: vi.fn(),
+    removeCoupon: vi.fn(),
     shippingOptions: vi.fn(),
     setShippingOption: vi.fn(),
     setAddress: vi.fn(),
@@ -92,6 +94,47 @@ describe("Cart Store", () => {
     await cart.clear();
 
     expect(cart.cart).toBeNull();
+  });
+
+  it("applyCoupon — stores discount totals and applied coupon", async () => {
+    cartModule.cartApi.applyCoupon.mockResolvedValue({
+      data: mockCart({
+        total: { formatted: "₱180.00", value: 18000 },
+        original_total: { formatted: "₱200.00", value: 20000 },
+        discount_total: { formatted: "₱20.00", value: 2000 },
+        applied_coupon: { code: "SAVE20", description: "Save 20 pesos" },
+      }),
+    });
+
+    const cart = useCartStore();
+    await cart.applyCoupon("SAVE20");
+
+    expect(cart.appliedCoupon).toEqual({
+      code: "SAVE20",
+      description: "Save 20 pesos",
+    });
+    expect(cart.discountTotal).toBe("₱20.00");
+    expect(cart.originalTotal).toBe("₱200.00");
+  });
+
+  it("removeCoupon — clears the applied coupon state", async () => {
+    cartModule.cartApi.removeCoupon.mockResolvedValue({
+      data: mockCart({
+        applied_coupon: null,
+        discount_total: { formatted: "₱0.00", value: 0 },
+      }),
+    });
+
+    const cart = useCartStore();
+    cart.cart = mockCart({
+      applied_coupon: { code: "SAVE20" },
+      discount_total: { formatted: "₱20.00", value: 2000 },
+    });
+
+    await cart.removeCoupon();
+
+    expect(cart.appliedCoupon).toBeNull();
+    expect(cart.discountTotal).toBe("₱0.00");
   });
 
   it("drawer — openDrawer / closeDrawer / toggleDrawer", () => {
