@@ -98,6 +98,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/featured-listings', [FeaturedListingController::class, 'index'])->name('featured-listings.index');
 
         // Reviews (public, read-only)
+        Route::get('/stores/{store:slug}/reviews', [ReviewController::class, 'storeIndex'])->name('stores.reviews.index');
         Route::get('/products/{product}/reviews', [ReviewController::class, 'productIndex'])->name('products.reviews.index');
         Route::get('/properties/{property:slug}/reviews', [ReviewController::class, 'propertyIndex'])->name('properties.reviews.index');
     });
@@ -188,6 +189,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('/moving-bookings/{movingBooking}/review', [MovingReviewController::class, 'store'])->name('moving-bookings.review.store');
 
             // Product & property reviews
+            Route::post('/stores/{store:slug}/reviews', [ReviewController::class, 'storeStore'])->name('stores.reviews.store');
             Route::post('/products/{product}/reviews', [ReviewController::class, 'productStore'])->name('products.reviews.store');
             Route::post('/properties/{property:slug}/reviews', [ReviewController::class, 'propertyStore'])->name('properties.reviews.store');
         });

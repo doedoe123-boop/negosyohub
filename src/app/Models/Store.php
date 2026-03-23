@@ -258,6 +258,14 @@ class Store extends Model
     }
 
     /**
+     * Return all configured outbound webhook endpoints for this store.
+     */
+    public function webhookEndpoints(): HasMany
+    {
+        return $this->hasMany(WebhookEndpoint::class);
+    }
+
+    /**
      * Return all e-commerce reviews (store + product) for this store.
      */
     public function reviews(): HasMany

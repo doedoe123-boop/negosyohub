@@ -248,7 +248,7 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 | 8   | Payment integration (PayPal)   | ✅     | PayPal via `paypalApi.createOrder()` / `captureOrder()`, sandbox + live          |
 | 9   | Order confirmation page        | ✅     | `CheckoutSuccess.vue` — captures PayPal order, displays order ID + next steps    |
 | 10  | Customer order history         | ✅     | `OrdersPage.vue` + `OrderDetail.vue` — list orders, view details, track status   |
-| 11  | Customer review submission     | 🔶     | Product review submission is live in `ProductDetail.vue`; store review submission UI is still missing |
+| 11  | Customer review submission     | ✅     | Product and store review submission are live in `ProductDetail.vue` and `StoreDetail.vue`, both backed by moderated review APIs |
 | 12  | Customer account/profile pages | ✅     | Profile, addresses, payment methods, change password, settings, account deletion |
 | 13  | Deals & offers page            | 🔶     | Blade marketing page exists at `/deals`, but it is not integrated into the Vue SPA storefront |
 | 14  | Market insights page           | 🔶     | Blade marketing page exists at `/insights`, but it is not integrated into the Vue SPA storefront |
@@ -304,7 +304,7 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 | 5   | Analytics dashboards (store owners)           | ✅     | Financial widgets in Lunar + property analytics/review dashboards in sector panels |
 | 6   | Multi-language support                        | 🔶     | Laravel lang files + DB translation overrides + admin translation management + frontend i18n foundation exist, but translation coverage is not yet full-app |
 | 7   | Mobile app (API-first)                        | 🔶     | Broad customer API surface, JSON resources, locale-aware requests, and structured pagination exist; no dedicated mobile client or fully standardized response envelope |
-| 8   | Webhook system for integrations               | 🔶     | Inbound PayMongo webhook plus outbound webhook endpoints/deliveries/jobs are implemented, but there is no admin UI for endpoint management yet |
+| 8   | Webhook system for integrations               | 🔶     | Inbound PayMongo webhook plus outbound webhook endpoints/deliveries/jobs are implemented, with admin + store panel endpoint management and delivery logs; manual retry and broader inbound provider support are still missing |
 | 9   | Advanced search (Laravel Scout + Meilisearch) | 🔶     | Scout-ready searchable models and fallback search services exist, but Meilisearch is not provisioned/enabled in runtime config |
 
 ---

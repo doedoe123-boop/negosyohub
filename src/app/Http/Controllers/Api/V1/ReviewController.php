@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CreateReviewRequest;
 use App\Models\Property;
 use App\Models\Review;
+use App\Models\Store;
 use App\Models\Testimonial;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Lunar\Models\Product;
 
 /**
@@ -18,6 +20,58 @@ use Lunar\Models\Product;
  */
 class ReviewController extends Controller
 {
+    /**
+     * List published reviews for a store.
+     */
+    public function storeIndex(Store $store): JsonResponse
+    {
+        abort_if(! $store->isApproved(), 404);
+
+        $reviewQuery = Review::query()
+            ->where('reviewable_type', Store::class)
+            ->where('reviewable_id', $store->id)
+            ->published();
+
+        $reviews = (clone $reviewQuery)
+            ->latest()
+            ->paginate(10);
+
+        return response()->json([
+            'data' => $reviews->getCollection()
+                ->map(fn (Review $review): array => $this->formatReview($review))
+                ->values()
+                ->all(),
+            'meta' => [
+                'current_page' => $reviews->currentPage(),
+                'last_page' => $reviews->lastPage(),
+                'per_page' => $reviews->perPage(),
+                'total' => $reviews->total(),
+            ],
+            'review_count' => (clone $reviewQuery)->count(),
+            'average_rating' => (float) ((clone $reviewQuery)->avg('rating') ?: 0),
+        ]);
+    }
+
+    /**
+     * Submit a review for a store.
+     */
+    public function storeStore(CreateReviewRequest $request, Store $store): JsonResponse
+    {
+        abort_if(! $store->isApproved(), 404);
+
+        $review = $this->createReview(
+            $request,
+            Store::class,
+            $store->id,
+            $store->id
+        );
+
+        return response()->json([
+            'message' => 'Thank you! Your review has been submitted and is pending approval.',
+            'review' => $this->formatReview($review),
+        ], 201);
+    }
+
     /**
      * List published reviews for a product.
      */
@@ -90,7 +144,11 @@ class ReviewController extends Controller
             ->where('property_id', $property->id)
             ->first();
 
-        abort_if($existing, 422, 'You have already reviewed this item.');
+        if ($existing) {
+            throw ValidationException::withMessages([
+                'review' => 'You have already reviewed this item.',
+            ]);
+        }
 
         $testimonial = Testimonial::create([
             'store_id' => $property->store_id,
@@ -136,7 +194,11 @@ class ReviewController extends Controller
             ->where('reviewable_id', $reviewableId)
             ->first();
 
-        abort_if($existing, 422, 'You have already reviewed this item.');
+        if ($existing) {
+            throw ValidationException::withMessages([
+                'review' => 'You have already reviewed this item.',
+            ]);
+        }
 
         return Review::create([
             'store_id' => $storeId,

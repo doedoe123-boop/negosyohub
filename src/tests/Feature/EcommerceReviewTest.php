@@ -3,6 +3,7 @@
 use App\Models\Review;
 use App\Models\Store;
 use App\Models\User;
+use App\StoreStatus;
 use Illuminate\Support\Carbon;
 use Lunar\Models\Product;
 
@@ -204,6 +205,89 @@ it('returns zero average when no published reviews exist', function () {
     Review::factory()->forStoreReview($this->store)->unpublished()->count(2)->create();
 
     expect($this->store->averageReviewRating())->toBe(0.0);
+});
+
+// =========================================================
+// Store Review API
+// =========================================================
+
+it('lists published store reviews for the storefront API', function () {
+    Review::factory()->forStoreReview($this->store)->published()->create([
+        'rating' => 5,
+        'reviewer_name' => 'Ana Reyes',
+        'created_at' => now()->subDay(),
+    ]);
+    Review::factory()->forStoreReview($this->store)->published()->create([
+        'rating' => 3,
+        'reviewer_name' => 'Marco Dizon',
+        'created_at' => now(),
+    ]);
+    Review::factory()->forStoreReview($this->store)->unpublished()->create([
+        'rating' => 1,
+    ]);
+
+    $response = $this->getJson("/api/v1/stores/{$this->store->slug}/reviews");
+
+    $response->assertOk()
+        ->assertJsonPath('review_count', 2)
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('data.0.name', 'Marco Dizon')
+        ->assertJsonPath('data.1.name', 'Ana Reyes');
+
+    expect((float) $response->json('average_rating'))->toBe(4.0);
+});
+
+it('returns 404 for unapproved store reviews API access', function () {
+    $pendingStore = Store::factory()->create([
+        'status' => StoreStatus::Pending,
+        'sector' => 'ecommerce',
+    ]);
+
+    $this->getJson("/api/v1/stores/{$pendingStore->slug}/reviews")
+        ->assertNotFound();
+});
+
+it('allows an authenticated customer to submit a store review', function () {
+    $customer = User::factory()->create();
+
+    $response = $this->actingAs($customer)
+        ->postJson("/api/v1/stores/{$this->store->slug}/reviews", [
+            'rating' => 5,
+            'title' => 'Excellent service',
+            'content' => 'Fast shipping, responsive support, and great packaging.',
+        ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('review.name', $customer->name)
+        ->assertJsonPath('review.rating', 5);
+
+    $this->assertDatabaseHas('reviews', [
+        'store_id' => $this->store->id,
+        'user_id' => $customer->id,
+        'reviewable_type' => Store::class,
+        'reviewable_id' => $this->store->id,
+        'rating' => 5,
+        'title' => 'Excellent service',
+        'is_published' => false,
+    ]);
+});
+
+it('prevents duplicate store reviews from the same user', function () {
+    $customer = User::factory()->create();
+
+    Review::factory()->forStoreReview($this->store)->create([
+        'user_id' => $customer->id,
+        'reviewable_type' => Store::class,
+        'reviewable_id' => $this->store->id,
+    ]);
+
+    $this->actingAs($customer)
+        ->postJson("/api/v1/stores/{$this->store->slug}/reviews", [
+            'rating' => 4,
+            'content' => 'Trying to review the same store again.',
+        ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('review');
 });
 
 // =========================================================

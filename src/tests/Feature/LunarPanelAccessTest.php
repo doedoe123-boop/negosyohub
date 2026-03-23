@@ -48,6 +48,20 @@ it('allows approved store owners to access the Lunar panel', function () {
         ->assertOk();
 });
 
+it('allows approved store owners to access webhook endpoints in the Lunar panel', function () {
+    $owner = User::factory()->storeOwner()->create();
+    $owner->assignRole('store_owner');
+    Store::factory()->for($owner, 'owner')->create([
+        'status' => StoreStatus::Approved,
+        'sector' => 'ecommerce',
+        'setup_completed_at' => now(),
+    ]);
+
+    $this->actingAs($owner)
+        ->get(lunarPath().'/webhook-endpoints')
+        ->assertOk();
+});
+
 it('redirects approved store owners with incomplete setup to the setup wizard', function () {
     $owner = User::factory()->storeOwner()->create();
     $owner->assignRole('store_owner');
@@ -124,6 +138,14 @@ it('allows admins to access the admin panel', function () {
 
     $this->actingAs($admin)
         ->get(adminPath())
+        ->assertOk();
+});
+
+it('allows admins to access webhook endpoints in the admin panel', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)
+        ->get(adminPath().'/webhook-endpoints')
         ->assertOk();
 });
 

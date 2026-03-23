@@ -11,6 +11,8 @@ import {
 import { storesApi } from "@/api/stores";
 import { useSeoMeta } from "@/composables/useSeoMeta";
 import { useCartStore } from "@/stores/cart";
+import { reviewsApi } from "@/api/reviews";
+import ReviewForm from "@/components/ReviewForm.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -22,6 +24,10 @@ const products = ref([]);
 const properties = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const storeReviews = ref([]);
+const storeReviewCount = ref(0);
+const storeAverageRating = ref(null);
+const reviewFormRef = ref(null);
 
 const isRealEstate = computed(() => store.value?.sector === "real_estate");
 
@@ -57,8 +63,14 @@ onMounted(async () => {
       const propRes = await storesApi.properties(route.params.slug);
       properties.value = propRes.data?.data ?? propRes.data;
     } else {
-      const prodRes = await storesApi.products(route.params.slug);
+      const [prodRes, reviewsRes] = await Promise.all([
+        storesApi.products(route.params.slug),
+        reviewsApi.listForStore(route.params.slug),
+      ]);
       products.value = prodRes.data?.data ?? prodRes.data;
+      storeReviews.value = reviewsRes.data?.data ?? [];
+      storeReviewCount.value = reviewsRes.data?.review_count ?? 0;
+      storeAverageRating.value = reviewsRes.data?.average_rating ?? null;
     }
   } catch (e) {
     error.value =
@@ -76,6 +88,17 @@ async function addToCart(product) {
   await cart.addItem("product-variant", product.default_variant_id, 1, {
     store_id: store.value.id,
   });
+}
+
+async function submitStoreReview(payload) {
+  try {
+    await reviewsApi.submitForStore(route.params.slug, payload);
+    reviewFormRef.value?.onSuccess();
+  } catch (e) {
+    reviewFormRef.value?.onError(
+      e.response?.data?.message ?? "Failed to submit review. Please try again.",
+    );
+  }
 }
 </script>
 
@@ -392,7 +415,7 @@ async function addToCart(product) {
 
               <div
                 v-else
-                class="grid grid-cols-2 gap-4 pb-16 sm:grid-cols-3 lg:grid-cols-4"
+                class="grid grid-cols-2 gap-4 pb-12 sm:grid-cols-3 lg:grid-cols-4"
               >
                 <div
                   v-for="product in products"
@@ -488,6 +511,17 @@ async function addToCart(product) {
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <div class="theme-card rounded-2xl p-6 sm:p-8">
+                <ReviewForm
+                  ref="reviewFormRef"
+                  :review-count="storeReviewCount"
+                  :average-rating="storeAverageRating"
+                  :reviews="storeReviews"
+                  item-label="store"
+                  @submit="submitStoreReview"
+                />
               </div>
             </template>
           </div>

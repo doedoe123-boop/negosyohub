@@ -2,6 +2,26 @@ import client from "./client";
 
 export const reviewsApi = {
   /**
+   * List published reviews for a store.
+   *
+   * @param {string} slug
+   * @param {{ page?: number }} params
+   */
+  listForStore(slug, params = {}) {
+    return client.get(`/api/v1/stores/${slug}/reviews`, { params });
+  },
+
+  /**
+   * Submit a review for a store. Requires authentication.
+   *
+   * @param {string} slug
+   * @param {{ rating: number, title?: string, content: string }} payload
+   */
+  submitForStore(slug, payload) {
+    return client.post(`/api/v1/stores/${slug}/reviews`, payload);
+  },
+
+  /**
    * List published reviews for a product.
    *
    * @param {number} productId

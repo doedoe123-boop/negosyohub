@@ -47,4 +47,21 @@ class WebhookEndpoint extends Model
     {
         return $this->hasMany(WebhookDelivery::class);
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function eventOptions(): array
+    {
+        return [
+            'order.created' => 'Order Created',
+            'order.updated' => 'Order Updated',
+            'order.delivered' => 'Order Delivered',
+            'payment.paid' => 'Payment Paid',
+            'payment.failed' => 'Payment Failed',
+            'shipment.created' => 'Shipment Created',
+            'shipment.updated' => 'Shipment Updated',
+            'store.approved' => 'Store Approved',
+        ];
+    }
 }
