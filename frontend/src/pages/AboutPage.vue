@@ -6,6 +6,16 @@ import {
   FlagIcon,
   EyeIcon
 } from '@heroicons/vue/24/outline'
+import { RouterLink } from "vue-router";
+import { useSeoMeta } from "@/composables/useSeoMeta";
+import { useAppI18n } from "@/i18n";
+
+const { t } = useAppI18n();
+
+useSeoMeta(() => ({
+  title: t("about.heroTitle"),
+  description: t("about.heroSubtitle"),
+}));
 </script>
 
 <template>
@@ -20,16 +30,19 @@ import {
         >
           <div class="flex flex-col gap-4 max-w-2xl relative z-10">
             <h1 class="text-white text-5xl font-black leading-tight tracking-tight sm:text-6xl">
-              About NegosyoHub
+              {{ t("about.heroTitle") }}
             </h1>
-            <p class="text-brand-400 text-lg font-bold tracking-widest uppercase">Empowering Filipino Commerce</p>
+            <p class="text-brand-400 text-lg font-bold tracking-widest uppercase">{{ t("about.heroEyebrow") }}</p>
             <h2 class="text-slate-200 text-lg font-medium leading-relaxed sm:text-xl mt-4">
-              A unified digital marketplace designed to bridge the gap between local entrepreneurs and modern consumers through trust and innovation.
+              {{ t("about.heroSubtitle") }}
             </h2>
           </div>
-          <button class="relative z-10 mt-6 flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-8 bg-brand-500 text-white text-base font-bold shadow-lg transition hover:bg-brand-600 hover:scale-[1.02] active:scale-95">
-            Explore Marketplace
-          </button>
+          <RouterLink
+            to="/stores"
+            class="relative z-10 mt-6 flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-8 bg-brand-500 text-white text-base font-bold shadow-lg transition hover:bg-brand-600 hover:scale-[1.02] active:scale-95"
+          >
+            {{ t("about.heroCta") }}
+          </RouterLink>
         </div>
       </section>
 
@@ -42,10 +55,10 @@ import {
             <div class="flex size-14 items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400">
               <FlagIcon class="size-8 stroke-2" />
             </div>
-            <h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Our Mission</h2>
+            <h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">{{ t("about.missionTitle") }}</h2>
           </div>
           <p class="text-slate-600 dark:text-slate-300 text-lg leading-relaxed relative z-10 max-w-4xl">
-            To provide a trustworthy and seamless platform that enables every Filipino entrepreneur to scale their business while offering consumers a premium, secure, and diverse shopping experience. We are committed to fostering economic growth across the archipelago by digitizing traditional sectors.
+            {{ t("about.missionBody") }}
           </p>
         </div>
       </section>
@@ -56,9 +69,9 @@ import {
           <div class="flex size-16 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 mb-6">
             <EyeIcon class="size-8 stroke-2" />
           </div>
-          <h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight mb-8">Our Vision</h2>
+          <h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight mb-8">{{ t("about.visionTitle") }}</h2>
           <p class="text-slate-600 dark:text-slate-300 text-2xl leading-relaxed italic font-medium px-4">
-            "To become the premier digital ecosystem in the Philippines, where commerce, real estate, and professional services converge to create a borderless economy for every Filipino."
+            {{ t("about.visionBody") }}
           </p>
         </div>
       </section>
@@ -66,8 +79,8 @@ import {
       <!-- Why Choose Us Section -->
       <section class="py-16">
         <div class="text-center mb-12">
-          <h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Why Choose NegosyoHub?</h2>
-          <p class="mt-4 text-slate-500">The core values that make us the best modern platform for local commerce.</p>
+          <h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">{{ t("about.whyTitle") }}</h2>
+          <p class="mt-4 text-slate-500">{{ t("about.whySubtitle") }}</p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -76,9 +89,9 @@ import {
             <div class="size-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <ShieldCheckIcon class="size-7 stroke-2" />
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Trusted Local Sellers</h3>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ t("about.trustedSellersTitle") }}</h3>
             <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed">
-              We prioritize safety with a rigorous verification process for all merchants, ensuring every transaction is secure and every product is genuine.
+              {{ t("about.trustedSellersBody") }}
             </p>
           </div>
           
@@ -87,9 +100,9 @@ import {
             <div class="size-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
               <MapIcon class="size-7 stroke-2" />
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">All-in-One Hub</h3>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ t("about.allInOneTitle") }}</h3>
             <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed">
-              Beyond retail—access E-commerce, Real Estate listings, and professional Services in one streamlined premium digital destination.
+              {{ t("about.allInOneBody") }}
             </p>
           </div>
           
@@ -98,9 +111,9 @@ import {
             <div class="size-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400">
               <HeartIcon class="size-7 stroke-2" />
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Proudly Filipino 🇵🇭</h3>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ t("about.proudlyFilipinoTitle") }} 🇵🇭</h3>
             <p class="text-slate-600 dark:text-slate-400 text-base leading-relaxed">
-              Designed by Filipinos for Filipinos. We celebrate local talent, champion indigenous products, and understand the unique needs of our community.
+              {{ t("about.proudlyFilipinoBody") }}
             </p>
           </div>
         </div>
@@ -115,11 +128,11 @@ import {
           </div>
           
           <div class="relative z-10 flex flex-col items-center gap-6">
-            <h2 class="text-3xl font-bold sm:text-4xl">Ready to grow your business?</h2>
-            <p class="text-slate-300 max-w-xl text-lg">Join thousands of Filipino entrepreneurs who have already digitized their journey with NegosyoHub.</p>
+            <h2 class="text-3xl font-bold sm:text-4xl">{{ t("about.ctaTitle") }}</h2>
+            <p class="text-slate-300 max-w-xl text-lg">{{ t("about.ctaBody") }}</p>
             <div class="flex flex-wrap items-center justify-center gap-4 mt-4">
-              <a href="/register/sector" class="bg-brand-500 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-brand-600 transition-colors shadow-lg">Start Selling</a>
-              <a href="/faq" class="border border-white/20 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-white/10 transition-colors">Learn More</a>
+              <a href="/register/sector" class="bg-brand-500 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-brand-600 transition-colors shadow-lg">{{ t("about.ctaPrimary") }}</a>
+              <RouterLink to="/faq" class="border border-white/20 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-white/10 transition-colors">{{ t("about.ctaSecondary") }}</RouterLink>
             </div>
           </div>
         </div>

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\FeaturedListingController;
 use App\Http\Controllers\Api\V1\GlobalSearchController;
 use App\Http\Controllers\Api\V1\HomepageStatsController;
 use App\Http\Controllers\Api\V1\LocalizationController;
+use App\Http\Controllers\Api\V1\MarketInsightController;
 use App\Http\Controllers\Api\V1\MoverController;
 use App\Http\Controllers\Api\V1\MovingBookingController;
 use App\Http\Controllers\Api\V1\MovingReviewController;
@@ -61,6 +62,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/search', GlobalSearchController::class)->name('search');
         Route::get('/localization', LocalizationController::class)->name('localization');
         Route::get('/homepage-stats', HomepageStatsController::class)->name('homepage.stats');
+        Route::get('/market-insights', MarketInsightController::class)->name('market-insights');
         Route::get('/seo/global', [SeoController::class, 'global'])->name('seo.global');
         Route::get('/stores', [StoreController::class, 'index'])->name('stores.index');
         Route::get('/stores/{store:slug}', [StoreController::class, 'show'])->name('stores.show');

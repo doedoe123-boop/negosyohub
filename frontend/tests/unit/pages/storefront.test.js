@@ -5,6 +5,9 @@ import { createRouter, createMemoryHistory } from "vue-router";
 import Stores from "@/pages/Stores.vue";
 import NotFound from "@/pages/NotFound.vue";
 import StoreDetail from "@/pages/store/StoreDetail.vue";
+import DealsPage from "@/pages/DealsPage.vue";
+import MarketInsightsPage from "@/pages/MarketInsightsPage.vue";
+import FaqPage from "@/pages/FaqPage.vue";
 
 // ---------------------------------------------------------------------------
 // API mocks
@@ -38,8 +41,18 @@ vi.mock("@/api/homepage", () => ({
   homepageApi: { stats: vi.fn().mockResolvedValue({ data: {} }) },
 }));
 
+vi.mock("@/api/marketInsights", () => ({
+  marketInsightsApi: {
+    show: vi.fn(),
+  },
+}));
+
 vi.mock("@/api/advertisements", () => ({
   advertisementsApi: { list: vi.fn().mockResolvedValue({ data: [] }) },
+}));
+
+vi.mock("@/api/announcements", () => ({
+  announcementsApi: { list: vi.fn().mockResolvedValue({ data: [] }) },
 }));
 
 vi.mock("@/api/promotions", () => ({
@@ -48,6 +61,12 @@ vi.mock("@/api/promotions", () => ({
 
 vi.mock("@/api/featuredListings", () => ({
   featuredListingsApi: { list: vi.fn().mockResolvedValue({ data: [] }) },
+}));
+
+vi.mock("@/api/faq", () => ({
+  faqApi: {
+    list: vi.fn(),
+  },
 }));
 
 // Stub complex sub-components from Home page so we don't need to provision all their deps
@@ -106,6 +125,9 @@ function storeRouter() {
       { path: "/", component: { template: "<div />" } },
       { path: "/stores", component: Stores },
       { path: "/stores/:slug", component: StoreDetail },
+      { path: "/deals", component: DealsPage },
+      { path: "/insights", component: MarketInsightsPage },
+      { path: "/faq", component: FaqPage },
       { path: "/properties", component: { template: "<div />" } },
       { path: "/movers", component: { template: "<div />" } },
     ],
@@ -123,6 +145,8 @@ describe("Stores listing page", () => {
     pinia = createPinia();
     setActivePinia(pinia);
     vi.clearAllMocks();
+    localStorage.clear();
+    document.documentElement.lang = "en";
   });
 
   it("renders Browse Stores heading", async () => {
@@ -291,6 +315,180 @@ describe("Store detail page", () => {
       title: "Great shop",
       content: "Very smooth order and delivery.",
     });
+  });
+});
+
+describe("Marketing storefront pages", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    setActivePinia(pinia);
+    vi.clearAllMocks();
+  });
+
+  it("renders deals page promotions and featured listings", async () => {
+    const { promotionsApi } = await import("@/api/promotions");
+    const { featuredListingsApi } = await import("@/api/featuredListings");
+    const { announcementsApi } = await import("@/api/announcements");
+
+    promotionsApi.list.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          name: "Weekend Saver",
+          description: "Big promo for verified local sellers.",
+          type: "flash_sale",
+          discount_percentage: 20,
+          ends_at: null,
+        },
+      ],
+    });
+    featuredListingsApi.list.mockResolvedValue({
+      data: [
+        {
+          id: 2,
+          featured_type: "store",
+          item: {
+            slug: "tech-nest",
+            name: "TechNest",
+            tagline: "Gadgets and accessories",
+          },
+        },
+      ],
+    });
+    announcementsApi.list.mockResolvedValue({
+      data: [
+        {
+          id: 3,
+          title: "Marketplace Week",
+          type: "promotion",
+          content: "<p>Fresh offers are now live.</p>",
+        },
+      ],
+    });
+
+    const router = storeRouter();
+    await router.push("/deals");
+    await router.isReady();
+
+    const wrapper = mount(DealsPage, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Deals & Offers Built for");
+    expect(wrapper.text()).toContain("Weekend Saver");
+    expect(wrapper.text()).toContain("TechNest");
+  });
+
+  it("renders marketing pages in Filipino when the locale is switched", async () => {
+    const { marketInsightsApi } = await import("@/api/marketInsights");
+    const { faqApi } = await import("@/api/faq");
+    const { useAppI18n } = await import("@/i18n");
+
+    localStorage.setItem("negosyohub.locale", "fil");
+    await useAppI18n().setLocale("fil");
+
+    marketInsightsApi.show.mockResolvedValue({
+      data: {
+        stats: {
+          approved_suppliers: 42,
+          registered_users: 310,
+          active_sectors: 4,
+          cities_covered: 18,
+          average_rating: 4.6,
+          published_reviews: 128,
+        },
+        top_sectors: [],
+        top_cities: [],
+        health: {
+          permit_compliance_rate: 88,
+          platform_status: "online",
+          updated_every: "24h",
+        },
+      },
+    });
+    faqApi.list.mockResolvedValue({ data: [] });
+
+    const router = storeRouter();
+    await router.push("/insights");
+    await router.isReady();
+
+    const insightsWrapper = mount(MarketInsightsPage, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    expect(insightsWrapper.text()).toContain("Tuklasin ang Sellers");
+    expect(insightsWrapper.text()).toContain("Bakit ito mahalaga");
+
+    await router.push("/faq");
+    await flushPromises();
+
+    const faqWrapper = mount(FaqPage, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    expect(faqWrapper.text()).toContain("Mga Madalas Itanong");
+    expect(faqWrapper.text()).toContain("Wala pang FAQs sa ngayon.");
+  });
+
+  it("renders market insights from the API", async () => {
+    const { marketInsightsApi } = await import("@/api/marketInsights");
+
+    marketInsightsApi.show.mockResolvedValue({
+      data: {
+        stats: {
+          approved_suppliers: 42,
+          registered_users: 310,
+          active_sectors: 4,
+          cities_covered: 18,
+          average_rating: 4.6,
+          published_reviews: 128,
+        },
+        top_sectors: [
+          { slug: "ecommerce", name: "E-Commerce", total: 20 },
+          { slug: "real_estate", name: "Real Estate", total: 12 },
+        ],
+        top_cities: [
+          { city: "Pasig", total: 10, share: 23.8 },
+        ],
+        health: {
+          permit_compliance_rate: 88,
+          platform_status: "online",
+          updated_every: "24h",
+        },
+      },
+    });
+
+    const router = storeRouter();
+    await router.push("/insights");
+    await router.isReady();
+
+    const wrapper = mount(MarketInsightsPage, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    expect(marketInsightsApi.show).toHaveBeenCalledOnce();
+    expect(wrapper.text()).toContain("42");
+    expect(wrapper.text()).toContain("E-Commerce");
+    expect(wrapper.text()).toContain("Pasig");
+    expect(wrapper.text()).toContain("88%");
   });
 });
 

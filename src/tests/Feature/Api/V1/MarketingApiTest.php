@@ -6,7 +6,11 @@ use App\Models\Announcement;
 use App\Models\Coupon;
 use App\Models\FeaturedListing;
 use App\Models\Promotion;
+use App\Models\Sector;
+use App\Models\Store;
 use App\Models\User;
+use App\StoreStatus;
+use Illuminate\Support\Facades\Cache;
 
 // ── Advertisements ────────────────────────────────────────────────────
 
@@ -143,4 +147,61 @@ it('filters featured listings by type', function () {
         ->assertOk()
         ->assertJsonCount(1)
         ->assertJsonPath('0.featured_type', 'store');
+});
+
+it('returns public market insight aggregates', function () {
+    Cache::forget('market_insights');
+
+    Sector::factory()->create([
+        'name' => 'E-Commerce',
+        'slug' => 'ecommerce',
+        'is_active' => true,
+    ]);
+    Sector::factory()->create([
+        'name' => 'Real Estate',
+        'slug' => 'real_estate',
+        'is_active' => true,
+    ]);
+
+    User::factory()->count(3)->create();
+
+    Store::factory()->create([
+        'status' => StoreStatus::Approved,
+        'sector' => 'ecommerce',
+        'business_permit' => 'permit-a',
+        'address' => [
+            'line_one' => '1 Emerald Street',
+            'city' => 'Pasig',
+        ],
+    ]);
+    Store::factory()->create([
+        'status' => StoreStatus::Approved,
+        'sector' => 'ecommerce',
+        'business_permit' => 'permit-b',
+        'address' => [
+            'line_one' => '2 Emerald Street',
+            'city' => 'Pasig',
+        ],
+    ]);
+    Store::factory()->create([
+        'status' => StoreStatus::Approved,
+        'sector' => 'real_estate',
+        'business_permit' => null,
+        'address' => [
+            'line_one' => '3 Sapphire Road',
+            'city' => 'Bacoor',
+        ],
+    ]);
+
+    $response = $this->getJson(route('api.v1.market-insights'))
+        ->assertOk()
+        ->assertJsonPath('stats.approved_suppliers', 3)
+        ->assertJsonPath('stats.active_sectors', 2)
+        ->assertJsonPath('stats.cities_covered', 2)
+        ->assertJsonPath('health.permit_compliance_rate', 67);
+
+    expect($response->json('top_sectors.0.name'))->toBe('E-Commerce')
+        ->and($response->json('top_sectors.0.total'))->toBe(2)
+        ->and($response->json('top_cities.0.city'))->toBe('Pasig')
+        ->and($response->json('top_cities.0.total'))->toBe(2);
 });

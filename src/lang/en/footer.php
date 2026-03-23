@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'brandDescription' => 'Multi-sector marketplace connecting buyers with trusted local Philippine businesses — e-commerce, real estate, and more.',
+    'browse' => 'Browse',
+    'sellers' => 'For Sellers',
+    'company' => 'Company',
+    'ecommerce' => 'E-Commerce',
+    'realEstate' => 'Real Estate',
+    'moving' => 'Lipat Bahay',
+    'registerStore' => 'Register Your Store',
+    'sellerDashboard' => 'Seller Dashboard',
+    'terms' => 'Terms of Service',
+    'privacy' => 'Privacy Policy',
+    'about' => 'About Us',
+    'faq' => 'FAQs',
+    'deals' => 'Deals & Offers',
+    'insights' => 'Market Insights',
+    'secureCheckout' => 'Secure checkout',
+    'paymentPartners' => 'PayMongo & PayPal',
+    'madeInPhilippines' => 'Made in the Philippines',
+    'rightsReserved' => 'All rights reserved.',
+    'builtInPhilippines' => 'Built with love in the Philippines',
+    'facebook' => 'Facebook',
+    'instagram' => 'Instagram',
+];

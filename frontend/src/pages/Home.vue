@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useSeoMeta } from "@/composables/useSeoMeta";
 import { useSeoStore } from "@/stores/seo";
 import { RouterLink } from "vue-router";
@@ -23,11 +23,13 @@ import TrendingCarousel from "@/components/homepage/TrendingCarousel.vue";
 import TrustStrip from "@/components/homepage/TrustStrip.vue";
 import AdBanner from "@/components/homepage/AdBanner.vue";
 import PromotionBanner from "@/components/homepage/PromotionBanner.vue";
+import { useAppI18n } from "@/i18n";
 
 // Live backend stats composable
 import { useHomepageStats } from "@/composables/useHomepageStats";
 const { stats, loaded: statsLoaded, formatCount } = useHomepageStats();
 const seo = useSeoStore();
+const { t } = useAppI18n();
 
 useSeoMeta({ title: null, description: seo.defaultDescription });
 
@@ -40,40 +42,40 @@ const loading = ref(true);
 const productsLoading = ref(true);
 const propertiesLoading = ref(true);
 
-const sectors = [
+const sectors = computed(() => [
   {
-    label: "E-Commerce",
-    description: "Shop from local online stores & retailers",
+    label: t("home.ecommerceLabel"),
+    description: t("home.ecommerceDescription"),
     to: "/stores",
     icon: BuildingStorefrontIcon,
     color: "bg-brand-50 text-brand-600 ring-brand-200",
     badge: "bg-brand-100 text-brand-700",
   },
   {
-    label: "Real Estate",
-    description: "Houses, condos, and commercial spaces",
+    label: t("home.realEstateLabel"),
+    description: t("home.realEstateDescription"),
     to: "/properties",
     icon: HomeModernIcon,
     color: "bg-emerald-50 text-emerald-600 ring-emerald-200",
     badge: "bg-emerald-100 text-emerald-700",
   },
   {
-    label: "Lipat Bahay",
-    description: "Book verified moving companies near you",
+    label: t("home.movingLabel"),
+    description: t("home.movingDescription"),
     to: "/movers",
     icon: TruckIcon,
     color: "bg-violet-50 text-violet-600 ring-violet-200",
     badge: "bg-violet-100 text-violet-700",
   },
   {
-    label: "Paupahan",
-    description: "Find apartments & rooms for rent",
+    label: t("home.rentalLabel"),
+    description: t("home.rentalDescription"),
     to: "/properties?listing_type=for_rent",
     icon: KeyIcon,
     color: "bg-amber-50 text-amber-600 ring-amber-200",
     badge: "bg-amber-100 text-amber-700",
   },
-];
+]);
 
 // Spotlight uses first 3 stores; assign each a visual theme
 const spotlightThemes = [
@@ -124,10 +126,10 @@ onMounted(async () => {
     <!-- ── 1. Hero ──────────────────────────────────────────────────── -->
     <div class="bg-navy-900">
       <DicedHeroSection
-        top-text="The Filipino Marketplace"
-        main-text="Shop. Rent. Move."
-        sub-main-text="From online stores and real estate to moving services and rentals — everything your lifestyle needs, in one trusted platform."
-        button-text="Explore Now"
+        :top-text="t('home.heroTopText')"
+        :main-text="t('home.heroMainText')"
+        :sub-main-text="t('home.heroSubMainText')"
+        :button-text="t('home.heroButton')"
         :slides="[
           {
             title: 'E-Commerce',
@@ -180,10 +182,10 @@ onMounted(async () => {
       <div class="mx-auto max-w-7xl">
         <div class="mb-7 text-center">
           <h2 class="theme-title text-2xl font-bold">
-            What are you looking for?
+            {{ t("home.sectorHeading") }}
           </h2>
           <p class="theme-copy mt-1.5 text-sm">
-            Browse our growing list of local sectors.
+            {{ t("home.sectorSubtitle") }}
           </p>
         </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -212,7 +214,7 @@ onMounted(async () => {
                   v-if="sector.soon"
                   class="rounded-full px-2 py-0.5 text-xs font-medium"
                   :class="sector.badge"
-                  >Coming Soon</span
+                  >{{ t("home.comingSoon") }}</span
                 >
               </p>
               <p class="theme-copy mt-0.5 text-sm line-clamp-2">
@@ -255,15 +257,15 @@ onMounted(async () => {
           <p
             class="mb-1 text-xs font-semibold uppercase tracking-widest text-emerald-600"
           >
-            Discover
+            {{ t("home.discoverEyebrow") }}
           </p>
-          <h2 class="theme-title text-2xl font-bold">Featured Stores</h2>
+          <h2 class="theme-title text-2xl font-bold">{{ t("home.featuredStoresTitle") }}</h2>
         </div>
         <RouterLink
           to="/stores"
           class="flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
         >
-          View All
+          {{ t("home.viewAll") }}
           <svg
             class="size-4"
             fill="none"
@@ -337,12 +339,12 @@ onMounted(async () => {
                 {{ store.name }}
               </p>
               <p class="mt-0.5 text-xs text-white/60">
-                {{ store.sector_label ?? "Local Store" }}
+                {{ store.sector_label ?? t("home.localStore") }}
               </p>
               <p
                 class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-white/90 transition-all group-hover:gap-2"
               >
-                Visit Store →
+                {{ t("home.visitStore") }} →
               </p>
             </div>
           </div>
@@ -434,7 +436,7 @@ onMounted(async () => {
       >
         <p class="text-2xl mb-2">🏪</p>
         <p class="theme-copy text-sm font-medium">
-          No featured stores yet — check back soon!
+          {{ t("home.noFeaturedStores") }}
         </p>
       </div>
     </section>
@@ -451,12 +453,11 @@ onMounted(async () => {
         <p
           class="mb-3 text-xs font-semibold uppercase tracking-widest text-emerald-400"
         >
-          For Business Owners
+          {{ t("home.businessOwnersEyebrow") }}
         </p>
-        <h2 class="text-3xl font-bold">Grow your business with NegosyoHub</h2>
+        <h2 class="text-3xl font-bold">{{ t("home.growTitle") }}</h2>
         <p class="mx-auto mt-3 max-w-xl text-base text-white/60">
-          List your store, manage orders and products, and reach thousands of
-          local customers — free to get started.
+          {{ t("home.growBody") }}
         </p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
@@ -464,7 +465,7 @@ onMounted(async () => {
             target="_blank"
             class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 hover:shadow-emerald-500/30 hover:shadow-lg active:bg-emerald-700 transition-all"
           >
-            Register your store
+            {{ t("home.registerStore") }}
             <svg
               class="size-4"
               fill="none"
@@ -483,7 +484,7 @@ onMounted(async () => {
             to="/stores"
             class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
           >
-            Browse stores
+            {{ t("home.browseStores") }}
           </RouterLink>
         </div>
 
@@ -504,8 +505,8 @@ onMounted(async () => {
               d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
             />
           </svg>
-          🔒 Your data is protected · Trusted by
-          {{ formatCount(stats.stores) }} sellers
+          🔒
+          {{ t("home.trustNote", { count: formatCount(stats.stores) }) }}
         </p>
       </div>
     </section>

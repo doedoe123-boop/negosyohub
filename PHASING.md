@@ -250,8 +250,8 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 | 10  | Customer order history         | ✅     | `OrdersPage.vue` + `OrderDetail.vue` — list orders, view details, track status   |
 | 11  | Customer review submission     | ✅     | Product and store review submission are live in `ProductDetail.vue` and `StoreDetail.vue`, both backed by moderated review APIs |
 | 12  | Customer account/profile pages | ✅     | Profile, addresses, payment methods, change password, settings, account deletion |
-| 13  | Deals & offers page            | 🔶     | Blade marketing page exists at `/deals`, but it is not integrated into the Vue SPA storefront |
-| 14  | Market insights page           | 🔶     | Blade marketing page exists at `/insights`, but it is not integrated into the Vue SPA storefront |
+| 13  | Deals & offers page            | ✅     | `DealsPage.vue` is now routed in the Vue SPA and powered by promotions, featured listings, and announcements APIs |
+| 14  | Market insights page           | ✅     | `MarketInsightsPage.vue` is now routed in the Vue SPA and backed by the public `GET /api/v1/market-insights` endpoint |
 
 ### 5B — Real Estate Storefront ✅ COMPLETE
 
@@ -302,7 +302,7 @@ Customer-facing frontend built with Vue 3 + Pinia + Vue Router + Tailwind CSS.
 | 3   | Delivery/rider assignment system              | 🔶     | `Shipment` model, `LogisticsManager`, delivery statuses, admin/store shipment management, and customer delivery progress UI exist; no live Lalamove/provider booking yet |
 | 4   | Promo codes & marketplace-level discounts     | ✅     | Coupons validate and apply to cart/order totals, checkout summaries, and PayPal amount calculation across global/sector/store scope |
 | 5   | Analytics dashboards (store owners)           | ✅     | Financial widgets in Lunar + property analytics/review dashboards in sector panels |
-| 6   | Multi-language support                        | 🔶     | Laravel lang files + DB translation overrides + admin translation management + frontend i18n foundation exist, but translation coverage is not yet full-app |
+| 6   | Multi-language support                        | 🔶     | Laravel lang files + DB translation overrides + admin translation management + frontend i18n now cover shared shell, auth, cart/checkout/orders, homepage, reviews, FAQ, about, deals, and market insights; listing/detail coverage still needs a broader pass |
 | 7   | Mobile app (API-first)                        | 🔶     | Broad customer API surface, JSON resources, locale-aware requests, and structured pagination exist; no dedicated mobile client or fully standardized response envelope |
 | 8   | Webhook system for integrations               | 🔶     | Inbound PayMongo webhook plus outbound webhook endpoints/deliveries/jobs are implemented, with admin + store panel endpoint management and delivery logs; manual retry and broader inbound provider support are still missing |
 | 9   | Advanced search (Laravel Scout + Meilisearch) | 🔶     | Scout-ready searchable models and fallback search services exist, but Meilisearch is not provisioned/enabled in runtime config |

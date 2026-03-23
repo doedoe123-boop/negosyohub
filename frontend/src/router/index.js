@@ -86,6 +86,16 @@ const routes = [
         name: "faq",
         component: () => import("@/pages/FaqPage.vue"),
       },
+      {
+        path: "deals",
+        name: "deals",
+        component: () => import("@/pages/DealsPage.vue"),
+      },
+      {
+        path: "insights",
+        name: "insights",
+        component: () => import("@/pages/MarketInsightsPage.vue"),
+      },
       // ─── Email verification (accessible to logged-in users) ───────
       {
         path: "email/verify",

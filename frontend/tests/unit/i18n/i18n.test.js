@@ -53,6 +53,10 @@ describe("app i18n", () => {
     expect(i18n.t("nav.signIn")).toBe("Mag-sign in");
     expect(i18n.t("orders.view")).toBe("Tingnan");
     expect(i18n.t("checkout.continueCheckout")).toBe("Magpatuloy sa Checkout");
+    expect(i18n.t("footer.deals")).toBe("Mga Deal at Alok");
+    expect(i18n.t("marketing.insights.trustLayerTitle")).toBe(
+      "Bakit ito mahalaga",
+    );
     expect(i18n.t("missing.key", {}, "Fallback copy")).toBe("Fallback copy");
   });
 

@@ -4,11 +4,14 @@ import { ChevronDownIcon } from "@heroicons/vue/20/solid";
 import { useSeoMeta } from "@/composables/useSeoMeta";
 import { faqApi } from "@/api/faq";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
+import { useAppI18n } from "@/i18n";
 
-useSeoMeta({
-  title: "Frequently Asked Questions",
-  description: "Answers to common questions about NegosyoHub.",
-});
+const { t } = useAppI18n();
+
+useSeoMeta(() => ({
+  title: t("faq.title"),
+  description: t("faq.introDescription"),
+}));
 
 const faqs = ref([]);
 const loading = ref(true);
@@ -20,7 +23,7 @@ onMounted(async () => {
     const { data } = await faqApi.list();
     faqs.value = data;
   } catch {
-    error.value = "Unable to load FAQs. Please try again later.";
+    error.value = t("faq.loadError");
   } finally {
     loading.value = false;
   }
@@ -40,22 +43,22 @@ function sanitizedAnswer(answer) {
     <!-- Header -->
     <div class="mb-10 text-center">
       <h1 class="text-3xl font-bold tracking-tight text-slate-800 dark:text-white">
-        Frequently Asked Questions
+        {{ t("faq.title") }}
       </h1>
       <p class="mt-3 text-base text-slate-500 dark:text-gray-300">
-        Can't find what you're looking for? Visit our
+        {{ t("faq.introPrefix") }}
         <RouterLink
           to="/account/help"
           class="font-medium text-brand-600 hover:underline"
         >
-          Help Center
+          {{ t("faq.helpCenter") }}
         </RouterLink>
-        or
+        {{ t("faq.introMiddle") }}
         <RouterLink
           to="/contact"
           class="font-medium text-brand-600 hover:underline"
         >
-          contact us </RouterLink
+          {{ t("faq.contactUs") }}</RouterLink
         >.
       </p>
     </div>
@@ -79,7 +82,7 @@ function sanitizedAnswer(answer) {
 
     <!-- Empty -->
     <div v-else-if="faqs.length === 0" class="py-10 text-center text-slate-400">
-      No FAQs available yet.
+      {{ t("faq.empty") }}
     </div>
 
     <!-- Accordion -->

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'brandDescription' => 'Multi-sector marketplace na nag-uugnay sa buyers at mapagkakatiwalaang lokal na negosyong Pilipino — e-commerce, real estate, at iba pa.',
+    'browse' => 'I-browse',
+    'sellers' => 'Para sa Sellers',
+    'company' => 'Kumpanya',
+    'ecommerce' => 'E-Commerce',
+    'realEstate' => 'Real Estate',
+    'moving' => 'Lipat Bahay',
+    'registerStore' => 'Irehistro ang Iyong Store',
+    'sellerDashboard' => 'Seller Dashboard',
+    'terms' => 'Mga Tuntunin ng Serbisyo',
+    'privacy' => 'Patakaran sa Privacy',
+    'about' => 'Tungkol sa Amin',
+    'faq' => 'FAQs',
+    'deals' => 'Mga Deal at Alok',
+    'insights' => 'Market Insights',
+    'secureCheckout' => 'Ligtas na checkout',
+    'paymentPartners' => 'PayMongo at PayPal',
+    'madeInPhilippines' => 'Gawa sa Pilipinas',
+    'rightsReserved' => 'Lahat ng karapatan ay nakalaan.',
+    'builtInPhilippines' => 'Binuo nang may pagmamahal sa Pilipinas',
+    'facebook' => 'Facebook',
+    'instagram' => 'Instagram',
+];

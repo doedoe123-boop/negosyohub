@@ -7,6 +7,7 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/vue/24/outline";
 import { useAuthStore } from "@/stores/auth";
+import { useAppI18n } from "@/i18n";
 
 const props = defineProps({
   /** Total existing review count shown in the section header */
@@ -22,6 +23,7 @@ const props = defineProps({
 const emit = defineEmits(["submit"]);
 
 const auth = useAuthStore();
+const { t } = useAppI18n();
 
 const rating = ref(0);
 const hoverRating = ref(0);
@@ -47,11 +49,11 @@ function resetForm() {
 
 async function handleSubmit() {
   if (!rating.value) {
-    error.value = "Please select a star rating.";
+    error.value = t("reviews.errorSelectRating");
     return;
   }
   if (content.value.trim().length < 10) {
-    error.value = "Your review must be at least 10 characters.";
+    error.value = t("reviews.errorMinLength");
     return;
   }
 
@@ -92,7 +94,7 @@ defineExpose({ onSuccess, onError });
       class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <h2 class="text-xl font-bold text-[#0F2044] dark:text-white">
-        Reviews
+        {{ t("reviews.title") }}
         <span v-if="reviewCount" class="text-base font-normal text-slate-400">
           ({{ reviewCount }})
         </span>
@@ -116,7 +118,14 @@ defineExpose({ onSuccess, onError });
             </template>
           </div>
           <p class="mt-0.5 text-xs text-slate-500">
-            {{ reviewCount }} {{ reviewCount === 1 ? "review" : "reviews" }}
+            {{
+              reviewCount
+            }}
+            {{
+              reviewCount === 1
+                ? t("reviews.reviewSingular")
+                : t("reviews.reviewPlural")
+            }}
           </p>
         </div>
       </div>
@@ -150,7 +159,7 @@ defineExpose({ onSuccess, onError });
               v-if="review.verified"
               class="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600 ring-1 ring-emerald-200"
             >
-              Verified
+              {{ t("reviews.verified") }}
             </span>
           </div>
           <span class="text-xs text-slate-400">{{ review.date }}</span>
@@ -172,7 +181,7 @@ defineExpose({ onSuccess, onError });
       class="mb-8 rounded-xl border border-dashed border-slate-200 bg-slate-50 py-10 text-center dark:bg-slate-800/50 dark:border-slate-700"
     >
       <p class="text-sm font-medium text-slate-500">
-        No reviews yet. Be the first to share your experience!
+        {{ t("reviews.empty") }}
       </p>
     </div>
 
@@ -180,7 +189,9 @@ defineExpose({ onSuccess, onError });
     <div
       class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:bg-slate-800 dark:border-slate-700"
     >
-      <h3 class="mb-5 text-base font-bold text-[#0F2044] dark:text-white">Write a Review</h3>
+      <h3 class="mb-5 text-base font-bold text-[#0F2044] dark:text-white">
+        {{ t("reviews.writeTitle") }}
+      </h3>
 
       <!-- Not logged in -->
       <div
@@ -188,13 +199,13 @@ defineExpose({ onSuccess, onError });
         class="rounded-xl bg-slate-50 p-5 text-center"
       >
         <p class="text-sm text-slate-600">
-          Please
+          {{ t("reviews.loginPrefix") }}
           <RouterLink
             to="/login"
             class="font-semibold text-brand-600 hover:underline"
-            >log in</RouterLink
+            >{{ t("reviews.loginAction") }}</RouterLink
           >
-          to write a review.
+          {{ t("reviews.loginSuffix") }}
         </p>
       </div>
 
@@ -204,15 +215,15 @@ defineExpose({ onSuccess, onError });
         class="flex flex-col items-center gap-3 rounded-xl bg-emerald-50 p-6 text-center ring-1 ring-emerald-100"
       >
         <CheckCircleIcon class="size-10 text-emerald-500" />
-        <p class="font-bold text-[#0F2044]">Thank you for your review!</p>
+        <p class="font-bold text-[#0F2044]">{{ t("reviews.successTitle") }}</p>
         <p class="text-sm text-slate-500">
-          Your review has been submitted and is pending approval.
+          {{ t("reviews.successBody") }}
         </p>
         <button
           class="mt-2 text-sm font-semibold text-emerald-600 hover:underline"
           @click="success = false"
         >
-          Write another review
+          {{ t("reviews.writeAnother") }}
         </button>
       </div>
 
@@ -221,7 +232,7 @@ defineExpose({ onSuccess, onError });
         <!-- Star rating -->
         <div>
           <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-gray-300"
-            >Rating</label
+            >{{ t("reviews.rating") }}</label
           >
           <div class="flex gap-1">
             <button
@@ -242,9 +253,14 @@ defineExpose({ onSuccess, onError });
           </div>
           <p v-if="displayRating" class="mt-1 text-xs text-slate-400">
             {{
-              ["", "Poor", "Fair", "Good", "Very Good", "Excellent"][
-                displayRating
-              ]
+              [
+                "",
+                t("reviews.poor"),
+                t("reviews.fair"),
+                t("reviews.good"),
+                t("reviews.veryGood"),
+                t("reviews.excellent"),
+              ][displayRating]
             }}
           </p>
         </div>
@@ -261,7 +277,7 @@ defineExpose({ onSuccess, onError });
           <label
             class="pointer-events-none absolute left-2 top-2 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white dark:bg-slate-700 px-1 text-sm text-slate-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-1 peer-focus:text-brand-500"
           >
-            Review Title
+            {{ t("reviews.titleLabel") }}
           </label>
         </div>
 
@@ -270,7 +286,7 @@ defineExpose({ onSuccess, onError });
           <textarea
             v-model="content"
             rows="4"
-            :placeholder="`Share your experience with this ${itemLabel}...`"
+            :placeholder="t('reviews.contentPlaceholder', { item: itemLabel })"
             maxlength="2000"
             class="w-full resize-none rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           />
@@ -294,7 +310,7 @@ defineExpose({ onSuccess, onError });
           :disabled="submitting || !rating || content.trim().length < 10"
           class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:from-brand-600 hover:to-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {{ submitting ? "Submitting…" : "Submit Review" }}
+          {{ submitting ? t("reviews.submitting") : t("reviews.submit") }}
         </button>
       </form>
     </div>

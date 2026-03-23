@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Reviews',
+    'reviewSingular' => 'review',
+    'reviewPlural' => 'reviews',
+    'verified' => 'Verified',
+    'empty' => 'No reviews yet. Be the first to share your experience!',
+    'writeTitle' => 'Write a Review',
+    'loginPrefix' => 'Please',
+    'loginAction' => 'log in',
+    'loginSuffix' => 'to write a review.',
+    'successTitle' => 'Thank you for your review!',
+    'successBody' => 'Your review has been submitted and is pending approval.',
+    'writeAnother' => 'Write another review',
+    'rating' => 'Rating',
+    'poor' => 'Poor',
+    'fair' => 'Fair',
+    'good' => 'Good',
+    'veryGood' => 'Very Good',
+    'excellent' => 'Excellent',
+    'titleLabel' => 'Review Title',
+    'contentPlaceholder' => 'Share your experience with this :item...',
+    'submit' => 'Submit Review',
+    'submitting' => 'Submitting...',
+    'errorSelectRating' => 'Please select a star rating.',
+    'errorMinLength' => 'Your review must be at least 10 characters.',
+];

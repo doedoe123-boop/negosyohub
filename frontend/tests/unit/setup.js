@@ -31,6 +31,7 @@ vi.mock("@heroicons/vue/24/outline", () => {
     Cog6ToothIcon: s,
     CreditCardIcon: s,
     GlobeAltIcon: s,
+    ChartBarIcon: s,
     HomeIcon: s,
     HomeModernIcon: s,
     KeyIcon: s,
@@ -43,12 +44,17 @@ vi.mock("@heroicons/vue/24/outline", () => {
     ShieldCheckIcon: s,
     ShoppingBagIcon: s,
     ShoppingCartIcon: s,
+    SparklesIcon: s,
     StarIcon: s,
+    Squares2X2Icon: s,
+    TagIcon: s,
     TrashIcon: s,
     TruckIcon: s,
+    UserGroupIcon: s,
     UserCircleIcon: s,
     XMarkIcon: s,
     ExclamationTriangleIcon: s,
+    FireIcon: s,
     // Added for dashboard / inquiry / notification features
     BellIcon: s,
     BellAlertIcon: s,
@@ -69,5 +75,16 @@ vi.mock("@heroicons/vue/24/solid", () => {
     ExclamationTriangleIcon: s,
     StarIcon: s,
     XCircleIcon: s,
+  };
+});
+
+vi.mock("@heroicons/vue/20/solid", () => {
+  const s = { template: "<svg />" };
+  return {
+    ChevronDownIcon: s,
+    CheckCircleIcon: s,
+    XCircleIcon: s,
+    MapPinIcon: s,
+    XMarkIcon: s,
   };
 });

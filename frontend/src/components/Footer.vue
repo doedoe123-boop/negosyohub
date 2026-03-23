@@ -1,6 +1,9 @@
 <script setup>
+import { useAppI18n } from "@/i18n";
+
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const year = new Date().getFullYear();
+const { t } = useAppI18n();
 </script>
 
 <template>
@@ -21,14 +24,13 @@ const year = new Date().getFullYear();
             >
           </div>
           <p class="text-sm leading-relaxed" style="color: var(--color-footer-muted)">
-            Multi-sector marketplace connecting buyers with trusted local
-            Philippine businesses — e-commerce, real estate, and more.
+            {{ t("footer.brandDescription") }}
           </p>
           <!-- Social links -->
           <div class="mt-5 flex items-center gap-3">
             <a
               href="#"
-              aria-label="Facebook"
+              :aria-label="t('footer.facebook')"
               class="flex size-8 items-center justify-center rounded-lg transition-colors hover:text-white"
               style="
                 background-color: color-mix(in srgb, var(--color-surface) 10%, transparent);
@@ -43,7 +45,7 @@ const year = new Date().getFullYear();
             </a>
             <a
               href="#"
-              aria-label="Instagram"
+              :aria-label="t('footer.instagram')"
               class="flex size-8 items-center justify-center rounded-lg transition-colors hover:text-white"
               style="
                 background-color: color-mix(in srgb, var(--color-surface) 10%, transparent);
@@ -64,22 +66,22 @@ const year = new Date().getFullYear();
           <p
             class="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-300"
           >
-            Browse
+            {{ t("footer.browse") }}
           </p>
           <ul class="space-y-2.5 text-sm">
             <li>
               <a href="/stores" class="transition-colors hover:text-white"
-                >E-Commerce</a
+                >{{ t("footer.ecommerce") }}</a
               >
             </li>
             <li>
               <a href="/properties" class="transition-colors hover:text-white"
-                >Real Estate</a
+                >{{ t("footer.realEstate") }}</a
               >
             </li>
             <li>
               <a href="/movers" class="transition-colors hover:text-white"
-                >Lipat Bahay</a
+                >{{ t("footer.moving") }}</a
               >
             </li>
           </ul>
@@ -90,7 +92,7 @@ const year = new Date().getFullYear();
           <p
             class="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-300"
           >
-            For Sellers
+            {{ t("footer.sellers") }}
           </p>
           <ul class="space-y-2.5 text-sm">
             <li>
@@ -99,7 +101,7 @@ const year = new Date().getFullYear();
                 target="_blank"
                 rel="noopener"
                 class="transition-colors hover:text-white"
-                >Register Your Store</a
+                >{{ t("footer.registerStore") }}</a
               >
             </li>
             <li>
@@ -108,7 +110,7 @@ const year = new Date().getFullYear();
                 target="_blank"
                 rel="noopener"
                 class="transition-colors hover:text-white"
-                >Seller Dashboard</a
+                >{{ t("footer.sellerDashboard") }}</a
               >
             </li>
           </ul>
@@ -119,21 +121,21 @@ const year = new Date().getFullYear();
           <p
             class="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-300"
           >
-            Company
+            {{ t("footer.company") }}
           </p>
           <ul class="space-y-2.5 text-sm">
             <li>
               <a
                 :href="`${backendUrl}/legal/terms-and-conditions`"
                 class="transition-colors hover:text-white"
-                >Terms of Service</a
+                >{{ t("footer.terms") }}</a
               >
             </li>
             <li>
               <a
                 :href="`${backendUrl}/legal/privacy-policy`"
                 class="transition-colors hover:text-white"
-                >Privacy Policy</a
+                >{{ t("footer.privacy") }}</a
               >
             </li>
             <li>
@@ -141,7 +143,7 @@ const year = new Date().getFullYear();
                 to="/about"
                 class="transition-colors hover:text-white"
               >
-                About Us
+                {{ t("footer.about") }}
               </RouterLink>
             </li>
             <li>
@@ -149,7 +151,23 @@ const year = new Date().getFullYear();
                 to="/faq"
                 class="transition-colors hover:text-white"
               >
-                FAQs
+                {{ t("footer.faq") }}
+              </RouterLink>
+            </li>
+            <li>
+              <RouterLink
+                to="/deals"
+                class="transition-colors hover:text-white"
+              >
+                {{ t("footer.deals") }}
+              </RouterLink>
+            </li>
+            <li>
+              <RouterLink
+                to="/insights"
+                class="transition-colors hover:text-white"
+              >
+                {{ t("footer.insights") }}
               </RouterLink>
             </li>
           </ul>
@@ -182,7 +200,7 @@ const year = new Date().getFullYear();
               d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
             />
           </svg>
-          Secure checkout
+          {{ t("footer.secureCheckout") }}
         </div>
         <div
           class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
@@ -205,7 +223,7 @@ const year = new Date().getFullYear();
               d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
             />
           </svg>
-          PayMongo &amp; Stripe
+          {{ t("footer.paymentPartners") }}
         </div>
         <div
           class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"
@@ -216,7 +234,7 @@ const year = new Date().getFullYear();
           "
         >
           <span class="text-sm">🇵🇭</span>
-          Made in the Philippines
+          {{ t("footer.madeInPhilippines") }}
         </div>
       </div>
 
@@ -225,8 +243,8 @@ const year = new Date().getFullYear();
         class="mt-8 flex flex-col items-center justify-between gap-2 text-xs sm:flex-row"
         style="color: color-mix(in srgb, var(--color-footer-muted) 72%, transparent)"
       >
-        <p>&copy; {{ year }} NegosyoHub. All rights reserved.</p>
-        <p>Built with ❤️ in the Philippines</p>
+        <p>&copy; {{ year }} NegosyoHub. {{ t("footer.rightsReserved") }}</p>
+        <p>{{ t("footer.builtInPhilippines") }}</p>
       </div>
     </div>
   </footer>

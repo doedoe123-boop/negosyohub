@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Mga Review',
+    'reviewSingular' => 'review',
+    'reviewPlural' => 'reviews',
+    'verified' => 'Verified',
+    'empty' => 'Wala pang review. Ikaw ang maunang magbahagi ng iyong karanasan!',
+    'writeTitle' => 'Magsulat ng Review',
+    'loginPrefix' => 'Mangyaring',
+    'loginAction' => 'mag-log in',
+    'loginSuffix' => 'para makapagsulat ng review.',
+    'successTitle' => 'Salamat sa iyong review!',
+    'successBody' => 'Naipadala na ang iyong review at naghihintay ng pag-apruba.',
+    'writeAnother' => 'Magsulat ng panibagong review',
+    'rating' => 'Rating',
+    'poor' => 'Mahina',
+    'fair' => 'Katamtaman',
+    'good' => 'Maganda',
+    'veryGood' => 'Napakaganda',
+    'excellent' => 'Napakahusay',
+    'titleLabel' => 'Pamagat ng Review',
+    'contentPlaceholder' => 'Ibahagi ang iyong karanasan sa :item na ito...',
+    'submit' => 'Ipasa ang Review',
+    'submitting' => 'Ipinapasa...',
+    'errorSelectRating' => 'Mangyaring pumili ng star rating.',
+    'errorMinLength' => 'Dapat hindi bababa sa 10 character ang iyong review.',
+];
