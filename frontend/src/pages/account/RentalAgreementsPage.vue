@@ -259,7 +259,7 @@ function statusBadge(agreement) {
 
         <!-- Pending Action Area -->
         <div v-if="agreement.status === 'pending' || agreement.status === 'negotiating'" class="theme-card-muted theme-divider-soft rounded-b-2xl border-t p-5">
-          <div class="mb-4 rounded-2xl border border-brand-200/60 bg-brand-50/70 px-4 py-3">
+          <div class="mb-4 rounded-2xl border border-brand-200/60 bg-brand-50/70 px-4 py-3 dark:bg-brand-900/20 dark:border-brand-800/50">
             <p class="theme-title text-sm font-bold">
               {{ agreement.tenant_primary_action ?? "Review and Sign" }}
             </p>
@@ -314,14 +314,14 @@ function statusBadge(agreement) {
           </div>
           
           <!-- Show previous question if negotiating -->
-           <div v-if="agreement.tenant_questions" class="mt-4 rounded-xl bg-yellow-50 p-3 text-sm text-yellow-800 border border-yellow-100">
-             <strong>Your question to the landlord:</strong>
+           <div v-if="agreement.tenant_questions" class="mt-4 rounded-xl bg-yellow-50 p-3 text-sm text-yellow-800 border border-yellow-100 dark:bg-yellow-900/20 dark:border-yellow-800/50 dark:text-yellow-200">
+             <strong class="dark:text-yellow-100">Your question to the landlord:</strong>
              <p class="mt-1 italic">"{{ agreement.tenant_questions }}"</p>
            </div>
            
            <!-- Landlord Response Block -->
-           <div v-if="agreement.landlord_response" class="mt-3 rounded-xl bg-brand-50 p-3 text-sm text-brand-800 border border-brand-100">
-             <strong>Response from Landlord:</strong>
+           <div v-if="agreement.landlord_response" class="mt-3 rounded-xl bg-brand-50 p-3 text-sm text-brand-800 border border-brand-100 dark:bg-brand-900/20 dark:border-brand-800/50 dark:text-brand-200">
+             <strong class="dark:text-brand-100">Response from Landlord:</strong>
              <p class="mt-1">"{{ agreement.landlord_response }}"</p>
            </div>
         </div>
@@ -343,12 +343,14 @@ function statusBadge(agreement) {
               :key="step.key"
               class="rounded-2xl border p-3"
               :class="step.done
-                ? 'border-emerald-500/30 bg-emerald-500/10'
+                ? 'border-emerald-500/30 bg-emerald-500/10 dark:border-emerald-500/20 dark:bg-emerald-500/5'
                 : step.active
-                  ? 'border-brand-500/30 bg-brand-500/10'
+                  ? 'border-brand-500/30 bg-brand-500/10 dark:border-brand-500/20 dark:bg-brand-500/5'
                   : 'theme-divider-soft theme-card'"
             >
-              <p class="theme-title text-sm font-semibold">{{ step.label }}</p>
+              <p class="theme-title text-sm font-semibold inline-flex items-center gap-1.5">
+                {{ step.label }}
+              </p>
               <p class="theme-copy mt-1 text-xs leading-relaxed">
                 {{ step.description }}
               </p>
@@ -359,7 +361,7 @@ function statusBadge(agreement) {
             v-if="agreement.status === 'signed' || agreement.status === 'active'"
             class="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]"
           >
-            <div class="rounded-2xl border border-brand-500/20 bg-brand-500/10 p-4">
+            <div class="rounded-2xl border border-brand-500/20 bg-brand-500/10 dark:border-brand-500/20 dark:bg-brand-900/10 p-4">
               <div class="flex items-start gap-3">
                 <TruckIcon class="mt-0.5 size-5 text-brand-500" />
                 <div>

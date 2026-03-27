@@ -69,9 +69,7 @@ onBeforeUnmount(() => {
           >
             <div class="text-center text-white px-6">
               <div class="text-2xl font-bold">{{ ad.title }}</div>
-              <div v-if="ad.description" class="mt-2 text-sm opacity-80">
-                {{ ad.description }}
-              </div>
+              <div v-if="ad.description" class="mt-2 text-sm opacity-80" v-html="ad.description"></div>
             </div>
           </div>
         </a>

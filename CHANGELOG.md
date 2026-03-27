@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-27
+
+### Added
+- **Analytics**: Added `@vercel/speed-insights` for deeper frontend performance monitoring.
+- **LipatBahay Dashboard**: Completely populated the Movers control panel with real data widgets:
+  - `MovingBookingsOverview` displaying total bookings, pending count, and revenue.
+  - `BookingsTrendChart` showing a 30-day graphical trend of moving requests.
+  - `RecentMovingBookingsTable` highlighting the 5 most recent service requests.
+
+### Changed
+- **UX Improvement**: Overhauled the top `AnnouncementBar`. Instead of expanding inline and pushing site content down, reading an announcement now triggers a sleek, centered modal overlay with native scrolling.
+
+### Fixed
+- **Analytics Build Issue**: Corrected the Vite compilation error by utilizing the framework-specific `@vercel/analytics/vue` entry point.
+- **Frontend Rich Text Escaping**: Fixed an issue where the backend text editor's `<p>` tags were rendering literally inside the `PromotionBanner` and `AdBanner` cards.
+- **Dark Mode Contrast**: Fixed glaring contrast and legibility issues across multiple frontend components:
+  - `RentalAgreementsPage`: Fixed unreadable text across the Pending Action boxes ("Review and Sign"), the Q&A conversation thread, and the Safe Move-In Journey steps.
+  - `PromotionBanner`: Implemented dark-mode specific text colors for titles, dates, and discounted prices so they remain completely legible against dark backgrounds.
+
 ## [1.0.0] - 2026-03-27
 
 ### Added

@@ -10,27 +10,27 @@ const loaded = ref(false);
 const typeStyles = {
   holiday_sale: {
     icon: SparklesIcon,
-    color: "text-red-500 bg-red-50 ring-red-200",
+    color: "text-red-500 bg-red-50 ring-red-200 dark:bg-red-900/30 dark:ring-red-900/50",
   },
   seasonal_promotion: {
     icon: TagIcon,
-    color: "text-emerald-600 bg-emerald-50 ring-emerald-200",
+    color: "text-emerald-600 bg-emerald-50 ring-emerald-200 dark:bg-emerald-900/30 dark:ring-emerald-900/50",
   },
   marketplace_discount: {
     icon: TagIcon,
-    color: "text-brand-600 bg-brand-50 ring-brand-200",
+    color: "text-brand-600 bg-brand-50 ring-brand-200 dark:bg-brand-900/30 dark:ring-brand-900/50",
   },
   flash_sale: {
     icon: FireIcon,
-    color: "text-amber-500 bg-amber-50 ring-amber-200",
+    color: "text-amber-500 bg-amber-50 ring-amber-200 dark:bg-amber-900/30 dark:ring-amber-900/50",
   },
   anniversary: {
     icon: SparklesIcon,
-    color: "text-indigo-500 bg-indigo-50 ring-indigo-200",
+    color: "text-indigo-500 bg-indigo-50 ring-indigo-200 dark:bg-indigo-900/30 dark:ring-indigo-900/50",
   },
   clearance: {
     icon: TagIcon,
-    color: "text-slate-600 bg-slate-50 ring-slate-200",
+    color: "text-slate-600 bg-slate-50 ring-slate-200 dark:bg-slate-700 dark:ring-slate-600 dark:text-slate-300",
   },
 };
 
@@ -70,7 +70,7 @@ onMounted(async () => {
     v-if="loaded && promotions.length > 0"
     class="border-b border-slate-100 bg-white px-4 py-12 sm:px-6 dark:bg-slate-900 dark:border-slate-800"
   >
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <div class="mb-7 flex items-end justify-between">
         <div>
           <p
@@ -78,7 +78,7 @@ onMounted(async () => {
           >
             Limited Time
           </p>
-          <h2 class="text-2xl font-bold text-slate-900">Active Promotions</h2>
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Active Promotions</h2>
         </div>
         <RouterLink
           to="/stores"
@@ -106,19 +106,18 @@ onMounted(async () => {
           </span>
 
           <!-- Discount badge -->
-          <p class="mb-1 text-xl font-extrabold text-slate-900">
+          <p class="mb-1 text-xl font-extrabold text-slate-900 dark:text-white">
             {{ discountLabel(promo) }}
           </p>
 
-          <div class="text-sm font-semibold text-slate-700 line-clamp-1">
+          <div class="text-sm font-semibold text-slate-700 dark:text-slate-200 line-clamp-1">
             {{ promo.name }}
           </div>
           <div
             v-if="promo.description"
-            class="mt-1 text-xs text-slate-500 line-clamp-2"
-          >
-            {{ promo.description }}
-          </div>
+            v-html="promo.description"
+            class="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2"
+          ></div>
 
           <!-- Urgency label -->
           <p

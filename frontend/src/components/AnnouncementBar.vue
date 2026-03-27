@@ -11,7 +11,7 @@ import { sanitizeHtml } from "@/utils/sanitizeHtml";
 const announcements = ref([]);
 const currentIndex = ref(0);
 const dismissed = ref(false);
-const expanded = ref(false);
+const showModal = ref(false);
 const loaded = ref(false);
 
 const typeColors = {
@@ -39,12 +39,12 @@ function dismiss() {
 }
 
 function next() {
-  expanded.value = false;
+  showModal.value = false;
   currentIndex.value = (currentIndex.value + 1) % announcements.value.length;
 }
 
-function toggleExpand() {
-  expanded.value = !expanded.value;
+function toggleModal() {
+  showModal.value = !showModal.value;
 }
 
 function sanitizedContent(content) {
@@ -71,14 +71,10 @@ function sanitizedContent(content) {
           <button
             v-if="current()?.content"
             type="button"
-            class="shrink-0 flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold opacity-80 hover:opacity-100 transition-opacity"
-            @click="toggleExpand"
+            class="shrink-0 flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold opacity-80 hover:opacity-100 transition-opacity underline underline-offset-2"
+            @click="toggleModal"
           >
-            {{ expanded ? "Less" : "More" }}
-            <component
-              :is="expanded ? ChevronUpIcon : ChevronDownIcon"
-              class="size-3.5"
-            />
+            Read More
           </button>
 
           <button
@@ -101,55 +97,62 @@ function sanitizedContent(content) {
         </div>
       </div>
 
-      <!-- Expanded rich-text content -->
-      <Transition name="slide">
+    </div>
+
+    <!-- Modal for rich-text content -->
+    <Teleport to="body">
+      <Transition name="fade">
         <div
-          v-if="expanded && current()?.content"
-          class="border-t border-white/20 bg-black/10 px-4 py-4"
+          v-if="showModal && current()?.content"
+          class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+          @click.self="toggleModal"
         >
-          <div
-            class="announcement-content mx-auto max-w-3xl text-sm leading-relaxed opacity-95"
-            v-html="sanitizedContent(current().content)"
-          />
+          <div class="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 p-4 sm:px-6">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white">Announcement</h3>
+              <button
+                type="button"
+                class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition"
+                @click="toggleModal"
+              >
+                <XMarkIcon class="size-5" />
+              </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="max-h-[70vh] overflow-y-auto p-4 sm:p-6">
+              <div
+                class="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300"
+                v-html="sanitizedContent(current().content)"
+              />
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="border-t border-slate-100 dark:border-slate-700 p-4 sm:px-6 text-right">
+              <button
+                type="button"
+                class="btn-primary inline-flex items-center rounded-xl px-4 py-2 text-sm font-bold"
+                @click="toggleModal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </Transition>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-/* Rich-text content from the admin editor */
-.announcement-content :deep(p) {
-  margin-bottom: 0.5rem;
+/* Modal fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
-.announcement-content :deep(p:last-child) {
-  margin-bottom: 0;
-}
-.announcement-content :deep(strong) {
-  font-weight: 700;
-}
-.announcement-content :deep(br) {
-  display: block;
-  content: "";
-  margin-top: 0.25rem;
-}
-
-/* Expand / collapse transition */
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.25s ease;
-  overflow: hidden;
-}
-.slide-enter-from,
-.slide-leave-to {
-  max-height: 0;
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-.slide-enter-to,
-.slide-leave-from {
-  max-height: 20rem;
-  opacity: 1;
 }
 </style>
