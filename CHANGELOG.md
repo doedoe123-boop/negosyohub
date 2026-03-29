@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-29
+
+### Added
+- **Operations**: Added `app:create-super-admin` to seed the required platform roles and permissions and provision a production-ready admin user without running the full demo seeders.
+
+### Changed
+- **Seller Onboarding**: Seller email verification now happens after store approval instead of immediately at registration time.
+- **Seller Login**: Unverified approved sellers are now blocked from the store portal until they verify their email, and a fresh verification notification is resent automatically.
+
+### Fixed
+- **Seller Registration Wizard**: Fixed multi-step validation so errors from a previous step no longer block progress after the user corrects them.
+- **Seller Registration Resilience**: Registration no longer depends on immediate email verification dispatch to complete the seller application flow.
+- **Seller Verification Redirect**: Fixed the signed verification flow so store owners can verify successfully without already being logged in.
+- **Seller Approval Flow**: Store approval now sends the seller verification notification at the correct stage of the lifecycle.
+
 ## [1.1.0] - 2026-03-27
 
 ### Added

@@ -72,7 +72,7 @@ Route::middleware('guest')->group(function () {
 // from the {id} segment)
 // ──────────────────────────────────────────────────────────────────────────────
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['auth', 'signed'])
+    ->middleware(['signed'])
     ->name('verification.verify');
 
 // Authenticated routes

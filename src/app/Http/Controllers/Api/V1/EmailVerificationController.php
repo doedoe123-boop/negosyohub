@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,10 +31,27 @@ class EmailVerificationController extends Controller
      * This is a WEB route so the signed URL works correctly.
      * After verifying, the user is redirected back to the frontend SPA.
      */
-    public function verify(EmailVerificationRequest $request): RedirectResponse
+    public function verify(Request $request, int $id, string $hash): RedirectResponse
     {
-        if (! $request->user()->hasVerifiedEmail()) {
-            $request->fulfill();
+        abort_unless($request->hasValidSignature(), 403);
+
+        $user = User::query()->findOrFail($id);
+
+        abort_unless(hash_equals((string) $hash, sha1($user->getEmailForVerification())), 403);
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+        }
+
+        if ($user->isStoreOwner()) {
+            $store = $user->store;
+
+            if ($store?->isApproved() && $store->login_token) {
+                return redirect($store->loginUrl().'?verified=1');
+            }
+
+            return redirect(route('register.store-owner.success', ['verified' => 1]));
         }
 
         $frontendUrl = rtrim(config('app.frontend_url', 'http://localhost:5173'), '/');

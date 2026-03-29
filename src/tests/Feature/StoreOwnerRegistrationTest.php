@@ -9,8 +9,8 @@ use App\Models\User;
 use App\StoreStatus;
 use App\UserRole;
 use Database\Seeders\SectorSeeder;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -202,23 +202,21 @@ it('auto-generates slug from store name', function () {
         ->assertSet('slug', 'juans-kitchen');
 });
 
-it('still completes registration when verification email dispatch fails', function () {
+it('creates the seller account without sending verification before approval', function () {
     $dtiFile = UploadedFile::fake()->create('dti.pdf', 1024, 'application/pdf');
     $permitFile = UploadedFile::fake()->create('permit.pdf', 1024, 'application/pdf');
     $birFile = UploadedFile::fake()->create('bir.pdf', 1024, 'application/pdf');
 
-    app('events')->listen(Registered::class, function (): void {
-        throw new RuntimeException('SMTP rejected sender');
-    });
+    Notification::fake();
 
     Livewire::test(StoreOwnerRegistration::class, ['sector' => 'ecommerce'])
-        ->set('name', 'Mail Fail User')
-        ->set('email', 'mail-fail@example.com')
+        ->set('name', 'Pending Seller')
+        ->set('email', 'pending-seller@example.com')
         ->set('phone', '09171234567')
         ->set('password', 'Str0ng#Pass9')
         ->set('password_confirmation', 'Str0ng#Pass9')
-        ->set('storeName', 'Mail Fail Store')
-        ->set('slug', 'mail-fail-store')
+        ->set('storeName', 'Pending Seller Store')
+        ->set('slug', 'pending-seller-store')
         ->set('description', 'A great store')
         ->set('addressLine', '123 St')
         ->set('city', 'City')
@@ -231,8 +229,13 @@ it('still completes registration when verification email dispatch fails', functi
         ->call('register')
         ->assertRedirect(route('register.store-owner.success'));
 
-    expect(User::query()->where('email', 'mail-fail@example.com')->exists())->toBeTrue()
-        ->and(Store::query()->where('slug', 'mail-fail-store')->exists())->toBeTrue();
+    $user = User::query()->where('email', 'pending-seller@example.com')->first();
+
+    expect($user)->not->toBeNull()
+        ->and($user->hasVerifiedEmail())->toBeFalse()
+        ->and(Store::query()->where('slug', 'pending-seller-store')->exists())->toBeTrue();
+
+    Notification::assertNothingSent();
 });
 
 // --- Validation ---

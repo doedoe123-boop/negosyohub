@@ -56,6 +56,8 @@ negosyohub/
 | `routes/web.php`               | Web routes                                                |
 | `routes/store.php`             | Store subdomain routes                                    |
 
+Current public API version: `v1` (`/api/v1/*`)
+
 ### Frontend SPA (`frontend/`)
 
 | Path              | Purpose                    |

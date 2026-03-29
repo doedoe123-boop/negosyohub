@@ -8,10 +8,8 @@ use App\Models\User;
 use App\PhilippineIdType;
 use App\Rules\ValidateUploadContent;
 use App\UserRole;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -411,18 +409,6 @@ class StoreOwnerRegistration extends Component
 
             return $user;
         });
-
-        try {
-            event(new Registered($user));
-        } catch (\Throwable $exception) {
-            Log::warning('Store owner registration completed without verification email.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'error' => $exception->getMessage(),
-            ]);
-
-            session()->flash('warning', 'Your application was submitted, but we could not send the verification email right now. Please contact support if you do not receive it shortly.');
-        }
 
         // Clear browser localStorage for this form
         $this->dispatch('registration-complete');

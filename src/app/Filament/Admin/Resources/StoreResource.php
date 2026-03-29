@@ -8,6 +8,7 @@ use App\Mail\StoreReinstated;
 use App\Mail\StoreSuspended;
 use App\Models\Sector;
 use App\Models\Store;
+use App\Notifications\SellerEmailVerificationNotification;
 use App\PhilippineIdType;
 use App\Services\StoreService;
 use App\StoreStatus;
@@ -312,6 +313,10 @@ class StoreResource extends Resource
                         ]);
 
                         try {
+                            if (! $record->owner->hasVerifiedEmail()) {
+                                $record->owner->notify(new SellerEmailVerificationNotification);
+                            }
+
                             Mail::to($ownerEmail)->send(new StoreApproved($record));
 
                             Log::info('Store approval email sent successfully', [

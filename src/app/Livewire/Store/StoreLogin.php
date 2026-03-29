@@ -3,6 +3,7 @@
 namespace App\Livewire\Store;
 
 use App\Models\Store;
+use App\Notifications\SellerEmailVerificationNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -98,6 +99,18 @@ class StoreLogin extends Component
             session()->regenerateToken();
 
             $this->addError('email', 'You do not have access to this store.');
+
+            return;
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->notify(new SellerEmailVerificationNotification);
+
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+
+            $this->addError('email', 'Please verify your email address before accessing your store dashboard. We sent a fresh verification link.');
 
             return;
         }
