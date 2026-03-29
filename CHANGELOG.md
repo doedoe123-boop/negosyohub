@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Operations**: Added `app:create-super-admin` to seed the required platform roles and permissions and provision a production-ready admin user without running the full demo seeders.
+- **Admin Recovery**: Added a `Resend Approval Email` action for approved stores so admins can resend seller onboarding emails when delivery fails.
 
 ### Changed
 - **Seller Onboarding**: Seller email verification now happens after store approval instead of immediately at registration time.
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Seller Registration Resilience**: Registration no longer depends on immediate email verification dispatch to complete the seller application flow.
 - **Seller Verification Redirect**: Fixed the signed verification flow so store owners can verify successfully without already being logged in.
 - **Seller Approval Flow**: Store approval now sends the seller verification notification at the correct stage of the lifecycle.
+- **Seller Approval Recovery**: Approval email resend now reuses the same seller communication flow instead of requiring a status change workaround.
 
 ## [1.1.0] - 2026-03-27
 

@@ -3,12 +3,10 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\StoreResource\Pages;
-use App\Mail\StoreApproved;
 use App\Mail\StoreReinstated;
 use App\Mail\StoreSuspended;
 use App\Models\Sector;
 use App\Models\Store;
-use App\Notifications\SellerEmailVerificationNotification;
 use App\PhilippineIdType;
 use App\Services\StoreService;
 use App\StoreStatus;
@@ -313,11 +311,7 @@ class StoreResource extends Resource
                         ]);
 
                         try {
-                            if (! $record->owner->hasVerifiedEmail()) {
-                                $record->owner->notify(new SellerEmailVerificationNotification);
-                            }
-
-                            Mail::to($ownerEmail)->send(new StoreApproved($record));
+                            app(StoreService::class)->sendApprovalCommunications($record);
 
                             Log::info('Store approval email sent successfully', [
                                 'store_id' => $record->id,
@@ -344,6 +338,43 @@ class StoreResource extends Resource
                         Notification::make()
                             ->title('Store approved')
                             ->body("Approval email sent to {$ownerEmail}")
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('resendApprovalEmail')
+                    ->label('Resend Approval Email')
+                    ->icon('heroicon-o-envelope')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->visible(fn (Store $record): bool => $record->status === StoreStatus::Approved)
+                    ->modalHeading('Resend approval email')
+                    ->modalDescription('This will resend the seller approval email and, if needed, the seller verification email.')
+                    ->action(function (Store $record): void {
+                        $ownerEmail = $record->owner->email;
+
+                        try {
+                            app(StoreService::class)->sendApprovalCommunications($record);
+                        } catch (\Throwable $e) {
+                            Log::error('Store approval resend email failed', [
+                                'store_id' => $record->id,
+                                'owner_email' => $ownerEmail,
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString(),
+                            ]);
+
+                            Notification::make()
+                                ->title('Approval email resend failed')
+                                ->body("Error: {$e->getMessage()}")
+                                ->danger()
+                                ->persistent()
+                                ->send();
+
+                            return;
+                        }
+
+                        Notification::make()
+                            ->title('Approval email resent')
+                            ->body("Approval email resent to {$ownerEmail}")
                             ->success()
                             ->send();
                     }),
@@ -468,7 +499,7 @@ class StoreResource extends Resource
                                     $record->generateLoginToken();
 
                                     try {
-                                        Mail::to($record->owner->email)->send(new StoreApproved($record));
+                                        app(StoreService::class)->sendApprovalCommunications($record);
                                     } catch (\Throwable) {
                                         // Continue processing remaining stores
                                     }
