@@ -9,6 +9,7 @@ use App\Models\User;
 use App\StoreStatus;
 use App\UserRole;
 use Database\Seeders\SectorSeeder;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
