@@ -9,6 +9,9 @@ use App\PhilippineIdType;
 use App\Rules\ValidateUploadContent;
 use App\UserRole;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -145,7 +148,7 @@ class StoreOwnerRegistration extends Component
     private function stepFields(): array
     {
         return [
-            1 => ['name', 'email', 'phone', 'password'],
+            1 => ['name', 'email', 'phone', 'password', 'password_confirmation'],
             2 => ['storeName', 'slug', 'description'],
             3 => ['addressLine', 'city', 'postcode'],
             4 => ['idType', 'idNumber'],
@@ -213,11 +216,7 @@ class StoreOwnerRegistration extends Component
      */
     public function nextStep(): void
     {
-        $this->validateCurrentStep();
-
-        // validateOnly() throws on failure, but addError() (used for the
-        // ID format check) does not — so we must check the bag explicitly.
-        if ($this->getErrorBag()->isNotEmpty()) {
+        if (! $this->validateCurrentStep()) {
             return;
         }
 
@@ -245,24 +244,36 @@ class StoreOwnerRegistration extends Component
     /**
      * Validate only the fields belonging to the current step.
      */
-    private function validateCurrentStep(): void
+    private function validateCurrentStep(): bool
     {
-        if ($this->step === 5) {
-            $this->validate($this->complianceRules);
-
-            return;
-        }
-
         $fields = $this->stepFields()[$this->step] ?? [];
+        $rules = $this->stepRules($this->step);
 
-        foreach ($fields as $field) {
-            $this->validateOnly($field);
+        $this->resetValidation($fields);
+
+        if ($rules !== []) {
+            $this->validate($rules);
         }
 
-        // Step 4: also validate the ID number format pattern
         if ($this->step === 4) {
-            $this->validateIdNumberFormat();
+            return $this->validateIdNumberFormat();
         }
+
+        return true;
+    }
+
+    /**
+     * Get the validation rules for a specific step.
+     *
+     * @return array<string, mixed>
+     */
+    private function stepRules(int $step): array
+    {
+        if ($step === 5) {
+            return $this->complianceRules;
+        }
+
+        return Arr::only($this->rules(), $this->stepFields()[$step] ?? []);
     }
 
     /**
@@ -305,6 +316,7 @@ class StoreOwnerRegistration extends Component
      */
     public function updatedIdNumber(): void
     {
+        $this->resetValidation('idNumber');
         $this->validateOnly('idNumber');
         $this->validateIdNumberFormat();
     }
@@ -370,35 +382,47 @@ class StoreOwnerRegistration extends Component
             }
         }
 
-        // Create the user
-        $user = User::create([
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'password' => $this->password,
-            'role' => UserRole::StoreOwner,
-        ]);
+        $user = DB::transaction(function () use ($compliancePaths): User {
+            $user = User::create([
+                'name' => $this->name,
+                'email' => $this->email,
+                'phone' => $this->phone,
+                'password' => $this->password,
+                'role' => UserRole::StoreOwner,
+            ]);
 
-        // Create the store with KYC details
-        Store::create([
-            'user_id' => $user->id,
-            'name' => $this->storeName,
-            'slug' => $this->slug,
-            'description' => $this->description,
-            'sector' => $this->sector,
-            'address' => [
-                'line_one' => $this->addressLine,
-                'city' => $this->city,
-                'postcode' => $this->postcode,
-            ],
-            'id_type' => $this->idType,
-            'id_number' => $this->idNumber,
-            'compliance_documents' => $compliancePaths,
-        ]);
+            Store::create([
+                'user_id' => $user->id,
+                'name' => $this->storeName,
+                'slug' => $this->slug,
+                'description' => $this->description,
+                'sector' => $this->sector,
+                'address' => [
+                    'line_one' => $this->addressLine,
+                    'city' => $this->city,
+                    'postcode' => $this->postcode,
+                ],
+                'id_type' => $this->idType,
+                'id_number' => $this->idNumber,
+                'compliance_documents' => $compliancePaths,
+            ]);
 
-        $user->assignRole('store_owner');
+            $user->assignRole('store_owner');
 
-        event(new Registered($user));
+            return $user;
+        });
+
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $exception) {
+            Log::warning('Store owner registration completed without verification email.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $exception->getMessage(),
+            ]);
+
+            session()->flash('warning', 'Your application was submitted, but we could not send the verification email right now. Please contact support if you do not receive it shortly.');
+        }
 
         // Clear browser localStorage for this form
         $this->dispatch('registration-complete');

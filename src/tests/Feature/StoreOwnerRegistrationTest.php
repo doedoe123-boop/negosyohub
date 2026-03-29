@@ -9,6 +9,7 @@ use App\Models\User;
 use App\StoreStatus;
 use App\UserRole;
 use Database\Seeders\SectorSeeder;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -130,6 +131,19 @@ it('shows real-estate-specific docs for real estate sector', function () {
         ->assertDontSee('Store / Warehouse Photo');
 });
 
+it('allows progressing after fixing validation errors from a previous step', function () {
+    Livewire::test(StoreOwnerRegistration::class, ['sector' => 'ecommerce'])
+        ->call('nextStep')
+        ->assertSet('step', 1)
+        ->set('name', 'Juan Dela Cruz')
+        ->set('email', 'step-fix@example.com')
+        ->set('phone', '09171234567')
+        ->set('password', 'Str0ng#Pass9')
+        ->set('password_confirmation', 'Str0ng#Pass9')
+        ->call('nextStep')
+        ->assertSet('step', 2);
+});
+
 // --- Successful Registration with Compliance Docs ---
 
 it('creates a user and store with compliance documents on registration', function () {
@@ -186,6 +200,39 @@ it('auto-generates slug from store name', function () {
     Livewire::test(StoreOwnerRegistration::class, ['sector' => 'ecommerce'])
         ->set('storeName', "Juan's Kitchen")
         ->assertSet('slug', 'juans-kitchen');
+});
+
+it('still completes registration when verification email dispatch fails', function () {
+    $dtiFile = UploadedFile::fake()->create('dti.pdf', 1024, 'application/pdf');
+    $permitFile = UploadedFile::fake()->create('permit.pdf', 1024, 'application/pdf');
+    $birFile = UploadedFile::fake()->create('bir.pdf', 1024, 'application/pdf');
+
+    app('events')->listen(Registered::class, function (): void {
+        throw new RuntimeException('SMTP rejected sender');
+    });
+
+    Livewire::test(StoreOwnerRegistration::class, ['sector' => 'ecommerce'])
+        ->set('name', 'Mail Fail User')
+        ->set('email', 'mail-fail@example.com')
+        ->set('phone', '09171234567')
+        ->set('password', 'Str0ng#Pass9')
+        ->set('password_confirmation', 'Str0ng#Pass9')
+        ->set('storeName', 'Mail Fail Store')
+        ->set('slug', 'mail-fail-store')
+        ->set('description', 'A great store')
+        ->set('addressLine', '123 St')
+        ->set('city', 'City')
+        ->set('postcode', '1000')
+        ->set('idType', 'passport')
+        ->set('idNumber', 'P1234567')
+        ->set('complianceFiles.dti_sec_registration', $dtiFile)
+        ->set('complianceFiles.business_permit', $permitFile)
+        ->set('complianceFiles.bir_registration', $birFile)
+        ->call('register')
+        ->assertRedirect(route('register.store-owner.success'));
+
+    expect(User::query()->where('email', 'mail-fail@example.com')->exists())->toBeTrue()
+        ->and(Store::query()->where('slug', 'mail-fail-store')->exists())->toBeTrue();
 });
 
 // --- Validation ---
