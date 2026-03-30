@@ -29,6 +29,9 @@ export const useCartStore = defineStore("cart", () => {
     return val / 100;
   });
   const storeId = computed(() => cart.value?.meta?.store_id ?? null);
+  const groups = computed(() => cart.value?.groups ?? []);
+  const storeCount = computed(() => cart.value?.store_count ?? groups.value.length);
+  const isMultiStore = computed(() => (cart.value?.multi_store ?? false) || storeCount.value > 1);
 
   async function fetch() {
     try {
@@ -121,6 +124,9 @@ export const useCartStore = defineStore("cart", () => {
     appliedCoupon,
     rawTotal,
     storeId,
+    groups,
+    storeCount,
+    isMultiStore,
     fetch,
     addItem,
     updateItem,

@@ -43,67 +43,76 @@ onMounted(() => cart.fetch());
 
     <div v-else class="grid gap-5 lg:grid-cols-3">
       <div class="lg:col-span-2">
-        <ul
-          class="theme-card theme-divider-soft divide-y overflow-hidden rounded-2xl"
-        >
-          <li
-            v-for="line in cart.cart?.lines"
-            :key="line.id"
-            class="flex gap-4 p-4"
+        <div v-if="cart.isMultiStore" class="mb-4 rounded-2xl bg-brand-500/10 px-4 py-3 text-sm text-brand-100">
+          Your cart contains items from {{ cart.storeCount }} stores. Checkout will split them into separate store orders automatically.
+        </div>
+
+        <div class="space-y-4">
+          <section
+            v-for="group in cart.cart?.groups ?? []"
+            :key="group.store.id"
+            class="theme-card overflow-hidden rounded-2xl"
           >
-            <div
-              class="theme-card-muted size-20 shrink-0 overflow-hidden rounded-xl"
-            >
-              <img
-                :src="line.purchasable?.thumbnail ?? '/placeholder.png'"
-                class="size-full object-cover"
-              />
-            </div>
-            <div class="flex flex-1 flex-col justify-between min-w-0">
-              <p class="theme-title line-clamp-2 font-medium">
-                {{ line.purchasable?.name }}
-              </p>
-              <div class="flex items-center justify-between mt-2">
-                <div
-                  class="theme-card-muted flex items-center gap-1 rounded-lg p-0.5"
-                >
-                  <button
-                    type="button"
-                    class="theme-copy flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-40"
-                    @click="cart.updateItem(line.id, line.quantity - 1)"
-                    :disabled="line.quantity <= 1"
-                  >
-                    −
-                  </button>
-                  <span
-                    class="theme-title w-6 text-center text-sm font-semibold"
-                  >
-                    {{ line.quantity }}
-                  </span>
-                  <button
-                    type="button"
-                    class="theme-copy flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
-                    @click="cart.updateItem(line.id, line.quantity + 1)"
-                  >
-                    +
-                  </button>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="theme-title font-bold">{{
-                    line.sub_total?.formatted
-                  }}</span>
-                  <button
-                    type="button"
-                    class="theme-copy rounded-lg p-1.5 hover:bg-red-500/10 hover:text-red-500"
-                    @click="cart.removeItem(line.id)"
-                  >
-                    <TrashIcon class="size-4" />
-                  </button>
-                </div>
+            <header class="theme-card-muted flex items-center justify-between px-4 py-3">
+              <div>
+                <p class="theme-title text-sm font-semibold">{{ group.store.name }}</p>
+                <p class="theme-copy text-xs">{{ group.quantity }} item{{ group.quantity !== 1 ? "s" : "" }}</p>
               </div>
-            </div>
-          </li>
-        </ul>
+              <span class="theme-title text-sm font-semibold">{{ group.sub_total.formatted }}</span>
+            </header>
+            <ul class="theme-divider-soft divide-y">
+              <li
+                v-for="line in group.lines"
+                :key="line.id"
+                class="flex gap-4 p-4"
+              >
+                <div class="theme-card-muted size-20 shrink-0 overflow-hidden rounded-xl">
+                  <img
+                    :src="line.purchasable?.thumbnail ?? '/placeholder.png'"
+                    class="size-full object-cover"
+                  />
+                </div>
+                <div class="flex min-w-0 flex-1 flex-col justify-between">
+                  <p class="theme-title line-clamp-2 font-medium">
+                    {{ line.purchasable?.name }}
+                  </p>
+                  <div class="mt-2 flex items-center justify-between">
+                    <div class="theme-card-muted flex items-center gap-1 rounded-lg p-0.5">
+                      <button
+                        type="button"
+                        class="theme-copy flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface)] hover:text-[var(--color-text)] disabled:opacity-40"
+                        :disabled="line.quantity <= 1"
+                        @click="cart.updateItem(line.id, line.quantity - 1)"
+                      >
+                        −
+                      </button>
+                      <span class="theme-title w-6 text-center text-sm font-semibold">
+                        {{ line.quantity }}
+                      </span>
+                      <button
+                        type="button"
+                        class="theme-copy flex size-7 items-center justify-center rounded-md hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
+                        @click="cart.updateItem(line.id, line.quantity + 1)"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="theme-title font-bold">{{ line.sub_total?.formatted }}</span>
+                      <button
+                        type="button"
+                        class="theme-copy rounded-lg p-1.5 hover:bg-red-500/10 hover:text-red-500"
+                        @click="cart.removeItem(line.id)"
+                      >
+                        <TrashIcon class="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </section>
+        </div>
       </div>
 
       <div class="lg:col-span-1">
@@ -113,6 +122,12 @@ onMounted(() => cart.fetch());
           <h2 class="theme-title mb-4 text-base font-semibold">
             {{ t("cart.orderSummary") }}
           </h2>
+          <div
+            v-if="cart.isMultiStore"
+            class="mb-4 rounded-xl bg-brand-500/10 px-3 py-2 text-xs text-brand-100"
+          >
+            One checkout will create {{ cart.storeCount }} separate store orders.
+          </div>
           <div class="theme-copy space-y-2 text-sm">
             <div class="flex justify-between">
               <span>{{ t("cart.subtotal") }}</span>

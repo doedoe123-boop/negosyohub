@@ -8,6 +8,7 @@ use App\Models\Property;
 use App\Models\Review;
 use App\Models\Store;
 use App\Models\Testimonial;
+use App\Services\ReviewEligibilityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Lunar\Models\Product;
@@ -20,6 +21,10 @@ use Lunar\Models\Product;
  */
 class ReviewController extends Controller
 {
+    public function __construct(
+        private ReviewEligibilityService $reviewEligibilityService
+    ) {}
+
     /**
      * List published reviews for a store.
      */
@@ -59,11 +64,20 @@ class ReviewController extends Controller
     {
         abort_if(! $store->isApproved(), 404);
 
+        $eligibility = $this->reviewEligibilityService->forStore(auth()->user(), $store);
+
+        if (! $eligibility['can_submit']) {
+            throw ValidationException::withMessages([
+                'review' => [$eligibility['reason'] ?? 'You are not eligible to review this store yet.'],
+            ]);
+        }
+
         $review = $this->createReview(
             $request,
             Store::class,
             $store->id,
-            $store->id
+            $store->id,
+            $eligibility['is_verified_purchase']
         );
 
         return response()->json([
@@ -94,12 +108,20 @@ class ReviewController extends Controller
     public function productStore(CreateReviewRequest $request, Product $product): JsonResponse
     {
         $storeId = $product->attribute_data->get('store_id')?->getValue();
+        $eligibility = $this->reviewEligibilityService->forProduct(auth()->user(), $product);
+
+        if (! $eligibility['can_submit']) {
+            throw ValidationException::withMessages([
+                'review' => [$eligibility['reason'] ?? 'You are not eligible to review this product yet.'],
+            ]);
+        }
 
         $review = $this->createReview(
             $request,
             Product::class,
             $product->id,
-            $storeId
+            $storeId,
+            $eligibility['is_verified_purchase']
         );
 
         return response()->json([
@@ -184,6 +206,7 @@ class ReviewController extends Controller
         string $reviewableType,
         int $reviewableId,
         ?int $storeId,
+        bool $isVerifiedPurchase = false,
     ): Review {
         $user = auth()->user();
 
@@ -210,7 +233,7 @@ class ReviewController extends Controller
             'rating' => $request->integer('rating'),
             'title' => $request->input('title'),
             'content' => $request->input('content'),
-            'is_verified_purchase' => false,
+            'is_verified_purchase' => $isVerifiedPurchase,
             'is_published' => false,
         ]);
     }

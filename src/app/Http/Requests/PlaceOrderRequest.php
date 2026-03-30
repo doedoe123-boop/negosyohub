@@ -56,7 +56,7 @@ class PlaceOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'store_id' => ['required', 'integer', 'exists:stores,id'],
+            'store_id' => ['nullable', 'integer', 'exists:stores,id'],
             'payment_method' => ['required', 'string', Rule::in(array_map(
                 static fn (OrderPaymentMethod $method): string => $method->value,
                 OrderPaymentMethod::cases()
@@ -80,7 +80,8 @@ class PlaceOrderRequest extends FormRequest
                     return;
                 }
 
-                $store = Store::query()->find($this->validated('store_id'));
+                $storeId = $this->validated('store_id');
+                $store = $storeId ? Store::query()->find($storeId) : null;
 
                 if ($store && $store->status !== StoreStatus::Approved) {
                     $validator->errors()->add(

@@ -5,10 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-03-30
+
+### Changed
+- **E-commerce Checkout**: The storefront `v1` cart now supports multi-store marketplace carts for the first public release instead of enforcing a single-store checkout.
+- **Marketplace Checkout UX**: Cart and checkout now group items by store and clearly explain that one checkout will split into separate store orders behind the scenes.
+
+### Fixed
+- **Multi-Store Ordering**: Cash on Delivery checkout now creates separate store orders from one marketplace cart instead of forcing customers to clear their cart between stores.
+- **PayPal Marketplace Capture**: PayPal checkout can now complete a grouped multi-store checkout and fan it out into per-store orders after capture.
+- **Cart API Shape**: Cart responses now include grouped store sections so the frontend can render marketplace-level carts consistently.
+- **Review Trust**: Product and store reviews now expose purchase-eligibility context so the storefront can guide customers toward verified review submission.
+
 ## [1.1.1] - 2026-03-29
 
 ### Added
 - **Operations**: Added `app:create-super-admin` to seed the required platform roles and permissions and provision a production-ready admin user without running the full demo seeders.
+- **Admin Recovery**: Added a `Resend Approval Email` action for approved stores so admins can resend seller onboarding emails when delivery fails.
 
 ### Changed
 - **Seller Onboarding**: Seller email verification now happens after store approval instead of immediately at registration time.
@@ -19,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Seller Registration Resilience**: Registration no longer depends on immediate email verification dispatch to complete the seller application flow.
 - **Seller Verification Redirect**: Fixed the signed verification flow so store owners can verify successfully without already being logged in.
 - **Seller Approval Flow**: Store approval now sends the seller verification notification at the correct stage of the lifecycle.
+- **Seller Approval Recovery**: Approval email resend now reuses the same seller communication flow instead of requiring a status change workaround.
 
 ## [1.1.0] - 2026-03-27
 

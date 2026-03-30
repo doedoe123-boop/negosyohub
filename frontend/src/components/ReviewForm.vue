@@ -18,6 +18,10 @@ const props = defineProps({
   reviews: { type: Array, default: () => [] },
   /** Label: "product" or "property" */
   itemLabel: { type: String, default: "item" },
+  /** Whether the signed-in user is currently eligible to submit a review */
+  canSubmit: { type: Boolean, default: true },
+  /** Optional eligibility explanation shown when review submission is blocked */
+  disabledReason: { type: String, default: null },
 });
 
 const emit = defineEmits(["submit"]);
@@ -207,6 +211,24 @@ defineExpose({ onSuccess, onError });
           >
           {{ t("reviews.loginSuffix") }}
         </p>
+      </div>
+
+      <!-- Review not yet allowed -->
+      <div
+        v-else-if="!canSubmit"
+        class="rounded-xl border border-amber-200 bg-amber-50 p-5"
+      >
+        <div class="flex items-start gap-3">
+          <ExclamationCircleIcon class="mt-0.5 size-5 shrink-0 text-amber-600" />
+          <div>
+            <p class="text-sm font-semibold text-amber-800">
+              Review available after a completed order
+            </p>
+            <p class="mt-1 text-sm text-amber-700">
+              {{ disabledReason || `You can review this ${itemLabel} after your order is delivered.` }}
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- Success state -->

@@ -9,9 +9,12 @@ use App\Models\Store;
 use App\OrderPaymentMethod;
 use App\OrderPaymentStatus;
 use App\OrderStatus;
+use App\Services\MarketplaceCartService;
+use App\Services\MultiStoreCheckoutService;
 use App\Services\OrderService;
 use App\Services\PaymentManager;
 use App\Services\PayMongoService;
+use App\Services\PayPalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -31,7 +34,10 @@ class PaymentController extends Controller
     public function __construct(
         private PayMongoService $payMongo,
         private OrderService $orderService,
-        private PaymentManager $paymentManager
+        private PaymentManager $paymentManager,
+        private MarketplaceCartService $marketplaceCartService,
+        private MultiStoreCheckoutService $multiStoreCheckoutService,
+        private PayPalService $payPalService
     ) {}
 
     // ── PayMongo ────────────────────────────────────────────────────────
@@ -98,6 +104,19 @@ class PaymentController extends Controller
             ], 422);
         }
 
+        if ($this->marketplaceCartService->hasMultipleStores($cart)) {
+            $result = $this->paymentManager->initiate(
+                OrderPaymentMethod::PayPal->value,
+                $cart,
+                $this->marketplaceCartService->groupCartByStore($cart)->first()['store']
+            );
+
+            return response()->json([
+                'paypal_order_id' => $result->externalReference,
+                'approve_url' => $result->redirectUrl,
+            ]);
+        }
+
         $store = $this->orderService->resolveStoreFromCart($cart);
         $result = $this->paymentManager->initiate(OrderPaymentMethod::PayPal->value, $cart, $store);
 
@@ -119,8 +138,56 @@ class PaymentController extends Controller
 
         $validated = $request->validate([
             'paypal_order_id' => ['required', 'string', 'max:100'],
-            'store_id' => ['required', 'integer', 'exists:stores,id'],
+            'store_id' => ['nullable', 'integer', 'exists:stores,id'],
         ]);
+
+        $cart = CartSession::current();
+
+        if (! $cart) {
+            throw ValidationException::withMessages([
+                'cart' => ['Cart session expired. Please try again.'],
+            ]);
+        }
+
+        if ($this->marketplaceCartService->hasMultipleStores($cart)) {
+            $paypalOrder = $this->payPalService->getOrder($validated['paypal_order_id']);
+            $status = $paypalOrder['status'] ?? null;
+
+            if (! in_array($status, ['APPROVED', 'COMPLETED'], true)) {
+                throw ValidationException::withMessages([
+                    'paypal_order_id' => 'PayPal order has not been approved by the customer.',
+                ]);
+            }
+
+            if ($status === 'APPROVED') {
+                $paypalOrder = $this->payPalService->captureOrder($validated['paypal_order_id']);
+            }
+
+            if (($paypalOrder['status'] ?? null) !== 'COMPLETED') {
+                throw ValidationException::withMessages([
+                    'paypal_order_id' => 'PayPal payment capture failed. Please try again.',
+                ]);
+            }
+
+            $this->assertCapturedAmountMatchesMarketplaceCheckout(
+                $paypalOrder,
+                $cart->calculate()->currency->code,
+                $cart->calculate()->total->value,
+                (int) (($cart->meta['applied_coupon']['discount_amount'] ?? 0)),
+            );
+
+            $captureId = $paypalOrder['purchase_units'][0]['payments']['captures'][0]['id'] ?? $validated['paypal_order_id'];
+            $result = $this->multiStoreCheckoutService->completePayPal($cart->calculate(), $validated['paypal_order_id'], $captureId);
+            CartSession::manager()->clear();
+
+            return response()->json([
+                'message' => 'Payment captured and orders placed successfully.',
+                'order_id' => $result['first_order_id'],
+                'order_ids' => $result['order_ids'],
+                'orders' => $result['orders'],
+                'checkout_group_id' => $result['checkout_group_id'],
+            ], 201);
+        }
 
         $store = Store::query()->findOrFail($validated['store_id']);
         $result = $this->paymentManager->complete(OrderPaymentMethod::PayPal->value, [
@@ -144,5 +211,40 @@ class PaymentController extends Controller
                 'payment_method' => 'PayPal checkout is temporarily unavailable.',
             ]);
         }
+    }
+
+    private function assertCapturedAmountMatchesMarketplaceCheckout(
+        array $paypalOrder,
+        string $expectedCurrency,
+        int $cartTotalInCents,
+        int $discountInCents = 0
+    ): void {
+        $expectedAmountInCents = max(0, $cartTotalInCents - $discountInCents);
+        $purchaseUnit = $paypalOrder['purchase_units'][0] ?? [];
+        $capturedAmount = $purchaseUnit['payments']['captures'][0]['amount']
+            ?? $purchaseUnit['amount']
+            ?? null;
+
+        $capturedCurrency = strtoupper((string) ($capturedAmount['currency_code'] ?? ''));
+        $capturedValue = $this->normalizeAmountToCents($capturedAmount['value'] ?? null);
+
+        if (
+            $capturedValue === null
+            || $capturedCurrency !== strtoupper($expectedCurrency)
+            || $capturedValue !== $expectedAmountInCents
+        ) {
+            throw ValidationException::withMessages([
+                'paypal_order_id' => 'Captured PayPal amount does not match the server-calculated checkout total.',
+            ]);
+        }
+    }
+
+    private function normalizeAmountToCents(mixed $value): ?int
+    {
+        if (! is_string($value) && ! is_numeric($value)) {
+            return null;
+        }
+
+        return (int) round(((float) $value) * 100);
     }
 }

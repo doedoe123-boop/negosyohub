@@ -33,6 +33,7 @@ const selectedVariantId = ref(null);
 const quantity = ref(1);
 const selectedImage = ref(0);
 const addedToCart = ref(false);
+const cartError = ref(null);
 const lightboxOpen = ref(false);
 const lightboxIndex = ref(0);
 
@@ -42,6 +43,9 @@ function openLightbox(index = 0) {
 }
 
 const activeTab = ref("specs");
+const reviewEligibility = computed(
+  () => product.value?.review_eligibility ?? null,
+);
 
 const selectedVariant = computed(
   () =>
@@ -106,25 +110,47 @@ function requireAuth() {
 async function addToCart() {
   if (!requireAuth()) return;
   if (!selectedVariantId.value) return;
-  await cart.addItem(
-    "product-variant",
-    selectedVariantId.value,
-    quantity.value,
-  );
-  addedToCart.value = true;
-  setTimeout(() => (addedToCart.value = false), 2500);
+  cartError.value = null;
+  try {
+    await cart.addItem(
+      "product-variant",
+      selectedVariantId.value,
+      quantity.value,
+      {
+        store_id: product.value?.store?.id ?? product.value?.store_id,
+      },
+    );
+    addedToCart.value = true;
+    setTimeout(() => (addedToCart.value = false), 2500);
+  } catch (e) {
+    cartError.value =
+      e.response?.data?.errors?.cart?.[0] ??
+      e.response?.data?.message ??
+      "Unable to add this item to your cart right now.";
+  }
 }
 
 async function buyNow() {
   if (!requireAuth()) return;
   if (!selectedVariantId.value || !inStock.value) return;
-  await cart.addItem(
-    "product-variant",
-    selectedVariantId.value,
-    quantity.value,
-  );
-  cart.closeDrawer();
-  router.push({ name: "checkout.index" });
+  cartError.value = null;
+  try {
+    await cart.addItem(
+      "product-variant",
+      selectedVariantId.value,
+      quantity.value,
+      {
+        store_id: product.value?.store?.id ?? product.value?.store_id,
+      },
+    );
+    cart.closeDrawer();
+    router.push({ name: "checkout.index" });
+  } catch (e) {
+    cartError.value =
+      e.response?.data?.errors?.cart?.[0] ??
+      e.response?.data?.message ??
+      "Unable to add this item to your cart right now.";
+  }
 }
 
 const reviewFormRef = ref(null);
@@ -470,6 +496,12 @@ async function submitProductReview(payload) {
             >
               This variant is currently out of stock.
             </p>
+            <p
+              v-else-if="cartError"
+              class="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-800"
+            >
+              {{ cartError }}
+            </p>
 
             <!-- Divider -->
             <hr class="theme-divider-soft my-5" />
@@ -600,6 +632,8 @@ async function submitProductReview(payload) {
                 :review-count="product.review_count ?? 0"
                 :average-rating="product.average_rating"
                 :reviews="product.reviews ?? []"
+                :can-submit="reviewEligibility?.can_submit ?? true"
+                :disabled-reason="reviewEligibility?.reason ?? null"
                 item-label="product"
                 @submit="submitProductReview"
               />

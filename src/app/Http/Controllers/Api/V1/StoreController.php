@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Store;
 use App\Services\PropertyService;
+use App\Services\ReviewEligibilityService;
 use App\Services\StoreService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class StoreController extends Controller
     public function __construct(
         private StoreService $storeService,
         private PropertyService $propertyService,
+        private ReviewEligibilityService $reviewEligibilityService,
     ) {}
 
     /**
@@ -40,9 +42,14 @@ class StoreController extends Controller
      */
     public function show(Store $store): JsonResponse
     {
-        return response()->json(
-            $this->storeService->findApprovedOrFail($store)
-        );
+        $store = $this->storeService->findApprovedOrFail($store);
+        $payload = $store->toArray();
+
+        if ($requestUser = request()->user('sanctum')) {
+            $payload['review_eligibility'] = $this->reviewEligibilityService->forStore($requestUser, $store);
+        }
+
+        return response()->json($payload);
     }
 
     /**

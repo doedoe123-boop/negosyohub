@@ -64,12 +64,17 @@ class ProductService
      */
     public function findOrFail(int $id): array
     {
-        $product = Product::query()
+        $product = $this->findModelOrFail($id);
+
+        return $this->formatProduct($product, detailed: true);
+    }
+
+    public function findModelOrFail(int $id): Product
+    {
+        return Product::query()
             ->with(['variants.prices.currency', 'media'])
             ->where('status', 'published')
             ->findOrFail($id);
-
-        return $this->formatProduct($product, detailed: true);
     }
 
     /**

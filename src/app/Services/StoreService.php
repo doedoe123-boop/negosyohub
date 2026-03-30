@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Mail\StoreApproved;
 use App\Mail\StoreRejected;
 use App\Models\Store;
 use App\Models\User;
+use App\Notifications\SellerEmailVerificationNotification;
 use App\Services\Webhooks\WebhookEventDispatcher;
 use App\StoreStatus;
 use App\UserRole;
@@ -69,6 +71,29 @@ class StoreService
         ], $store);
 
         return $store;
+    }
+
+    /**
+     * Send the approval communications for an approved store owner.
+     */
+    public function sendApprovalCommunications(Store $store): void
+    {
+        $store = $store->refresh();
+
+        if ($store->status !== StoreStatus::Approved) {
+            return;
+        }
+
+        if (! $store->login_token) {
+            $store->generateLoginToken();
+            $store = $store->refresh();
+        }
+
+        if (! $store->owner->hasVerifiedEmail()) {
+            $store->owner->notify(new SellerEmailVerificationNotification);
+        }
+
+        Mail::to($store->owner->email)->send(new StoreApproved($store));
     }
 
     /**

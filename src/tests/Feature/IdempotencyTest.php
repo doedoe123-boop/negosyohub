@@ -5,6 +5,7 @@ use App\Models\Store;
 use App\Models\User;
 use App\Services\CheckoutDiscountService;
 use App\Services\CommissionService;
+use App\Services\MarketplaceCartService;
 use App\Services\OrderService;
 use App\Services\Webhooks\WebhookEventDispatcher;
 use Illuminate\Support\Facades\Cache;
@@ -130,6 +131,11 @@ describe('Concurrent order lock', function () {
         $fakeCart->customer_id = $user->id;
 
         CartSession::shouldReceive('current')->once()->andReturn($fakeCart);
+        $this->mock(MarketplaceCartService::class)
+            ->shouldReceive('hasMultipleStores')
+            ->once()
+            ->with($fakeCart)
+            ->andReturn(false);
 
         // Pre-hold the distributed lock — simulates a concurrent in-flight request.
         $heldLock = Cache::lock("order-create:{$user->id}", 60);
@@ -171,6 +177,11 @@ describe('Concurrent order lock', function () {
         $fakeCart->shouldReceive('calculate')->andThrow(new RuntimeException('Simulated failure'));
 
         CartSession::shouldReceive('current')->once()->andReturn($fakeCart);
+        $this->mock(MarketplaceCartService::class)
+            ->shouldReceive('hasMultipleStores')
+            ->once()
+            ->with($fakeCart)
+            ->andReturn(false);
 
         $this->actingAs($user)
             ->postJson('/api/v1/orders', [

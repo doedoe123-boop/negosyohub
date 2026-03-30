@@ -28,8 +28,12 @@ const storeReviews = ref([]);
 const storeReviewCount = ref(0);
 const storeAverageRating = ref(null);
 const reviewFormRef = ref(null);
+const cartError = ref(null);
 
 const isRealEstate = computed(() => store.value?.sector === "real_estate");
+const storeReviewEligibility = computed(
+  () => store.value?.review_eligibility ?? null,
+);
 
 const listingLabels = {
   for_sale: "For Sale",
@@ -85,9 +89,17 @@ async function addToCart(product) {
     router.push({ name: "auth.login", query: { redirect: route.fullPath } });
     return;
   }
-  await cart.addItem("product-variant", product.default_variant_id, 1, {
-    store_id: store.value.id,
-  });
+  cartError.value = null;
+  try {
+    await cart.addItem("product-variant", product.default_variant_id, 1, {
+      store_id: store.value.id,
+    });
+  } catch (e) {
+    cartError.value =
+      e.response?.data?.errors?.cart?.[0] ??
+      e.response?.data?.message ??
+      "Unable to add this item to your cart right now.";
+  }
 }
 
 async function submitStoreReview(payload) {
@@ -418,6 +430,12 @@ async function submitStoreReview(payload) {
                 class="grid grid-cols-2 gap-4 pb-12 sm:grid-cols-3 lg:grid-cols-4"
               >
                 <div
+                  v-if="cartError"
+                  class="col-span-full rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+                >
+                  {{ cartError }}
+                </div>
+                <div
                   v-for="product in products"
                   :key="product.id"
                   class="theme-card theme-card-hover group flex flex-col overflow-hidden rounded-2xl transition-all duration-200"
@@ -519,6 +537,8 @@ async function submitStoreReview(payload) {
                   :review-count="storeReviewCount"
                   :average-rating="storeAverageRating"
                   :reviews="storeReviews"
+                  :can-submit="storeReviewEligibility?.can_submit ?? true"
+                  :disabled-reason="storeReviewEligibility?.reason ?? null"
                   item-label="store"
                   @submit="submitStoreReview"
                 />

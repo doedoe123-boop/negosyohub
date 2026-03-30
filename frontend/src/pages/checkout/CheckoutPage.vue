@@ -68,6 +68,12 @@ const selectedPaymentOption = computed(() =>
 
 const isSelectedPaymentDisabled = computed(() => selectedPaymentOption.value?.disabled ?? false);
 
+function extractApiMessage(errorResponse, fallback) {
+  const firstValidationError = Object.values(errorResponse?.response?.data?.errors ?? {})?.[0]?.[0];
+
+  return firstValidationError ?? errorResponse?.response?.data?.message ?? fallback;
+}
+
 watch(
   paymentOptions,
   (options) => {
@@ -147,7 +153,7 @@ async function saveAddress() {
 
     step.value = "shipping";
   } catch (e) {
-    error.value = "Failed to save address.";
+    error.value = extractApiMessage(e, "Failed to save address.");
   } finally {
     loading.value = false;
   }
@@ -159,8 +165,8 @@ async function selectShipping() {
   try {
     await cartApi.setShippingOption(selectedShipping.value);
     step.value = "payment";
-  } catch {
-    error.value = "Failed to set shipping.";
+  } catch (e) {
+    error.value = extractApiMessage(e, "Failed to set shipping.");
   } finally {
     loading.value = false;
   }
@@ -179,7 +185,6 @@ async function placeOrder() {
   try {
     if (selectedPaymentMethod.value === "cash_on_delivery") {
       const { data } = await ordersApi.place({
-        store_id: cart.storeId,
         payment_method: "cash_on_delivery",
       });
 
@@ -187,7 +192,10 @@ async function placeOrder() {
 
       await router.push({
         path: "/checkout/success",
-        query: { order: data.order_id },
+        query: {
+          order: data.order_id,
+          orders: (data.order_ids ?? []).join(","),
+        },
       });
 
       return;
@@ -200,10 +208,9 @@ async function placeOrder() {
       return;
     }
 
-    sessionStorage.setItem("paypal_store_id", cart.storeId);
     window.location.href = data.approve_url;
   } catch (e) {
-    error.value = e.response?.data?.message ?? "Failed to place order.";
+    error.value = extractApiMessage(e, "Failed to place order.");
   } finally {
     loading.value = false;
   }
@@ -473,6 +480,12 @@ async function placeOrder() {
             Choose how you want to pay for this order.
           </p>
           <p
+            v-if="cart.isMultiStore"
+            class="mb-4 rounded-xl bg-brand-500/10 px-4 py-3 text-sm text-brand-100"
+          >
+            This marketplace checkout will split your purchase into {{ cart.storeCount }} separate store orders after payment.
+          </p>
+          <p
             v-if="!seo.paypalCheckoutEnabled"
             class="mb-4 rounded-xl bg-amber-500/12 px-4 py-3 text-sm text-amber-300"
           >
@@ -582,25 +595,40 @@ async function placeOrder() {
         class="theme-card sticky top-6 h-fit w-full rounded-2xl p-6 lg:col-span-4 xl:col-span-4"
       >
         <h2 class="theme-title mb-4 text-lg font-bold">{{ t("checkout.orderSummary") }}</h2>
-        <ul class="divide-y divide-[var(--color-border)] text-sm">
-          <li
-            v-for="line in cart.cart?.lines"
-            :key="line.id"
-            class="flex justify-between py-3"
+        <div class="space-y-4 text-sm">
+          <section
+            v-for="group in cart.cart?.groups ?? []"
+            :key="group.store.id"
+            class="rounded-xl border border-[var(--color-border)] p-3"
           >
-            <span
-              class="theme-copy line-clamp-2 mr-4 flex-1 leading-relaxed"
-              >{{ line.purchasable?.name }} × {{ line.quantity }}</span
-            >
-            <span class="theme-title font-semibold">{{
-              line.sub_total?.formatted
-            }}</span>
-          </li>
-        </ul>
+            <div class="mb-2 flex items-center justify-between">
+              <p class="theme-title text-sm font-semibold">{{ group.store.name }}</p>
+              <span class="theme-title text-sm">{{ group.sub_total.formatted }}</span>
+            </div>
+            <ul class="space-y-2">
+              <li
+                v-for="line in group.lines"
+                :key="line.id"
+                class="flex justify-between gap-3"
+              >
+                <span class="theme-copy line-clamp-2 mr-4 flex-1 leading-relaxed">
+                  {{ line.purchasable?.name }} × {{ line.quantity }}
+                </span>
+                <span class="theme-title font-semibold">{{ line.sub_total?.formatted }}</span>
+              </li>
+            </ul>
+          </section>
+        </div>
         <div class="theme-divider mt-4 border-t pt-4">
           <CouponInput @applied="onCouponApplied" @removed="onCouponRemoved" />
         </div>
         <div class="theme-copy mt-4 space-y-2 text-sm">
+          <div
+            v-if="cart.isMultiStore"
+            class="rounded-xl bg-brand-500/10 px-3 py-2 text-xs text-brand-100"
+          >
+            Shipping and payment will be handled once, then split into separate store orders after checkout.
+          </div>
           <div class="flex justify-between">
             <span>Subtotal</span>
             <span class="theme-title font-medium">{{ cart.originalTotal }}</span>
