@@ -5,10 +5,13 @@ namespace App\Filament\LipatBahay\Resources;
 use App\Filament\LipatBahay\Resources\MovingBookingResource\Pages;
 use App\Models\MovingBooking;
 use App\MovingBookingStatus;
+use App\Services\MovingBookingService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -80,17 +83,13 @@ class MovingBookingResource extends Resource
 
                 Forms\Components\Section::make('Status & Pricing')
                     ->schema([
-                        Forms\Components\Select::make('status')
-                            ->options(collect(MovingBookingStatus::cases())
-                                ->mapWithKeys(fn ($case) => [$case->value => $case->label()])
-                                ->toArray())
-                            ->required(),
-
                         Forms\Components\TextInput::make('base_price')
                             ->label('Base Price (₱)')
                             ->numeric()
                             ->minValue(0)
-                            ->helperText('In pesos. Stored internally as centavos.'),
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->helperText('Derived from the provider profile and stored internally as centavos.'),
                     ])->columns(2),
             ]);
     }
@@ -140,7 +139,34 @@ class MovingBookingResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                static::transitionTableAction(
+                    'confirm',
+                    'Confirm',
+                    'heroicon-o-check-circle',
+                    'info',
+                    MovingBookingStatus::Confirmed,
+                ),
+                static::transitionTableAction(
+                    'start_move',
+                    'Start Move',
+                    'heroicon-o-arrow-path',
+                    'primary',
+                    MovingBookingStatus::InProgress,
+                ),
+                static::transitionTableAction(
+                    'complete',
+                    'Complete',
+                    'heroicon-o-check-badge',
+                    'success',
+                    MovingBookingStatus::Completed,
+                ),
+                static::transitionTableAction(
+                    'cancel',
+                    'Cancel',
+                    'heroicon-o-x-circle',
+                    'danger',
+                    MovingBookingStatus::Cancelled,
+                ),
             ])
             ->bulkActions([]);
     }
@@ -150,7 +176,40 @@ class MovingBookingResource extends Resource
         return [
             'index' => Pages\ListMovingBookings::route('/'),
             'view' => Pages\ViewMovingBooking::route('/{record}'),
-            'edit' => Pages\EditMovingBooking::route('/{record}/edit'),
         ];
+    }
+
+    public static function transitionAction(
+        string $name,
+        string $label,
+        string $icon,
+        string $color,
+        MovingBookingStatus $target
+    ): Action {
+        return Action::make($name)
+            ->label($label)
+            ->icon($icon)
+            ->color($color)
+            ->requiresConfirmation()
+            ->visible(fn (MovingBooking $record): bool => $record->status->canTransitionTo($target))
+            ->action(function (MovingBooking $record) use ($target, $label): void {
+                app(MovingBookingService::class)->updateStatus($record, $target);
+
+                Notification::make()
+                    ->title("Booking {$label}")
+                    ->success()
+                    ->send();
+            });
+    }
+
+    private static function transitionTableAction(
+        string $name,
+        string $label,
+        string $icon,
+        string $color,
+        MovingBookingStatus $target
+    ): Action {
+        return static::transitionAction($name, $label, $icon, $color, $target)
+            ->hiddenLabel();
     }
 }

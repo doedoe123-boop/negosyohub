@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\MovingAddOn;
 use App\Models\MovingBooking;
 use App\Models\Sector;
 use App\Models\Store;
@@ -10,6 +11,8 @@ use App\MovingBookingStatus;
 use App\PaymentStatus;
 use App\SectorTemplate;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Business logic for creating and managing Lipat Bahay moving bookings.
@@ -52,7 +55,7 @@ class MovingBookingService
     /**
      * Create a new moving booking.
      *
-     * @param  array{store_id: int, rental_agreement_id?: int, pickup_address: string, delivery_address: string, pickup_city: string, delivery_city: string, scheduled_at: string, contact_name: string, contact_phone: string, notes?: string, add_on_ids?: array<int>, base_price?: int}  $data
+     * @param  array{store_id: int, rental_agreement_id?: int, pickup_address: string, delivery_address: string, pickup_city: string, delivery_city: string, scheduled_at: string, contact_name: string, contact_phone: string, notes?: string, add_on_ids?: array<int>}  $data
      */
     public function createBooking(User $customer, array $data): MovingBooking
     {
@@ -66,20 +69,10 @@ class MovingBookingService
             ->whereIn('sector', $logisticsSlugs)
             ->firstOrFail();
 
-        // Gather selected add-ons from this store
-        $addOns = collect();
-        $addOnsTotal = 0;
-
-        if (! empty($data['add_on_ids'])) {
-            $addOns = $store->movingAddOns()
-                ->whereIn('id', $data['add_on_ids'])
-                ->where('is_active', true)
-                ->get();
-
-            $addOnsTotal = $addOns->sum('price');
-        }
-
-        $basePrice = (int) ($data['base_price'] ?? 0);
+        $pricing = $this->calculatePricing($store, $data['add_on_ids'] ?? []);
+        $addOns = $pricing['add_ons'];
+        $addOnsTotal = $pricing['add_ons_total'];
+        $basePrice = $pricing['base_price'];
         $totalPrice = $basePrice + $addOnsTotal;
 
         $booking = MovingBooking::create([
@@ -117,8 +110,54 @@ class MovingBookingService
      */
     public function updateStatus(MovingBooking $booking, MovingBookingStatus $status): MovingBooking
     {
+        if (! $booking->status->canTransitionTo($status)) {
+            throw ValidationException::withMessages([
+                'status' => sprintf(
+                    'Moving bookings cannot move from %s to %s.',
+                    strtolower($booking->status->label()),
+                    strtolower($status->label())
+                ),
+            ]);
+        }
+
         $booking->update(['status' => $status]);
 
         return $booking->fresh('addOns');
+    }
+
+    /**
+     * @param  list<int>|array<int>  $addOnIds
+     * @return array{base_price: int, add_ons_total: int, add_ons: Collection<int, MovingAddOn>}
+     */
+    public function calculatePricing(Store $store, array $addOnIds = []): array
+    {
+        $basePrice = (int) ($store->moving_base_price ?? 0);
+
+        if ($basePrice <= 0) {
+            throw ValidationException::withMessages([
+                'store_id' => 'This moving provider is not accepting bookings until a base service rate is configured.',
+            ]);
+        }
+
+        $normalizedAddOnIds = array_values(array_unique(array_map('intval', $addOnIds)));
+
+        $addOns = $normalizedAddOnIds === []
+            ? collect()
+            : $store->movingAddOns()
+                ->whereIn('id', $normalizedAddOnIds)
+                ->where('is_active', true)
+                ->get();
+
+        if (count($normalizedAddOnIds) !== $addOns->count()) {
+            throw ValidationException::withMessages([
+                'add_on_ids' => 'One or more selected add-on services are no longer available for this provider.',
+            ]);
+        }
+
+        return [
+            'base_price' => $basePrice,
+            'add_ons_total' => (int) $addOns->sum('price'),
+            'add_ons' => $addOns,
+        ];
     }
 }

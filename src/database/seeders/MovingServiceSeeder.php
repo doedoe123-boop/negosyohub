@@ -130,9 +130,9 @@ class MovingServiceSeeder extends Seeder
                 'scheduled_at' => now()->addDays(6)->setTime(9, 0),
                 'contact_name' => $customer->name,
                 'contact_phone' => $customer->phone ?? '09171234567',
-                'base_price' => $data['base_price'],
+                'base_price' => $store->moving_base_price ?? $data['base_price'],
                 'add_ons_total' => $addOnsTotal,
-                'total_price' => $data['base_price'] + $addOnsTotal,
+                'total_price' => ($store->moving_base_price ?? $data['base_price']) + $addOnsTotal,
                 'payment_status' => PaymentStatus::Pending,
                 'paymongo_payment_intent_id' => null,
             ]
@@ -171,9 +171,9 @@ class MovingServiceSeeder extends Seeder
                 'scheduled_at' => now()->subDays(4)->setTime(8, 30),
                 'contact_name' => $tenant->name,
                 'contact_phone' => $tenant->phone ?? '09179876543',
-                'base_price' => $data['base_price'],
+                'base_price' => $store->moving_base_price ?? $data['base_price'],
                 'add_ons_total' => $addOnsTotal,
-                'total_price' => $data['base_price'] + $addOnsTotal,
+                'total_price' => ($store->moving_base_price ?? $data['base_price']) + $addOnsTotal,
                 'payment_status' => PaymentStatus::Paid,
                 'paymongo_payment_intent_id' => 'pi_demo_'.str($store->slug)->replace('-', '_'),
             ]

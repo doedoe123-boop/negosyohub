@@ -10,12 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **E-commerce Checkout**: The storefront `v1` cart now supports multi-store marketplace carts for the first public release instead of enforcing a single-store checkout.
 - **Marketplace Checkout UX**: Cart and checkout now group items by store and clearly explain that one checkout will split into separate store orders behind the scenes.
+- **Moving Service Workflow**: Lipat Bahay bookings now use provider-controlled base rates, consistent `Pending Confirmation -> Confirmed -> In Progress -> Completed` lifecycle language, and clearer customer/provider progress states.
 
 ### Fixed
 - **Multi-Store Ordering**: Cash on Delivery checkout now creates separate store orders from one marketplace cart instead of forcing customers to clear their cart between stores.
 - **PayPal Marketplace Capture**: PayPal checkout can now complete a grouped multi-store checkout and fan it out into per-store orders after capture.
 - **Cart API Shape**: Cart responses now include grouped store sections so the frontend can render marketplace-level carts consistently.
 - **Review Trust**: Product and store reviews now expose purchase-eligibility context so the storefront can guide customers toward verified review submission.
+- **Moving Booking Price Integrity**: Moving bookings no longer trust client-submitted base pricing and now calculate totals from backend-controlled provider rates plus validated add-ons.
+- **Moving Booking Lifecycle**: Invalid status jumps are now rejected by a transition matrix, and the provider panel now offers explicit `Confirm`, `Start Move`, `Complete`, and `Cancel` actions instead of relying on generic edits.
+- **Moving Booking Tracking UX**: The customer booking detail page now shows a visible progress stepper so the current move stage is easy to understand.
 
 ## [1.1.1] - 2026-03-29
 

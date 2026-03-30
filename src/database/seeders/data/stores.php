@@ -335,6 +335,7 @@ return [
             'description' => 'Bayanihan Movers handles full-service household relocation with trained loaders, careful appliance handling, and same-day Metro Manila coverage.',
             'phone' => '+63 2 8812 4400',
             'website' => 'https://bayanihanmovers.ph',
+            'moving_base_price' => 12_500_00,
             'address' => ['line_one' => '85 Pioneer Street', 'city' => 'Mandaluyong City', 'postcode' => '1554'],
         ],
         [
@@ -345,6 +346,7 @@ return [
             'description' => 'Lipat Express PH specializes in apartment and townhouse relocation between Metro Manila, Cavite, Laguna, and nearby growth cities.',
             'phone' => '+63 49 544 7788',
             'website' => 'https://lipatexpress.ph',
+            'moving_base_price' => 9_800_00,
             'address' => ['line_one' => 'South Luzon Expressway Service Road', 'city' => 'Biñan City', 'postcode' => '4024'],
         ],
         [
@@ -355,6 +357,7 @@ return [
             'description' => 'VisMin Relocation Co. serves household and small-office moves in Cebu City, Mandaue, Davao, and nearby provinces with optional packing and setup crews.',
             'phone' => '+63 82 301 8877',
             'website' => 'https://visminrelocation.ph',
+            'moving_base_price' => 8_900_00,
             'address' => ['line_one' => 'Quimpo Boulevard', 'city' => 'Davao City', 'postcode' => '8000'],
         ],
     ],

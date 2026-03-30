@@ -29,9 +29,16 @@ const reviewSuccess = ref(false);
 
 const reviewForm = ref({ rating: 5, comment: "" });
 
+const lifecycleSteps = [
+  { key: "pending", label: "Pending Confirmation" },
+  { key: "confirmed", label: "Confirmed" },
+  { key: "in_progress", label: "In Progress" },
+  { key: "completed", label: "Completed" },
+];
+
 const statusConfig = {
   pending: {
-    label: "Pending Review",
+    label: "Pending Confirmation",
     icon: ClockIcon,
     colorClass: "bg-amber-50 text-amber-700 ring-amber-100",
     dotClass: "bg-amber-400",
@@ -68,6 +75,10 @@ const canReview = computed(
   () => booking.value?.status === "completed" && !booking.value?.review,
 );
 
+const currentStepIndex = computed(() =>
+  lifecycleSteps.findIndex((step) => step.key === booking.value?.status),
+);
+
 function formatDate(dt) {
   if (!dt) return "—";
   return new Date(dt).toLocaleString("en-PH", {
@@ -85,6 +96,22 @@ function formatPrice(centavos) {
     style: "currency",
     currency: "PHP",
   });
+}
+
+function stepState(index) {
+  if (booking.value?.status === "cancelled") {
+    return "cancelled";
+  }
+
+  if (index < currentStepIndex.value) {
+    return "complete";
+  }
+
+  if (index === currentStepIndex.value) {
+    return "current";
+  }
+
+  return "upcoming";
 }
 
 async function cancelBooking() {
@@ -192,6 +219,64 @@ onMounted(async () => {
             {{ cancelLoading ? "Cancelling..." : "Cancel" }}
           </button>
         </div>
+      </div>
+
+      <div
+        v-if="booking.status !== 'cancelled'"
+        class="theme-card mb-8 rounded-3xl p-6"
+      >
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="theme-title text-base font-bold">Booking Progress</h2>
+            <p class="theme-copy mt-1 text-xs">
+              Follow your move from provider confirmation to completion.
+            </p>
+          </div>
+          <span class="theme-copy text-xs font-semibold">
+            Current stage: {{ statusConfig[booking.status]?.label ?? booking.status }}
+          </span>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-4">
+          <div
+            v-for="(step, index) in lifecycleSteps"
+            :key="step.key"
+            class="rounded-2xl border p-4 transition-colors"
+            :class="
+              stepState(index) === 'complete'
+                ? 'border-emerald-200 bg-emerald-50'
+                : stepState(index) === 'current'
+                  ? 'border-brand-200 bg-brand-50/70'
+                  : 'theme-divider-soft theme-card-muted'
+            "
+          >
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <span
+                class="flex size-7 items-center justify-center rounded-full text-xs font-black"
+                :class="
+                  stepState(index) === 'complete'
+                    ? 'bg-emerald-600 text-white'
+                    : stepState(index) === 'current'
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-[var(--color-surface)] text-[var(--color-text-muted)]'
+                "
+              >
+                {{ index + 1 }}
+              </span>
+            </div>
+            <p class="theme-title text-sm font-bold">{{ step.label }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-else
+        class="mb-8 rounded-3xl border border-rose-200 bg-rose-50 p-5 text-rose-700"
+      >
+        <p class="text-sm font-bold">This booking was cancelled</p>
+        <p class="mt-1 text-xs">
+          The move will not proceed unless you create a new booking with this provider.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">

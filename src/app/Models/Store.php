@@ -50,6 +50,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property ?string $phone
  * @property ?string $website
  * @property ?array $operating_hours
+ * @property ?int $moving_base_price
  * @property ?PayoutMethod $payout_method
  * @property ?array $payout_details
  * @property ?Carbon $suspended_at
@@ -107,6 +108,7 @@ class Store extends Model
         'phone',
         'website',
         'operating_hours',
+        'moving_base_price',
         'payout_method',
         'payout_details',
         'suspended_at',
@@ -140,6 +142,7 @@ class Store extends Model
             'default_interest_rate' => 'decimal:2',
             'default_down_payment_percent' => 'decimal:2',
             'operating_hours' => 'array',
+            'moving_base_price' => 'integer',
             'payout_method' => PayoutMethod::class,
             'payout_details' => 'encrypted:array',
             'suspended_at' => 'datetime',

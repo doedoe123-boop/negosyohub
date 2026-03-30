@@ -27,7 +27,6 @@ class CreateMovingBookingRequest extends FormRequest
             'contact_name' => ['required', 'string', 'max:255'],
             'contact_phone' => ['required', 'string', 'max:30'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'base_price' => ['required', 'integer', 'min:0'],
             'add_on_ids' => ['nullable', 'array'],
             'add_on_ids.*' => ['integer', 'exists:moving_add_ons,id'],
         ];

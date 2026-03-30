@@ -463,6 +463,61 @@ describe("Mover detail page", () => {
       "Move-in booking linked to your rental agreement.",
     );
   });
+
+  it("submits moving bookings without trusting a client-side base price", async () => {
+    const { moversApi } = await import("@/api/movers");
+    const { movingBookingsApi } = await import("@/api/movingBookings");
+    const { useAuthStore } = await import("@/stores/auth");
+
+    moversApi.show.mockResolvedValue({
+      data: {
+        id: 9,
+        slug: "bayanihan-movers",
+        name: "Bayanihan Movers",
+        city: "Makati City",
+        province: "Metro Manila",
+        moving_base_price: 1250000,
+        moving_add_ons: [
+          { id: 88, name: "Packing Crew", price: 250000, description: "Two packers" },
+        ],
+      },
+    });
+    movingBookingsApi.create.mockResolvedValue({ data: { id: 12 } });
+
+    const auth = useAuthStore();
+    auth.user = {
+      id: 7,
+      name: "Demo Customer",
+      phone: "09171234567",
+      role: "customer",
+    };
+    auth.token = "demo-token";
+
+    const router = storeRouter();
+    await router.push("/movers/bayanihan-movers");
+
+    const wrapper = mount(MoverDetail, {
+      global: {
+        plugins: [pinia, router],
+      },
+    });
+
+    await flushPromises();
+
+    const inputs = wrapper.findAll("input");
+    await inputs[2].setValue("123 Pickup Street");
+    await inputs[3].setValue("Makati City");
+    await inputs[4].setValue("456 Delivery Avenue");
+    await inputs[5].setValue("Taguig City");
+    await inputs[6].setValue("2026-04-10T09:00");
+    await wrapper.find("textarea").setValue("Handle fragile items.");
+    await wrapper.findAll('[class*="cursor-pointer"]').at(0).trigger("click");
+    await wrapper.find("form").trigger("submit.prevent");
+
+    expect(movingBookingsApi.create).toHaveBeenCalledWith(
+      expect.not.objectContaining({ base_price: expect.anything() }),
+    );
+  });
 });
 
 describe("Movers page", () => {

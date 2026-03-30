@@ -111,6 +111,7 @@ class StoreFactory extends Factory
     {
         return $this->sector('lipat_bahay')->state(fn (): array => [
             'tagline' => 'Safe, scheduled, and professional household relocation.',
+            'moving_base_price' => 1_250_000,
         ]);
     }
 
