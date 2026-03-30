@@ -7,7 +7,6 @@ use App\Mail\StoreReinstated;
 use App\Mail\StoreSuspended;
 use App\Models\Sector;
 use App\Models\Store;
-use App\Notifications\SellerEmailVerificationNotification;
 use App\PhilippineIdType;
 use App\Services\StoreService;
 use App\StoreStatus;
