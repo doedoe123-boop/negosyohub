@@ -72,6 +72,7 @@ class StoreSeeder extends Seeder
                 'description' => $data['description'],
                 'phone' => $data['phone'],
                 'website' => $data['website'] ?? null,
+                'moving_base_price' => $data['moving_base_price'] ?? null,
                 'logo' => $data['logo'] ?? null,
                 'banner' => $data['banner'] ?? $this->bannerForSector($sector),
                 'commission_rate' => 12.00,

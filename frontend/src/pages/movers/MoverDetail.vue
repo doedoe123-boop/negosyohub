@@ -57,6 +57,8 @@ const addOnTotal = computed(() =>
   }, 0),
 );
 
+const estimatedTotal = computed(() => (mover.value?.moving_base_price ?? 0) + addOnTotal.value);
+
 function toggleAddOn(id) {
   const idx = selectedAddOns.value.indexOf(id);
   if (idx === -1) {
@@ -202,10 +204,25 @@ watch(
           <!-- Services Sidebar / List -->
           <div class="lg:col-span-5 space-y-6">
             <div class="theme-card rounded-3xl p-6 shadow-sm">
-               <div class="mb-6">
+              <div class="mb-6">
                   <h2 class="theme-title text-lg font-bold">Custom Services</h2>
                   <p class="theme-copy text-xs">Pick the services you need for your move.</p>
                </div>
+
+              <div
+                v-if="mover.moving_base_price"
+                class="theme-card-muted theme-divider-soft mb-4 rounded-2xl border p-4"
+              >
+                <p class="theme-copy text-[10px] font-bold uppercase tracking-widest">
+                  Base Moving Rate
+                </p>
+                <p class="theme-title mt-1 text-lg font-black">
+                  {{ formatPrice(mover.moving_base_price) }}
+                </p>
+                <p class="theme-copy mt-1 text-xs">
+                  Booking totals are calculated from this provider-set rate plus your selected add-ons.
+                </p>
+              </div>
 
               <div v-if="activeAddOns.length === 0" class="theme-copy flex flex-col items-center justify-center py-8 text-center">
                 <div class="theme-card-muted mb-3 flex size-12 items-center justify-center rounded-full">
@@ -248,6 +265,20 @@ watch(
                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Add-ons Total</span>
                    <span class="text-lg font-black font-mono">{{ formatPrice(addOnTotal) }}</span>
                  </div>
+              </div>
+
+              <div
+                v-if="mover.moving_base_price"
+                class="theme-card mt-4 rounded-2xl p-4"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="theme-copy text-[10px] font-bold uppercase tracking-widest">
+                    Estimated Total
+                  </span>
+                  <span class="theme-title text-lg font-black">
+                    {{ formatPrice(estimatedTotal) }}
+                  </span>
+                </div>
               </div>
             </div>
 

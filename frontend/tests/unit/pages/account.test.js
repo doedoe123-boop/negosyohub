@@ -16,6 +16,7 @@ import OrderDetail from "@/pages/account/OrderDetail.vue";
 import HelpPage from "@/pages/account/HelpPage.vue";
 import InquiriesPage from "@/pages/account/InquiriesPage.vue";
 import RentalAgreementsPage from "@/pages/account/RentalAgreementsPage.vue";
+import MovingBookingDetail from "@/pages/moving/MovingBookingDetail.vue";
 
 // ---------------------------------------------------------------------------
 // API mocks
@@ -1604,6 +1605,58 @@ describe("HelpPage query prefill", () => {
     expect(wrapper.find("textarea").element.value).toBe(
       "Please review this listing",
     );
+  });
+});
+
+describe("Moving booking detail", () => {
+  let pinia;
+
+  beforeEach(() => {
+    pinia = createPinia();
+    setActivePinia(pinia);
+    vi.clearAllMocks();
+  });
+
+  it("shows the enforced moving lifecycle stepper", async () => {
+    const { movingBookingsApi } = await import("@/api/movingBookings");
+    movingBookingsApi.show.mockResolvedValue({
+      data: {
+        id: 42,
+        status: "confirmed",
+        created_at: "2026-03-23T10:00:00.000Z",
+        scheduled_at: "2026-03-29T17:00:00.000Z",
+        pickup_address: "123 Pickup Street",
+        pickup_city: "Makati City",
+        delivery_address: "456 Delivery Avenue",
+        delivery_city: "Taguig City",
+        total_price: 1680000,
+        base_price: 1250000,
+        add_ons_total: 430000,
+        store: { name: "Bayanihan Movers" },
+        add_ons: [],
+        review: null,
+      },
+    });
+
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: "/account/moving", component: { template: "<div />" }, name: "account.moving" },
+        { path: "/account/moving/:id", component: MovingBookingDetail, name: "account.moving.show" },
+      ],
+    });
+    await router.push("/account/moving/42");
+
+    const wrapper = mount(MovingBookingDetail, {
+      global: { plugins: [pinia, router] },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Pending Confirmation");
+    expect(wrapper.text()).toContain("Confirmed");
+    expect(wrapper.text()).toContain("In Progress");
+    expect(wrapper.text()).toContain("Completed");
+    expect(wrapper.text()).toContain("Current stage: Confirmed");
   });
 });
 

@@ -20,7 +20,7 @@ const error = ref(false);
 
 const statusConfig = {
   pending: {
-    label: "Pending",
+    label: "Pending Confirmation",
     icon: ClockIcon,
     colorClass: "bg-amber-50 text-amber-700 border-amber-100",
     dotClass: "bg-amber-400",

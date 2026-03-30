@@ -50,6 +50,7 @@ class StoreProfile extends Page implements HasForms
             'collection_ids' => $store->collections()->pluck('lunar_collections.id')->toArray(),
             'phone' => $store->phone,
             'website' => $store->website,
+            'moving_base_price' => $store->moving_base_price ? $store->moving_base_price / 100 : null,
             'address' => $store->address ?? [],
             'social_facebook' => $social['facebook'] ?? null,
             'social_instagram' => $social['instagram'] ?? null,
@@ -140,6 +141,14 @@ class StoreProfile extends Page implements HasForms
                             ->url()
                             ->placeholder('https://yourstore.com')
                             ->maxLength(500),
+
+                        Forms\Components\TextInput::make('moving_base_price')
+                            ->label('Base Moving Rate (PHP)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->suffix('PHP')
+                            ->helperText('Used as the server-controlled base rate for every moving booking before add-ons.')
+                            ->visible(fn (): bool => auth()->user()?->getStoreForPanel()?->isLipatBahay() ?? false),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Address')
@@ -280,6 +289,9 @@ class StoreProfile extends Page implements HasForms
             'banner' => $data['banner'] ?? $store->banner,
             'phone' => $data['phone'] ?? null,
             'website' => $data['website'] ?? null,
+            'moving_base_price' => isset($data['moving_base_price'])
+                ? (int) round(((float) $data['moving_base_price']) * 100)
+                : null,
             'address' => $data['address'] ?? $store->address,
             'social_links' => array_filter([
                 'facebook' => $data['social_facebook'] ?? null,

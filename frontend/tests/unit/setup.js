@@ -61,6 +61,7 @@ vi.mock("@heroicons/vue/24/outline", () => {
     UserIcon: s,
     UserGroupIcon: s,
     UserCircleIcon: s,
+    XCircleIcon: s,
     XMarkIcon: s,
     ExclamationTriangleIcon: s,
     ExclamationCircleIcon: s,
