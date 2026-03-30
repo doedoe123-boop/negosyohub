@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Store;
 use App\Services\ProductService;
+use App\Services\ReviewEligibilityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,8 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     public function __construct(
-        private ProductService $productService
+        private ProductService $productService,
+        private ReviewEligibilityService $reviewEligibilityService
     ) {}
 
     /**
@@ -39,9 +41,14 @@ class ProductController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        return response()->json(
-            $this->productService->findOrFail($id)
-        );
+        $product = $this->productService->findModelOrFail($id);
+        $data = $this->productService->formatProduct($product, detailed: true);
+
+        if ($requestUser = request()->user('sanctum')) {
+            $data['review_eligibility'] = $this->reviewEligibilityService->forProduct($requestUser, $product);
+        }
+
+        return response()->json($data);
     }
 
     /**

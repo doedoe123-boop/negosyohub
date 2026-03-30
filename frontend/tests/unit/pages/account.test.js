@@ -1061,8 +1061,8 @@ describe("Orders list page", () => {
 
     expect(wrapper.text()).toContain("ORD-001");
     expect(wrapper.text()).toContain("ORD-002");
-    expect(wrapper.text()).toContain("delivered");
-    expect(wrapper.text()).toContain("pending");
+    expect(wrapper.text()).toContain("Delivered");
+    expect(wrapper.text()).toContain("Pending");
   });
 
   it("shows empty state when no orders", async () => {

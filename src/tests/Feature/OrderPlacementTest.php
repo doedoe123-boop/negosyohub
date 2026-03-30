@@ -24,12 +24,12 @@ describe('Order Placement', function () {
             ->assertForbidden();
     });
 
-    it('requires a valid store_id', function () {
+    it('requires a payment method', function () {
         $user = User::factory()->create();
 
         $this->actingAs($user)
             ->postJson('/api/v1/orders', [])
-            ->assertJsonValidationErrors(['store_id']);
+            ->assertJsonValidationErrors(['payment_method']);
     });
 
     it('rejects a non-existent store', function () {

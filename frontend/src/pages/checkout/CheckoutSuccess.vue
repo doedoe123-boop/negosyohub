@@ -10,6 +10,13 @@ const route = useRoute();
 const cart = useCartStore();
 
 const orderId = ref(route.query.order ?? null);
+const orderIds = ref(
+  typeof route.query.orders === "string" && route.query.orders.length > 0
+    ? route.query.orders.split(",").filter(Boolean)
+    : orderId.value
+      ? [String(orderId.value)]
+      : [],
+);
 const order = ref(null);
 const status = ref(orderId.value ? "success" : "loading"); // loading | success | error
 const errorMessage = ref(null);
@@ -24,6 +31,26 @@ const paymentStatusLabels = {
   unpaid: "Pay upon delivery",
   paid: "Payment received",
 };
+
+function successHeading() {
+  if (order.value?.payment_method === "cash_on_delivery") {
+    return orderIds.value.length > 1 ? "Orders Placed!" : "Order Placed!";
+  }
+
+  return orderIds.value.length > 1 ? "Orders Confirmed!" : "Order Confirmed!";
+}
+
+function successBody() {
+  if (order.value?.payment_method === "cash_on_delivery") {
+    return orderIds.value.length > 1
+      ? "Your checkout was split into separate store orders. Please prepare payment when each order arrives."
+      : "Your order was placed successfully. Please prepare payment when it arrives.";
+  }
+
+  return orderIds.value.length > 1
+    ? "Your payment was confirmed and your checkout was split into separate store orders."
+    : "Thank you for your purchase. We'll notify you when it ships.";
+}
 
 async function loadOrder() {
   if (!orderId.value) {
@@ -52,16 +79,14 @@ onMounted(async () => {
   // Capture the PayPal payment and create the order
   status.value = "loading";
   try {
-    const storeId =
-      cart.storeId ?? Number(sessionStorage.getItem("paypal_store_id"));
-    const { data } = await paypalApi.captureOrder(paypalOrderId, storeId);
+    const { data } = await paypalApi.captureOrder(paypalOrderId);
 
     orderId.value = data.order_id;
+    orderIds.value = (data.order_ids ?? []).map((id) => String(id));
     order.value = data.order ?? null;
     status.value = "success";
 
     // Clean up
-    sessionStorage.removeItem("paypal_store_id");
     cart.reset();
   } catch (e) {
     status.value = "error";
@@ -86,12 +111,12 @@ onMounted(async () => {
 
     <template v-else-if="status === 'success'">
       <CheckCircleIcon class="mb-4 size-16 text-green-500" />
-      <h1 class="theme-title text-3xl font-bold">Order Confirmed!</h1>
+      <h1 class="theme-title text-3xl font-bold">{{ successHeading() }}</h1>
       <p class="theme-copy mt-2">
-        Thank you for your purchase. We'll notify you when it ships.
+        {{ successBody() }}
       </p>
       <p v-if="orderId" class="theme-copy mt-1 text-sm">
-        Order #{{ orderId }}
+        {{ orderIds.length > 1 ? `Orders #${orderIds.join(", #")}` : `Order #${orderId}` }}
       </p>
       <div
         v-if="order"

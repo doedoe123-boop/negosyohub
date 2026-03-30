@@ -7,7 +7,9 @@ use App\Http\Requests\Api\V1\AddCartLineRequest;
 use App\Http\Requests\Api\V1\SetCartAddressRequest;
 use App\Http\Requests\Api\V1\SetShippingOptionRequest;
 use App\Http\Requests\Api\V1\UpdateCartLineRequest;
+use App\Models\Coupon;
 use App\Services\CheckoutDiscountService;
+use App\Services\MarketplaceCartService;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,7 +32,8 @@ class CartController extends Controller
 {
     public function __construct(
         private OrderService $orderService,
-        private CheckoutDiscountService $checkoutDiscountService
+        private CheckoutDiscountService $checkoutDiscountService,
+        private MarketplaceCartService $marketplaceCartService
     ) {}
 
     /**
@@ -63,18 +66,8 @@ class CartController extends Controller
 
         $modelClass = self::PURCHASABLE_TYPES[$data['purchasable_type']];
         $purchasable = $modelClass::findOrFail($data['purchasable_id']);
-
         $cart = CartSession::manager();
         $cart = $cart->add($purchasable, $data['quantity'], $data['meta'] ?? []);
-
-        // Persist store_id at cart level so OrderController can find it later.
-        if (! empty($data['meta']['store_id'])) {
-            $cart->update([
-                'meta' => array_merge((array) ($cart->meta ?? []), [
-                    'store_id' => (int) $data['meta']['store_id'],
-                ]),
-            ]);
-        }
 
         return response()->json($this->cartResource($cart->calculate()));
     }
@@ -136,8 +129,31 @@ class CartController extends Controller
             ]);
         }
 
-        $store = $this->orderService->resolveStoreFromCart($cart);
-        $cart = $this->checkoutDiscountService->applyToCart($cart, $store, $validated['code']);
+        $storeGroups = $this->marketplaceCartService->groupCartByStore($cart);
+
+        if ($storeGroups->count() > 1) {
+            $coupon = Coupon::query()
+                ->active()
+                ->whereRaw('LOWER(code) = ?', [mb_strtolower(trim($validated['code']))])
+                ->first();
+
+            if (! $coupon) {
+                throw ValidationException::withMessages([
+                    'code' => ['This coupon code is invalid or has expired.'],
+                ]);
+            }
+
+            $couponData = $this->checkoutDiscountService->calculateMarketplaceCouponData($coupon, $cart);
+            $cart->update([
+                'meta' => array_merge((array) ($cart->meta ?? []), [
+                    'applied_coupon' => $couponData,
+                ]),
+            ]);
+            $cart = $cart->refresh();
+        } else {
+            $store = $this->orderService->resolveStoreFromCart($cart);
+            $cart = $this->checkoutDiscountService->applyToCart($cart, $store, $validated['code']);
+        }
 
         return response()->json($this->cartResource($cart->calculate()));
     }
@@ -233,10 +249,21 @@ class CartController extends Controller
             'total_after_discount' => $cart->total?->value ?? 0,
             'applied_coupon' => null,
         ];
+        $storeGroups = $this->marketplaceCartService->groupCartByStore($cart);
 
         try {
-            $store = $this->orderService->resolveStoreFromCart($cart);
-            $discountSummary = $this->checkoutDiscountService->summarizeCart($cart, $store);
+            if ($storeGroups->count() === 1) {
+                $store = $this->orderService->resolveStoreFromCart($cart);
+                $discountSummary = $this->checkoutDiscountService->summarizeCart($cart, $store);
+            } else {
+                $appliedCoupon = (array) ($cart->meta['applied_coupon'] ?? []);
+                $discountAmount = (int) ($appliedCoupon['discount_amount'] ?? 0);
+                $discountSummary = [
+                    'discount_amount' => $discountAmount,
+                    'total_after_discount' => max(0, ($cart->total?->value ?? 0) - $discountAmount),
+                    'applied_coupon' => $appliedCoupon ?: null,
+                ];
+            }
         } catch (\Throwable) {
         }
 
@@ -255,6 +282,7 @@ class CartController extends Controller
                     'id' => $line->purchasable?->id,
                     'name' => $line->purchasable?->product?->translateAttribute('name'),
                     'thumbnail' => $line->purchasable?->product?->getFirstMediaUrl('images') ?: null,
+                    'store_id' => $this->marketplaceCartService->resolveLineStoreId($line),
                 ],
                 'unit_price' => [
                     'formatted' => '₱'.number_format($line->unitPrice?->decimal ?? 0, 2),
@@ -263,6 +291,42 @@ class CartController extends Controller
                     'formatted' => '₱'.number_format($line->subTotal?->decimal ?? 0, 2),
                 ],
             ])->values(),
+            'groups' => $storeGroups->map(function (array $group): array {
+                return [
+                    'store' => [
+                        'id' => $group['store']->id,
+                        'name' => $group['store']->name,
+                        'slug' => $group['store']->slug,
+                        'sector' => $group['store']->sector,
+                    ],
+                    'quantity' => $group['quantity'],
+                    'sub_total' => [
+                        'value' => $group['sub_total'],
+                        'formatted' => '₱'.number_format($group['sub_total'] / 100, 2),
+                    ],
+                    'total' => [
+                        'value' => $group['total'],
+                        'formatted' => '₱'.number_format($group['total'] / 100, 2),
+                    ],
+                    'lines' => $group['lines']->sortBy('id')->map(fn ($line): array => [
+                        'id' => $line->id,
+                        'quantity' => $line->quantity,
+                        'purchasable' => [
+                            'id' => $line->purchasable?->id,
+                            'name' => $line->purchasable?->product?->translateAttribute('name'),
+                            'thumbnail' => $line->purchasable?->product?->getFirstMediaUrl('images') ?: null,
+                        ],
+                        'unit_price' => [
+                            'formatted' => '₱'.number_format($line->unitPrice?->decimal ?? 0, 2),
+                        ],
+                        'sub_total' => [
+                            'formatted' => '₱'.number_format($line->subTotal?->decimal ?? 0, 2),
+                        ],
+                    ])->values(),
+                ];
+            })->values(),
+            'store_count' => $storeGroups->count(),
+            'multi_store' => $storeGroups->count() > 1,
 
             'sub_total' => ['formatted' => '₱'.number_format($cart->subTotal?->decimal ?? 0, 2)],
             'shipping_total' => ['formatted' => '₱'.number_format($cart->shippingTotal?->decimal ?? 0, 2)],

@@ -34,6 +34,23 @@ const mockCartWithItem = {
       sub_total: { formatted: "₱350.00" },
     },
   ],
+  groups: [
+    {
+      store: { id: 3, name: "Kapitolyo Kitchen" },
+      quantity: 1,
+      sub_total: { formatted: "₱350.00", value: 35000 },
+      lines: [
+        {
+          id: "line_1",
+          quantity: 1,
+          purchasable: { name: "Crispy Pata", thumbnail: null },
+          sub_total: { formatted: "₱350.00" },
+        },
+      ],
+    },
+  ],
+  store_count: 1,
+  multi_store: false,
   total: { formatted: "₱350.00", value: 35000 },
   meta: { store_id: 3 },
 };

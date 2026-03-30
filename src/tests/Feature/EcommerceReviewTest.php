@@ -3,11 +3,23 @@
 use App\Models\Review;
 use App\Models\Store;
 use App\Models\User;
+use App\OrderStatus;
 use App\StoreStatus;
+use Database\Seeders\LunarSeeder;
 use Illuminate\Support\Carbon;
+use Lunar\Base\ValueObjects\Cart\TaxBreakdown;
+use Lunar\FieldTypes\Number;
+use Lunar\FieldTypes\Text;
+use Lunar\Models\Currency;
+use Lunar\Models\Order;
 use Lunar\Models\Product;
+use Lunar\Models\ProductType;
+use Lunar\Models\ProductVariant;
+use Lunar\Models\TaxClass;
 
 beforeEach(function () {
+    Currency::factory()->create(['default' => true, 'code' => 'PHP']);
+    (new LunarSeeder)->run();
     $this->store = Store::factory()->create([
         'sector' => 'ecommerce',
     ]);
@@ -249,6 +261,49 @@ it('returns 404 for unapproved store reviews API access', function () {
 
 it('allows an authenticated customer to submit a store review', function () {
     $customer = User::factory()->create();
+    $type = ProductType::query()->firstOrCreate(['name' => 'Review Test Type']);
+    $taxClass = TaxClass::query()->first() ?? TaxClass::factory()->create();
+
+    $product = Product::query()->create([
+        'product_type_id' => $type->id,
+        'status' => 'published',
+        'attribute_data' => [
+            'name' => new Text('Review Test Product'),
+            'store_id' => new Number($this->store->id),
+        ],
+    ]);
+
+    $variant = ProductVariant::query()->create([
+        'product_id' => $product->id,
+        'tax_class_id' => $taxClass->id,
+        'sku' => fake()->unique()->regexify('[A-Z0-9]{12}'),
+        'unit_quantity' => 1,
+        'shippable' => true,
+        'purchasable' => 'always',
+    ]);
+
+    Order::factory()->for($this->store)->create([
+        'user_id' => $customer->id,
+        'status' => OrderStatus::Delivered->value,
+        'placed_at' => now(),
+    ])->lines()->create([
+        'purchasable_type' => ProductVariant::morphName(),
+        'purchasable_id' => $variant->id,
+        'type' => 'physical',
+        'description' => 'Review Test Product',
+        'option' => null,
+        'identifier' => fake()->uuid(),
+        'unit_price' => 100000,
+        'unit_quantity' => 1,
+        'quantity' => 1,
+        'sub_total' => 100000,
+        'discount_total' => 0,
+        'tax_breakdown' => new TaxBreakdown,
+        'tax_total' => 0,
+        'total' => 100000,
+        'notes' => null,
+        'meta' => null,
+    ]);
 
     $response = $this->actingAs($customer)
         ->postJson("/api/v1/stores/{$this->store->slug}/reviews", [

@@ -127,6 +127,66 @@ class CheckoutDiscountService
         return $order->refresh();
     }
 
+    /**
+     * @return array{
+     *     coupon_id: int,
+     *     code: string,
+     *     description: ?string,
+     *     type: string,
+     *     type_label: string,
+     *     discount_amount: int,
+     *     discount_formatted: string,
+     *     helper_text: string
+     * }
+     */
+    public function calculateMarketplaceCouponData(Coupon $coupon, Cart $cart): array
+    {
+        $cart = $cart->calculate();
+        $subTotal = (int) ($cart->subTotal?->value ?? 0);
+        $shippingTotal = (int) ($cart->shippingTotal?->value ?? 0);
+
+        if ($coupon->scope !== CouponScope::Global) {
+            throw ValidationException::withMessages([
+                'code' => ['Only marketplace-wide coupons can be used when your cart contains multiple stores.'],
+            ]);
+        }
+
+        if ($coupon->min_order_cents && $subTotal < $coupon->min_order_cents) {
+            throw ValidationException::withMessages([
+                'code' => ['This coupon requires a higher order subtotal.'],
+            ]);
+        }
+
+        $discountAmount = match ($coupon->type) {
+            CouponType::Percentage => (int) round($subTotal * ($coupon->value / 100)),
+            CouponType::FixedAmount => min($coupon->value, $subTotal),
+            CouponType::FreeShipping => $shippingTotal,
+        };
+
+        if ($coupon->max_discount_cents) {
+            $discountAmount = min($discountAmount, $coupon->max_discount_cents);
+        }
+
+        if ($discountAmount <= 0) {
+            throw ValidationException::withMessages([
+                'code' => ['This coupon does not apply to your current checkout.'],
+            ]);
+        }
+
+        return [
+            'coupon_id' => $coupon->id,
+            'code' => $coupon->code,
+            'description' => $coupon->description,
+            'type' => $coupon->type->value,
+            'type_label' => $coupon->type->label(),
+            'discount_amount' => $discountAmount,
+            'discount_formatted' => '₱'.number_format($discountAmount / 100, 2),
+            'helper_text' => $coupon->type === CouponType::FreeShipping
+                ? 'Marketplace-wide free shipping applied.'
+                : 'Marketplace-wide discount applied at checkout.',
+        ];
+    }
+
     private function calculateCouponData(Coupon $coupon, Cart $cart, Store $store): array
     {
         $cart = $cart->calculate();

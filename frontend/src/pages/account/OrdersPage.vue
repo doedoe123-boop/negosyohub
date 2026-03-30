@@ -30,6 +30,16 @@ const statusColors = {
   cancelled: "bg-red-100 text-red-700",
 };
 
+const statusLabels = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  preparing: "Preparing",
+  shipped: "Shipped",
+  ready: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
+
 const paymentStatusColors = {
   unpaid: "bg-amber-100 text-amber-700",
   pending: "bg-amber-100 text-amber-700",
@@ -101,7 +111,7 @@ const deliveryStatusLabels = {
                 statusColors[order.status] ?? 'theme-badge-neutral'
               "
             >
-              {{ order.status }}
+              {{ statusLabels[order.status] ?? order.status }}
             </span>
           </div>
           <p class="theme-copy text-xs sm:hidden">{{ order.created_at }}</p>
@@ -112,7 +122,7 @@ const deliveryStatusLabels = {
                 statusColors[order.status] ?? 'theme-badge-neutral'
               "
             >
-              {{ order.status }}
+              {{ statusLabels[order.status] ?? order.status }}
             </span>
             <span
               v-if="order.latest_shipment?.delivery_status"

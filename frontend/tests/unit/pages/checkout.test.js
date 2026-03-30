@@ -60,6 +60,23 @@ const mockCart = {
       sub_total: { formatted: "₱1,200.00", value: 120000 },
     },
   ],
+  groups: [
+    {
+      store: { id: 8, name: "TechNest" },
+      quantity: 2,
+      sub_total: { formatted: "₱1,200.00", value: 120000 },
+      lines: [
+        {
+          id: "line-1",
+          quantity: 2,
+          purchasable: { name: "Wireless Earbuds" },
+          sub_total: { formatted: "₱1,200.00", value: 120000 },
+        },
+      ],
+    },
+  ],
+  store_count: 1,
+  multi_store: false,
   total: { formatted: "₱1,350.00", value: 135000 },
   original_total: { formatted: "₱1,350.00", value: 135000 },
   discount_total: { formatted: "₱0.00", value: 0 },
@@ -259,7 +276,6 @@ describe("Checkout page", () => {
     await flushPromises();
 
     expect(ordersApi.place).toHaveBeenCalledWith({
-      store_id: 8,
       payment_method: "cash_on_delivery",
     });
     expect(cart.reset).toHaveBeenCalledOnce();

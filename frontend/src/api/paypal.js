@@ -13,10 +13,9 @@ export const paypalApi = {
    * Capture a PayPal order after customer approval.
    * Returns the placed order data.
    */
-  captureOrder(paypalOrderId, storeId) {
+  captureOrder(paypalOrderId) {
     return client.post("/api/v1/paypal/capture-order", {
       paypal_order_id: paypalOrderId,
-      store_id: storeId,
     });
   },
 };

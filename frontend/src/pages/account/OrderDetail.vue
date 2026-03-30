@@ -94,16 +94,12 @@ const paymentStatusColors = {
   unpaid: "bg-yellow-100 text-yellow-700",
   pending: "bg-yellow-100 text-yellow-700",
   paid: "bg-green-100 text-green-700",
-  failed: "bg-red-100 text-red-600",
-  refunded: "theme-badge-neutral",
 };
 
 const paymentStatusLabels = {
   unpaid: "Unpaid",
   pending: "Unpaid",
   paid: "Paid",
-  failed: "Failed",
-  refunded: "Refunded",
 };
 
 const paymentMethodLabels = {
@@ -116,8 +112,6 @@ const paymentStatusHelper = {
   unpaid: "Pay upon delivery",
   pending: "Awaiting payment",
   paid: "Payment received",
-  failed: "Payment failed",
-  refunded: "Refund issued",
 };
 
 const deliverySteps = [

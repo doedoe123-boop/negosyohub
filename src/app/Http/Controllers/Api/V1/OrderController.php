@@ -11,6 +11,8 @@ use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\Store;
 use App\Services\LogisticsManager;
+use App\Services\MarketplaceCartService;
+use App\Services\MultiStoreCheckoutService;
 use App\Services\OrderService;
 use App\Services\PaymentManager;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +34,9 @@ class OrderController extends Controller
     public function __construct(
         private OrderService $orderService,
         private PaymentManager $paymentManager,
-        private LogisticsManager $logisticsManager
+        private LogisticsManager $logisticsManager,
+        private MarketplaceCartService $marketplaceCartService,
+        private MultiStoreCheckoutService $multiStoreCheckoutService
     ) {}
 
     /**
@@ -148,8 +152,34 @@ class OrderController extends Controller
 
         // #10 — store resolution lives in the service; controller only passes
         // the validated primitive so the service owns the full domain flow.
-        $store = Store::query()->findOrFail($request->validated('store_id'));
         $paymentMethod = $request->validated('payment_method');
+
+        if ($this->marketplaceCartService->hasMultipleStores($cart)) {
+            if ($paymentMethod !== 'cash_on_delivery') {
+                return response()->json([
+                    'message' => 'Use the PayPal checkout flow to complete a multi-store online payment.',
+                ], 422);
+            }
+
+            $result = $this->multiStoreCheckoutService->placeCashOnDelivery($cart);
+            CartSession::manager()->clear();
+
+            $responseData = [
+                'message' => 'Orders placed successfully across multiple stores.',
+                'order_id' => $result['first_order_id'],
+                'order_ids' => $result['order_ids'],
+                'orders' => $result['orders'],
+                'checkout_group_id' => $result['checkout_group_id'],
+            ];
+
+            if ($idempotencyKey) {
+                Cache::put($cacheKey, $responseData, now()->addHours(24));
+            }
+
+            return response()->json($responseData, 201);
+        }
+
+        $store = Store::query()->findOrFail($request->validated('store_id'));
         $result = $this->paymentManager->initiate($paymentMethod, $cart, $store);
 
         if ($result->requiresRedirect()) {
