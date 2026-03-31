@@ -57,6 +57,7 @@ class SetupWizard extends Page implements HasForms
             'collection_ids' => $store->collections()->pluck('lunar_collections.id')->toArray(),
             'phone' => $store->phone,
             'website' => $store->website,
+            'moving_base_price' => $store->moving_base_price ? $store->moving_base_price / 100 : null,
             'address' => $store->address ?? [],
             'social_facebook' => $social['facebook'] ?? null,
             'social_instagram' => $social['instagram'] ?? null,
@@ -484,6 +485,9 @@ class SetupWizard extends Page implements HasForms
             'banner' => $bannerPath,
             'phone' => $data['phone'] ?? null,
             'website' => $data['website'] ?? null,
+            'moving_base_price' => isset($data['moving_base_price'])
+                ? (int) round(((float) $data['moving_base_price']) * 100)
+                : null,
             'address' => $data['address'] ?? $store->address,
             'social_links' => array_filter([
                 'facebook' => $data['social_facebook'] ?? null,
