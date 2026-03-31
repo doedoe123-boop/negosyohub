@@ -40,6 +40,13 @@ vi.mock("@/api/homepage", () => ({
   },
 }));
 
+vi.mock("@/components/TurnstileWidget.vue", () => ({
+  default: {
+    name: "TurnstileWidget",
+    template: '<div data-test="turnstile-widget"></div>',
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -295,6 +302,7 @@ describe("Login page", () => {
     expect(auth.login).toHaveBeenCalledWith({
       email: "juan@example.com",
       password: "password",
+      turnstile_token: "",
     });
   });
 
@@ -365,5 +373,30 @@ describe("Register page", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("The email has already been taken.");
+  });
+
+  it("calls auth.register with form values on submit", async () => {
+    const auth = useAuthStore();
+    auth.register = vi.fn().mockResolvedValue({
+      token: "tok",
+      user: { id: 1, name: "Maria", role: "customer" },
+    });
+
+    const wrapper = mountRegister(pinia);
+    await wrapper.find("#register-name").setValue("Maria Santos");
+    await wrapper.find("#register-email").setValue("maria@example.com");
+    const passwordInputs = wrapper.findAll('input[type="password"]');
+    await passwordInputs[0].setValue("Password#123");
+    await passwordInputs[1].setValue("Password#123");
+    await wrapper.find("form").trigger("submit");
+    await flushPromises();
+
+    expect(auth.register).toHaveBeenCalledWith({
+      name: "Maria Santos",
+      email: "maria@example.com",
+      password: "Password#123",
+      password_confirmation: "Password#123",
+      turnstile_token: "",
+    });
   });
 });

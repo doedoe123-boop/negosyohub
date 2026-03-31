@@ -2,12 +2,16 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Http\Requests\Concerns\ValidatesTurnstile;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
+    use ValidatesTurnstile;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -40,7 +44,16 @@ class RegisterRequest extends FormRequest
                     ->uncompromised(),
             ],
             'device_name' => ['nullable', 'string', 'max:255'],
+            'turnstile_token' => $this->turnstileRules(),
         ];
+    }
+
+    /**
+     * @return array<int, Closure>
+     */
+    public function after(): array
+    {
+        return $this->turnstileValidationHooks();
     }
 
     /**
@@ -51,6 +64,7 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
+            ...$this->turnstileMessages(),
             'password.min' => 'Password must be at least 8 characters.',
             'password.mixed' => 'Password must contain both uppercase and lowercase letters.',
             'password.letters' => 'Password must contain at least one letter.',

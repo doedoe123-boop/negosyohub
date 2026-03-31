@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter, useRoute, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useAppI18n } from "@/i18n";
+import TurnstileWidget from "@/components/TurnstileWidget.vue";
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
@@ -16,15 +17,28 @@ const error = ref(null);
 const loading = ref(false);
 const showPassword = ref(false);
 
+const turnstileToken = ref('')
+const turnstileEnabled = import.meta.env.VITE_TURNSTILE_ENABLED === 'true'
+const turnstile = ref(null)
+
+const resetTurnstile = () => {
+  turnstileToken.value = ''
+  turnstile.value?.reset?.()
+}
+
 async function submit() {
   loading.value = true;
   error.value = null;
   try {
-    await auth.login(form.value);
+    await auth.login({
+      ...form.value,
+      turnstile_token: turnstileToken.value,
+    });
     const redirect = route.query.redirect ?? "/";
     router.push(redirect);
   } catch (e) {
     error.value = e.response?.data?.message ?? t("auth.login.invalid");
+    resetTurnstile();
   } finally {
     loading.value = false;
   }
@@ -140,11 +154,17 @@ async function submit() {
           </button>
         </div>
       </div>
-
+      <TurnstileWidget
+        v-if="turnstileEnabled"
+        ref="turnstile"
+        @verified="turnstileToken = $event"
+        @expired="turnstileToken = ''"
+        @error="turnstileToken = ''"
+      />
       <!-- Submit -->
       <button
         type="submit"
-        :disabled="loading"
+        :disabled="loading || (turnstileEnabled && !turnstileToken)"
         class="mt-1 w-full rounded-xl bg-brand-500 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-600 active:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span v-if="loading" class="flex items-center justify-center gap-2">

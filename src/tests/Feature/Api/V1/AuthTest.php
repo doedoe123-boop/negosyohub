@@ -5,6 +5,7 @@ use App\Notifications\CustomerResetPasswordNotification;
 use App\UserRole;
 use Illuminate\Auth\Passwords\PasswordBrokerManager;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
 // Strong password satisfying the API registration policy:
@@ -82,6 +83,29 @@ it('accepts an optional device_name during registration', function () {
     ])->assertStatus(201);
 });
 
+it('requires a valid turnstile token for registration when enabled', function () {
+    config([
+        'services.turnstile.enabled' => true,
+        'services.turnstile.secret_key' => 'secret',
+    ]);
+
+    Http::fake([
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+            'success' => false,
+        ]),
+    ]);
+
+    $this->postJson(route('api.v1.auth.register'), [
+        'name' => 'Captcha User',
+        'email' => 'captcha@example.com',
+        'password' => VALID_PASSWORD,
+        'password_confirmation' => VALID_PASSWORD,
+        'turnstile_token' => 'bad-token',
+    ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('turnstile_token');
+});
+
 // --- Login ---
 
 it('logs in a user via API and returns a token', function () {
@@ -114,6 +138,32 @@ it('rejects login with missing required fields', function () {
     $this->postJson(route('api.v1.auth.login'), [])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email', 'password']);
+});
+
+it('requires a valid turnstile token for login when enabled', function () {
+    config([
+        'services.turnstile.enabled' => true,
+        'services.turnstile.secret_key' => 'secret',
+    ]);
+
+    Http::fake([
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+            'success' => false,
+        ]),
+    ]);
+
+    User::factory()->create([
+        'email' => 'turnstile-login@example.com',
+        'password' => Hash::make('password'),
+    ]);
+
+    $this->postJson(route('api.v1.auth.login'), [
+        'email' => 'turnstile-login@example.com',
+        'password' => 'password',
+        'turnstile_token' => 'bad-token',
+    ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('turnstile_token');
 });
 
 // --- Authenticated Endpoints ---
