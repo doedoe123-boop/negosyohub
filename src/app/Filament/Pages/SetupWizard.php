@@ -75,6 +75,13 @@ class SetupWizard extends Page implements HasForms
             'payout_bank_name' => $store->payout_details['bank_name'] ?? null,
             'payout_mobile_number' => $store->payout_details['mobile_number'] ?? null,
         ]);
+
+        if ($store->isLipatBahay()) {
+            $this->form->fill([
+                ...$this->form->getState(),
+                'moving_base_price' => $store->moving_base_price ? $store->moving_base_price / 100 : null,
+            ]);
+        }
     }
 
     public function form(Form $form): Form
@@ -470,7 +477,7 @@ class SetupWizard extends Page implements HasForms
             'mobile_number' => $data['payout_mobile_number'] ?? null,
         ]) ?: null;
 
-        $store->update([
+        $payload = [
             'name' => $data['name'],
             'tagline' => $data['tagline'] ?? null,
             'description' => $data['description'] ?? null,
@@ -499,7 +506,15 @@ class SetupWizard extends Page implements HasForms
             'payout_method' => $data['payout_method'] ?? null,
             'payout_details' => $payoutDetails,
             'setup_completed_at' => now(),
-        ]);
+        ];
+
+        if ($store->isLipatBahay()) {
+            $payload['moving_base_price'] = isset($data['moving_base_price'])
+                ? (int) round(((float) $data['moving_base_price']) * 100)
+                : null;
+        }
+
+        $store->update($payload);
 
         Notification::make()
             ->title('Portal setup complete! 🎉')
