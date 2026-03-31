@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\PermissionBootstrapper;
 use App\UserRole;
 use Database\Seeders\PlatformRolesAndPermissionsSeeder;
 use Spatie\Permission\Models\Role;
@@ -28,6 +29,7 @@ it('creates a super admin and ensures required roles exist', function () {
         ->and($user->email_verified_at)->not->toBeNull()
         ->and($user->hasRole('admin'))->toBeTrue()
         ->and($user->hasRole('super_admin'))->toBeTrue()
+        ->and($user->hasPermissionTo(PermissionBootstrapper::STORE_OWNER_PANEL_PERMISSIONS[4]))->toBeTrue()
         ->and(Role::query()->where('guard_name', 'web')->where('name', 'super_admin')->exists())->toBeTrue();
 });
 

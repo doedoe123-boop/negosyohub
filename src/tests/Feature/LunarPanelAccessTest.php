@@ -4,22 +4,9 @@ use App\Models\Store;
 use App\Models\User;
 use App\StoreStatus;
 use App\UserRole;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    // Ensure the store_owner Spatie role exists with all permissions
-    $role = Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => 'web']);
-
-    $permissions = [
-        'settings', 'settings:core', 'settings:manage-staff', 'settings:manage-attributes',
-        'catalog:manage-products', 'catalog:manage-collections',
-        'sales:manage-orders', 'sales:manage-customers', 'sales:manage-discounts',
-    ];
-    foreach ($permissions as $perm) {
-        Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
-    }
-    $role->syncPermissions($permissions);
+    $this->artisan('permissions:seed')->assertSuccessful();
 });
 
 /**

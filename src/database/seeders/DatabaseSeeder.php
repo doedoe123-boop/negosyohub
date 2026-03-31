@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Support\PermissionBootstrapper;
 use App\UserRole;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -49,23 +50,11 @@ class DatabaseSeeder extends Seeder
      */
     private function seedRolesAndPermissions(): void
     {
-        $webGuard = 'web';
         $staffGuard = 'staff';
 
-        // Web guard roles (for User model — store owners, admins, staff)
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => $webGuard]);
-        $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => $webGuard]);
-        $storeOwnerRole = Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => $webGuard]);
+        (new PermissionBootstrapper)->seedWebRolesAndPermissions();
 
-        $webPermissions = Permission::where('guard_name', $webGuard)->get();
-        $adminRole->syncPermissions($webPermissions);
-        $storeOwnerRole->syncPermissions($webPermissions);
-
-        // Staff get limited permissions (no settings, no staff management)
-        $staffPermissions = $webPermissions->filter(
-            fn (Permission $p) => in_array($p->name, self::STAFF_PERMISSIONS)
-        );
-        $staffRole->syncPermissions($staffPermissions);
+        $webPermissions = Permission::where('guard_name', 'web')->get();
 
         // Lunar's internal staff guard (for Staff model compatibility)
         $staffAdminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => $staffGuard]);
@@ -81,18 +70,6 @@ class DatabaseSeeder extends Seeder
         $lunarStaffPermissions = Permission::where('guard_name', $staffGuard)->get();
         $staffAdminRole->syncPermissions($lunarStaffPermissions);
     }
-
-    /**
-     * Permissions granted to store staff members.
-     *
-     * @var list<string>
-     */
-    private const STAFF_PERMISSIONS = [
-        'catalog:manage-products',
-        'catalog:manage-collections',
-        'sales:manage-orders',
-        'sales:manage-customers',
-    ];
 
     /**
      * Assign the store_owner Spatie role to all seeded store owners.

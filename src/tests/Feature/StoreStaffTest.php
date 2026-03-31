@@ -5,33 +5,9 @@ use App\Models\Store;
 use App\Models\User;
 use App\StoreStatus;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    // Create roles
-    $storeOwnerRole = Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => 'web']);
-    $staffRole = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
-
-    // Create permissions
-    $permissions = [
-        'settings', 'settings:core', 'settings:manage-staff', 'settings:manage-attributes',
-        'catalog:manage-products', 'catalog:manage-collections',
-        'sales:manage-orders', 'sales:manage-customers', 'sales:manage-discounts',
-    ];
-    foreach ($permissions as $perm) {
-        Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
-    }
-
-    $storeOwnerRole->syncPermissions($permissions);
-
-    // Staff get limited permissions
-    $staffRole->syncPermissions([
-        'catalog:manage-products',
-        'catalog:manage-collections',
-        'sales:manage-orders',
-        'sales:manage-customers',
-    ]);
+    $this->artisan('permissions:seed')->assertSuccessful();
 });
 
 /**
