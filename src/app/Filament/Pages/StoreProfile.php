@@ -50,7 +50,6 @@ class StoreProfile extends Page implements HasForms
             'collection_ids' => $store->collections()->pluck('lunar_collections.id')->toArray(),
             'phone' => $store->phone,
             'website' => $store->website,
-            'moving_base_price' => $store->moving_base_price ? $store->moving_base_price / 100 : null,
             'address' => $store->address ?? [],
             'social_facebook' => $social['facebook'] ?? null,
             'social_instagram' => $social['instagram'] ?? null,
@@ -64,6 +63,13 @@ class StoreProfile extends Page implements HasForms
             'payout_bank_name' => $store->payout_details['bank_name'] ?? null,
             'payout_mobile_number' => $store->payout_details['mobile_number'] ?? null,
         ]);
+
+        if ($store->isLipatBahay()) {
+            $this->form->fill([
+                ...$this->form->getState(),
+                'moving_base_price' => $store->moving_base_price ? $store->moving_base_price / 100 : null,
+            ]);
+        }
     }
 
     public function form(Form $form): Form
@@ -281,7 +287,7 @@ class StoreProfile extends Page implements HasForms
             'mobile_number' => $data['payout_mobile_number'] ?? null,
         ]) ?: null;
 
-        $store->update([
+        $payload = [
             'name' => $data['name'],
             'tagline' => $data['tagline'] ?? null,
             'description' => $data['description'] ?? null,
@@ -289,9 +295,6 @@ class StoreProfile extends Page implements HasForms
             'banner' => $data['banner'] ?? $store->banner,
             'phone' => $data['phone'] ?? null,
             'website' => $data['website'] ?? null,
-            'moving_base_price' => isset($data['moving_base_price'])
-                ? (int) round(((float) $data['moving_base_price']) * 100)
-                : null,
             'address' => $data['address'] ?? $store->address,
             'social_links' => array_filter([
                 'facebook' => $data['social_facebook'] ?? null,
@@ -303,7 +306,15 @@ class StoreProfile extends Page implements HasForms
             'operating_hours' => $data['hours'] ?? SetupWizard::defaultHours(),
             'payout_method' => $data['payout_method'] ?? null,
             'payout_details' => $payoutDetails,
-        ]);
+        ];
+
+        if ($store->isLipatBahay()) {
+            $payload['moving_base_price'] = isset($data['moving_base_price'])
+                ? (int) round(((float) $data['moving_base_price']) * 100)
+                : null;
+        }
+
+        $store->update($payload);
 
         Notification::make()
             ->title('Store profile updated')
