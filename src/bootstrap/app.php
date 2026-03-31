@@ -47,4 +47,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return response()->view('errors.custom', HttpErrorMessages::toArray($code), $code);
         });
+
+        $exceptions->render(function (Throwable $e) {
+            if (config('app.debug')) {
+                return null;
+            }
+
+            return response()->view('errors.custom', HttpErrorMessages::toArray(500), 500);
+        });
     })->create();

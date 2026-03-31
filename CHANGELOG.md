@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PayPal Marketplace Capture**: PayPal checkout can now complete a grouped multi-store checkout and fan it out into per-store orders after capture.
 - **Cart API Shape**: Cart responses now include grouped store sections so the frontend can render marketplace-level carts consistently.
 - **Review Trust**: Product and store reviews now expose purchase-eligibility context so the storefront can guide customers toward verified review submission.
+- **Ecommerce Store Bootstrap**: Production permission seeding now creates the Lunar catalog, sales, and store settings permissions required for ecommerce store owners to see product-management modules without running the full demo seeders.
+- **Frontend 404 Handling**: Vercel deployments now rewrite unknown SPA paths to the storefront app instead of showing the platform's default Vercel 404 page on refresh.
+- **Error Page Experience**: The storefront now has a richer custom 404 page, and Laravel production errors now consistently render the custom NegosyoHub error screen instead of the default framework page.
 - **Moving Booking Price Integrity**: Moving bookings no longer trust client-submitted base pricing and now calculate totals from backend-controlled provider rates plus validated add-ons.
 - **Moving Booking Lifecycle**: Invalid status jumps are now rejected by a transition matrix, and the provider panel now offers explicit `Confirm`, `Start Move`, `Complete`, and `Cancel` actions instead of relying on generic edits.
 - **Moving Booking Tracking UX**: The customer booking detail page now shows a visible progress stepper so the current move stage is easy to understand.

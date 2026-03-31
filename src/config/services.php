@@ -57,4 +57,10 @@ return [
         'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
     ],
 
+    'turnstile' => [
+        'enabled' => env('TURNSTILE_ENABLED', false),
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];
