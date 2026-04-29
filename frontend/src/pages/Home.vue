@@ -23,6 +23,7 @@ import TrendingCarousel from "@/components/homepage/TrendingCarousel.vue";
 import TrustStrip from "@/components/homepage/TrustStrip.vue";
 import AdBanner from "@/components/homepage/AdBanner.vue";
 import PromotionBanner from "@/components/homepage/PromotionBanner.vue";
+import MerchantPromoPopup from "@/components/MerchantPromoPopup.vue";
 import { useAppI18n } from "@/i18n";
 
 // Live backend stats composable
@@ -34,6 +35,7 @@ const { t } = useAppI18n();
 useSeoMeta({ title: null, description: seo.defaultDescription });
 
 const backendUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const sellerRegistrationUrl = `${backendUrl}/register/sector`;
 
 const featuredStores = ref([]);
 const featuredProducts = ref([]);
@@ -447,6 +449,84 @@ onMounted(async () => {
     <!-- ── 8. Trust Signals Strip ──────────────────────────────────── -->
     <TrustStrip :stats="stats" />
 
+    <!-- ── 8a. Merchant Benefits ──────────────────────────────────── -->
+    <section
+      id="merchant-benefits"
+      class="theme-page-section border-t border-b px-4 py-12 sm:px-6"
+      style="border-color: var(--color-border)"
+    >
+      <div class="mx-auto max-w-7xl">
+        <div class="max-w-3xl">
+          <p
+            class="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-500"
+          >
+            Sell on NegosyoHub
+          </p>
+          <h2 class="theme-title text-3xl font-bold sm:text-4xl">
+            Why early merchants should join now
+          </h2>
+          <p class="theme-copy mt-4 text-base leading-7">
+            We are still shaping the marketplace, which gives early business
+            owners more visibility, more support, and a better chance to stand
+            out before the platform gets crowded.
+          </p>
+        </div>
+
+        <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <article class="theme-card rounded-2xl p-6">
+            <p class="theme-title text-lg font-semibold">
+              Higher launch visibility
+            </p>
+            <p class="theme-copy mt-3 text-sm leading-6">
+              Early merchants have a stronger chance of being discovered while
+              categories are still forming and featured placements are more
+              curated.
+            </p>
+          </article>
+
+          <article class="theme-card rounded-2xl p-6">
+            <p class="theme-title text-lg font-semibold">
+              Guided store setup
+            </p>
+            <p class="theme-copy mt-3 text-sm leading-6">
+              We can help you structure your store profile, listings, and first
+              impression so your page feels credible from day one.
+            </p>
+          </article>
+
+          <article class="theme-card rounded-2xl p-6">
+            <p class="theme-title text-lg font-semibold">
+              Better buyer trust
+            </p>
+            <p class="theme-copy mt-3 text-sm leading-6">
+              A polished merchant page gives customers more confidence before
+              they inquire, message, or place an order.
+            </p>
+          </article>
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a
+            :href="sellerRegistrationUrl"
+            class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-600"
+          >
+            Start seller registration
+          </a>
+          <RouterLink
+            to="/stores"
+            class="inline-flex items-center gap-2 rounded-xl border px-6 py-3 text-sm font-semibold"
+            style="
+              border-color: var(--color-border);
+              color: var(--color-text);
+              background-color: var(--color-surface);
+            "
+          >
+            Explore existing stores
+          </RouterLink>
+        </div>
+      </div>
+    </section>
+
     <!-- ── 9. Customer CTA banner ──────────────────────────────────── -->
     <section class="bg-navy-900 py-14 text-white">
       <div class="mx-auto max-w-7xl px-4 text-center sm:px-6">
@@ -525,6 +605,11 @@ onMounted(async () => {
         </p>
       </div>
     </section>
+
+    <MerchantPromoPopup
+      :register-url="sellerRegistrationUrl"
+      benefits-href="#merchant-benefits"
+    />
   </div>
 </template>
 
