@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->jsonb('notification_preferences')
-                ->default(json_encode(['order_updates' => true, 'promotions' => false]))
+                ->nullable()
                 ->after('paymongo_customer_id');
         });
     }
