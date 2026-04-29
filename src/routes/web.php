@@ -8,8 +8,10 @@ use App\Livewire\Store\StoreOwnerRegistration;
 use App\Livewire\StoreDirectory;
 use App\Models\GlobalSeoSetting;
 use App\Models\LegalPage;
+use App\Models\Store;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 // =========================================================
 // Store subdomain routes (must load first so domain-constrained
@@ -25,11 +27,97 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/robots.txt', function () {
-    $content = GlobalSeoSetting::current()->robots_txt_content
-        ?? "User-agent: *\nAllow: /";
+    $settings = GlobalSeoSetting::current();
+
+    $defaultContent = implode("\n", [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin',
+        'Disallow: /moon',
+        'Disallow: /store/dashboard',
+        'Disallow: /store/pending',
+        'Disallow: /logout',
+    ]);
+
+    $content = trim($settings->robots_txt_content ?: $defaultContent);
+
+    if ($settings->sitemap_enabled && ! Str::contains($content, 'Sitemap:')) {
+        $sitemapUrl = route('sitemap');
+        $content .= "\n\nSitemap: {$sitemapUrl}";
+    }
 
     return response($content, 200)->header('Content-Type', 'text/plain');
 })->name('robots');
+
+Route::get('/sitemap.xml', function () {
+    $settings = GlobalSeoSetting::current();
+
+    abort_unless($settings->sitemap_enabled, 404);
+
+    $urls = collect([
+        [
+            'loc' => route('home'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'weekly',
+            'priority' => '1.0',
+        ],
+        [
+            'loc' => route('stores.index'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'daily',
+            'priority' => '0.8',
+        ],
+        [
+            'loc' => route('deals.index'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'weekly',
+            'priority' => '0.7',
+        ],
+        [
+            'loc' => route('insights.index'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'weekly',
+            'priority' => '0.7',
+        ],
+        [
+            'loc' => route('sector.browse'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'weekly',
+            'priority' => '0.7',
+        ],
+        [
+            'loc' => route('register.sector'),
+            'lastmod' => now()->toAtomString(),
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
+        ],
+    ])->merge(
+        LegalPage::query()
+            ->published()
+            ->get()
+            ->map(fn (LegalPage $page): array => [
+                'loc' => route('legal.show', $page->slug),
+                'lastmod' => $page->updated_at->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ])
+    )->merge(
+        Store::query()
+            ->approved()
+            ->whereNotNull('slug')
+            ->get()
+            ->map(fn (Store $store): array => [
+                'loc' => route('suppliers.show', $store->slug),
+                'lastmod' => optional($store->updated_at)->toAtomString() ?? now()->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.6',
+            ])
+    );
+
+    $xml = view('sitemap.marketplace', ['urls' => $urls])->render();
+
+    return response($xml, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
 
 // Browse stores (all verified stores) — Livewire-powered search, filter, sort, pagination
 Route::get('/stores', StoreDirectory::class)->name('stores.index');

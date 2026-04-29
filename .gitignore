@@ -66,6 +66,8 @@ dist
 dist-ssr
 coverage
 *.local
+frontend/public/robots.txt
+frontend/public/sitemap.xml
 
 # ─── Logs ──────────────────────────────────────────────────────────────
 logs
@@ -75,3 +77,4 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.codex
