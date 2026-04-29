@@ -10,7 +10,10 @@ use Lunar\Models\Cart;
 use Lunar\Models\Currency;
 
 beforeEach(function () {
-    Currency::factory()->create(['default' => true, 'code' => 'PHP']);
+    Currency::query()->firstOrCreate(
+        ['code' => 'PHP'],
+        Currency::factory()->make(['default' => true, 'code' => 'PHP'])->toArray(),
+    );
 });
 
 it('returns grouped order ids when placing a multi-store cash on delivery checkout', function () {

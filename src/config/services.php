@@ -63,4 +63,10 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+        'newsletter_list_id' => env('BREVO_NEWSLETTER_LIST_ID'),
+        'base_url' => env('BREVO_BASE_URL', 'https://api.brevo.com/v3'),
+    ],
+
 ];
