@@ -79,3 +79,15 @@ it('updates the authenticated users preferred locale', function () {
 
     expect($user->fresh()->preferred_locale)->toBe('fil');
 });
+
+it('returns default notification preferences for authenticated users', function () {
+    $user = User::factory()->create([
+        'notification_preferences' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->getJson('/api/v1/user')
+        ->assertOk()
+        ->assertJsonPath('notification_preferences.order_updates', true)
+        ->assertJsonPath('notification_preferences.promotions', false);
+});
