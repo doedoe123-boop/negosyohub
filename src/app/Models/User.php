@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,11 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, LunarUserInterface, MustVerifyEmail
 {
+    private const DEFAULT_NOTIFICATION_PREFERENCES = [
+        'order_updates' => true,
+        'promotions' => false,
+    ];
+
     /** @use HasFactory<UserFactory> */
     use HasApiTokens;
 
@@ -80,8 +86,24 @@ class User extends Authenticatable implements FilamentUser, LunarUserInterface, 
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
-            'notification_preferences' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute<array<string, bool>, array<string, bool>|string|null>
+     */
+    protected function notificationPreferences(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value): array => array_replace(
+                self::DEFAULT_NOTIFICATION_PREFERENCES,
+                is_array($value) ? $value : (json_decode($value ?? '[]', true) ?: [])
+            ),
+            set: fn (mixed $value): string => json_encode(array_replace(
+                self::DEFAULT_NOTIFICATION_PREFERENCES,
+                is_array($value) ? $value : []
+            )),
+        );
     }
 
     /**
