@@ -6,6 +6,8 @@ use App\Models\NewsletterSubscriber;
 use App\Services\BrevoNewsletterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class NewsletterSubscriptionController extends Controller
 {
@@ -13,19 +15,44 @@ class NewsletterSubscriptionController extends Controller
         Request $request,
         BrevoNewsletterService $brevoNewsletterService
     ): RedirectResponse {
-        $validated = $request->validate([
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'source' => ['nullable', 'string', 'max:100'],
-            'redirect_anchor' => ['nullable', 'string', 'max:100'],
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
         ]);
 
-        $subscriber = NewsletterSubscriber::query()->firstOrCreate(
-            ['email' => strtolower($validated['email'])],
-            [
-                'source' => $validated['source'] ?? 'website',
-                'subscribed_at' => now(),
+        $validator = Validator::make($request->all(), [
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('newsletter_subscribers', 'email'),
             ],
-        );
+            'source' => ['nullable', 'string', 'max:100'],
+            'redirect_anchor' => ['nullable', 'string', 'max:100'],
+        ], [
+            'email.unique' => 'This email is already subscribed to marketplace updates.',
+        ]);
+
+        if ($validator->fails()) {
+            $redirectUrl = url()->previous();
+            $redirectAnchor = $request->input('redirect_anchor');
+
+            if (filled($redirectAnchor)) {
+                $redirectUrl .= '#'.ltrim((string) $redirectAnchor, '#');
+            }
+
+            return redirect($redirectUrl)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $validated = $validator->validated();
+
+        $subscriber = NewsletterSubscriber::query()->create([
+            'email' => $validated['email'],
+            'source' => $validated['source'] ?? 'website',
+            'subscribed_at' => now(),
+        ]);
 
         $brevoNewsletterService->subscribe(
             $subscriber->email,

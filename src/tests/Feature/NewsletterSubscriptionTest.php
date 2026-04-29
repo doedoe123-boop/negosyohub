@@ -50,13 +50,18 @@ it('does not duplicate an existing newsletter subscriber', function () {
         'subscribed_at' => now(),
     ]);
 
-    $this->post(route('newsletter.subscribe'), [
-        'email' => 'merchant@example.com',
-        'source' => 'deals.index',
-    ])->assertSessionHas('newsletter_status');
+    $this->from(route('deals.index'))
+        ->post(route('newsletter.subscribe'), [
+            'email' => 'merchant@example.com',
+            'source' => 'deals.index',
+        ])
+        ->assertRedirect(route('deals.index'))
+        ->assertSessionHasErrors('email');
 
     expect(NewsletterSubscriber::query()->where('email', 'merchant@example.com')->count())
         ->toBe(1);
+
+    Http::assertNothingSent();
 });
 
 it('still stores the subscriber when Brevo is unavailable', function () {
