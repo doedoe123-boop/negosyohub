@@ -87,7 +87,7 @@
             </div>
 
             {{-- Newsletter CTA --}}
-            <div class="relative rounded-3xl bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700/60 p-10 lg:p-14 text-center overflow-hidden shadow-2xl">
+            <div id="newsletter-signup" class="relative rounded-3xl bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700/60 p-10 lg:p-14 text-center overflow-hidden shadow-2xl">
                 <div class="absolute inset-0 bg-gradient-to-b from-transparent to-amber-500/5 mix-blend-overlay"></div>
                 <div class="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] opacity-[0.03] [background-size:24px_24px]"></div>
 
@@ -95,18 +95,38 @@
                     <div class="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-amber-500/20 mb-6 border border-amber-500/30 shadow-inner">
                         <x-heroicon-o-bell-alert class="w-8 h-8 text-amber-400" />
                     </div>
-                    <h3 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-3">Get notified when Phase 2 launches</h3>
-                    <p class="text-base text-slate-400 max-w-lg mx-auto mb-8 leading-relaxed">Join the enterprise procurement waitlist. Be the first to secure access to wholesale flash sales and verified corporate liquidation events.</p>
-                    
-                    <div class="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+                    <h3 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-3">Stay updated on verified deals and marketplace offers</h3>
+                    <p class="text-base text-slate-400 max-w-lg mx-auto mb-8 leading-relaxed">Subscribe to receive launch updates, supplier promotions, flash sale alerts, and newly listed verified marketplace deals.</p>
+
+                    @if (session('newsletter_status'))
+                        <div class="max-w-md mx-auto mb-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-200">
+                            {{ session('newsletter_status') }}
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('newsletter.subscribe') }}" class="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+                        @csrf
+                        <input type="hidden" name="source" value="deals.index">
+                        <input type="hidden" name="redirect_anchor" value="newsletter-signup">
                         <div class="relative flex-1 group/input">
                             <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-xl blur opacity-20 group-focus-within/input:opacity-50 transition duration-500"></div>
-                            <input type="email" placeholder="Corporate email address" class="relative w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-4 text-base placeholder:text-slate-500 focus:ring-0 focus:border-amber-500 focus:outline-none text-white shadow-inner transition-all">
+                            <input
+                                type="email"
+                                name="email"
+                                value="{{ old('email') }}"
+                                placeholder="Business email address"
+                                class="relative w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-4 text-base placeholder:text-slate-500 focus:ring-0 focus:border-amber-500 focus:outline-none text-white shadow-inner transition-all"
+                                required
+                            >
                         </div>
-                        <button class="px-8 py-4 rounded-xl bg-white hover:bg-slate-100 text-base font-bold text-slate-900 shadow-xl shadow-black/20 transition-all duration-300 transform hover:-translate-y-1 shrink-0">
-                            Notify Me
+                        <button type="submit" class="px-8 py-4 rounded-xl bg-white hover:bg-slate-100 text-base font-bold text-slate-900 shadow-xl shadow-black/20 transition-all duration-300 transform hover:-translate-y-1 shrink-0">
+                            Subscribe
                         </button>
-                    </div>
+                    </form>
+
+                    @error('email')
+                        <p class="mt-4 text-sm font-medium text-rose-300">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
         </div>

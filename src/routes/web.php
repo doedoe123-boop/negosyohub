@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\EmailVerificationController;
+use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SupplierProfileController;
 use App\Livewire\SectorBrowse;
 use App\Livewire\Store\SectorSelection;
@@ -144,6 +145,9 @@ Route::get('/legal/{slug}', function (string $slug) {
 
     return view('legal.show', compact('page'));
 })->name('legal.show');
+
+Route::post('/newsletter/subscribe', NewsletterSubscriptionController::class)
+    ->name('newsletter.subscribe');
 
 // Guest auth & registration routes
 Route::middleware('guest')->group(function () {
