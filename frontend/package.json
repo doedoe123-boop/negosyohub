@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/generate-seo-assets.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/generate-seo-assets.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.vue --fix",

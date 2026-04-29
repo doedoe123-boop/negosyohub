@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **E-commerce Checkout**: The storefront `v1` cart now supports multi-store marketplace carts for the first public release instead of enforcing a single-store checkout.
 - **Marketplace Checkout UX**: Cart and checkout now group items by store and clearly explain that one checkout will split into separate store orders behind the scenes.
 - **Moving Service Workflow**: Lipat Bahay bookings now use provider-controlled base rates, consistent `Pending Confirmation -> Confirmed -> In Progress -> Completed` lifecycle language, and clearer customer/provider progress states.
+- **SEO Host Split**: The storefront now generates its own deploy-time sitemap and `robots.txt`, while the Laravel marketplace host now serves a separate marketplace sitemap and host-specific robots directives.
 
 ### Fixed
 - **Multi-Store Ordering**: Cash on Delivery checkout now creates separate store orders from one marketplace cart instead of forcing customers to clear their cart between stores.
