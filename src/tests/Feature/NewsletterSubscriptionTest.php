@@ -24,6 +24,7 @@ it('stores a newsletter subscriber from the public deals form', function () {
     $this->assertDatabaseHas('newsletter_subscribers', [
         'email' => 'merchant@example.com',
         'source' => 'deals.index',
+        'brevo_sync_status' => 'synced',
     ]);
 
     Http::assertSent(function ($request) {
@@ -82,5 +83,6 @@ it('still stores the subscriber when Brevo is unavailable', function () {
     $this->assertDatabaseHas('newsletter_subscribers', [
         'email' => 'fallback@example.com',
         'source' => 'deals.index',
+        'brevo_sync_status' => 'failed',
     ]);
 });

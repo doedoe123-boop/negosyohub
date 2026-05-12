@@ -54,10 +54,7 @@ class NewsletterSubscriptionController extends Controller
             'subscribed_at' => now(),
         ]);
 
-        $brevoNewsletterService->subscribe(
-            $subscriber->email,
-            $validated['source'] ?? $subscriber->source,
-        );
+        $brevoNewsletterService->subscribe($subscriber);
 
         $redirectUrl = url()->previous();
 

@@ -66,7 +66,9 @@ return [
     'brevo' => [
         'api_key' => env('BREVO_API_KEY'),
         'newsletter_list_id' => env('BREVO_NEWSLETTER_LIST_ID'),
+        'newsletter_resend_list_id' => env('BREVO_NEWSLETTER_RESEND_LIST_ID'),
         'base_url' => env('BREVO_BASE_URL', 'https://api.brevo.com/v3'),
+        'webhook_secret' => env('BREVO_WEBHOOK_SECRET'),
     ],
 
 ];
