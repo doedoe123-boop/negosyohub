@@ -31,8 +31,8 @@ use App\Http\Controllers\Api\V1\SeoController;
 use App\Http\Controllers\Api\V1\StoreController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
 use App\Http\Controllers\Api\V1\UserController;
-use App\Http\Controllers\Webhooks\PayMongoController;
 use App\Http\Controllers\Webhooks\BrevoController;
+use App\Http\Controllers\Webhooks\PayMongoController;
 use Illuminate\Support\Facades\Route;
 
 /*
