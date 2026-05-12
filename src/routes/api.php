@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\V1\SeoController;
 use App\Http\Controllers\Api\V1\StoreController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Webhooks\BrevoController;
 use App\Http\Controllers\Webhooks\PayMongoController;
 use Illuminate\Support\Facades\Route;
 
@@ -237,3 +238,6 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 //
 Route::post('/webhooks/paymongo', [PayMongoController::class, 'handle'])
     ->name('webhooks.paymongo');
+
+Route::post('/webhooks/brevo', [BrevoController::class, 'handle'])
+    ->name('webhooks.brevo');
